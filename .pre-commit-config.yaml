@@ -1,0 +1,61 @@
+exclude: ^$
+fail_fast: false
+repos:
+- hooks:
+  - args:
+    - check
+    - --fix
+    entry: ruff
+    id: ruff
+    language: system
+    name: ruff
+    stages:
+    - pre-commit
+    types:
+    - python
+  repo: local
+- hooks:
+  - args:
+    - --baseline
+    - .secrets.baseline
+    exclude: (tests/.*|uv.lock|)
+    id: detect-secrets
+    stages:
+    - pre-push
+  repo: https://github.com/Yelp/detect-secrets
+  rev: v1.2.0
+- hooks:
+  - id: check-ast
+  - id: check-executables-have-shebangs
+  - exclude: "(?x)(\n  ^docker/|\n  ^devops/|\n  ^docs/\n)\n"
+    id: check-shebang-scripts-are-executable
+  - args:
+    - --django
+    exclude: ^(tests/_extras/.*|docs)
+    id: name-tests-test
+  - id: trailing-whitespace
+  - id: debug-statements
+    stages:
+    - pre-commit
+  - exclude: .bumpversion.cfg
+    id: end-of-file-fixer
+    stages:
+    - pre-commit
+  - id: check-merge-conflict
+    stages:
+    - pre-commit
+  - id: check-case-conflict
+    stages:
+    - pre-commit
+  - id: check-toml
+    stages:
+    - pre-commit
+  repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.2.0
+- hooks:
+  - id: commitizen
+  - id: commitizen-branch
+    stages:
+    - pre-push
+  repo: https://github.com/commitizen-tools/commitizen
+  rev: v4.0.0
