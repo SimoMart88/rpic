@@ -15,6 +15,21 @@ repos:
     - python
   repo: local
 - hooks:
+  - id: mypy
+    name: mypy
+    entry: mypy
+    args:
+      - "--config-file"
+      - ".mypy.ini"
+    language: python
+    types:
+      - python
+    stages:
+      - pre-commit
+    additional_dependencies:
+      - packaging
+  repo: local
+- hooks:
   - args:
     - --baseline
     - .secrets.baseline
