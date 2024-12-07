@@ -1,11 +1,10 @@
 from typing import Any
 from abc import abstractmethod
-from strategy_field.registry import Registry
 
-from rpi_controller.core.interfaces import Interface
+from rpi_controller.core.interfaces import Interface, InterfaceRegistry
 
 
-class SensorRegistry(Registry):
+class SensorRegistry(InterfaceRegistry):
     pass
 
 

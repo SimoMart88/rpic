@@ -1,4 +1,5 @@
 # Create your models here.
+from __future__ import annotations
 
 from django.db import models
 from strategy_field.fields import StrategyField
@@ -12,7 +13,7 @@ if TYPE_CHECKING:
 
 
 class Device(models.Model):
-    _registry: "type[Registry] | None" = None
+    _registry: Registry
 
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255, unique=True)
@@ -32,7 +33,7 @@ class Device(models.Model):
 
 
 class Sensor(Device):
-    _registry = SensorRegistry
+    _registry: type[SensorRegistry] = SensorRegistry
 
     gpio_refs = models.JSONField(default=dict)
 
