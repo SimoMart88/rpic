@@ -50,7 +50,7 @@ DEFAULT_APPS = [
 ]
 
 USER_APPS = [
-    'rpi_controller.core'
+    'rpi_controller'
 ]
 
 THIRDPARTY_APPS = env.list("THIRDPARTY_APPS")

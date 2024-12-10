@@ -4,16 +4,17 @@ from __future__ import annotations
 from django.db import models
 from strategy_field.fields import StrategyField
 
-from typing import Any, TYPE_CHECKING
+import typing
 
-from rpi_controller.core.interfaces.sensors import SensorRegistry
+from rpi_controller.interfaces.sensors import sensor_registry
 
-if TYPE_CHECKING:
+if typing.TYPE_CHECKING:
     from strategy_field.registry import Registry
+    from rpi_controller.interfaces.sensors import SensorRegistry
 
 
 class Device(models.Model):
-    _registry: Registry
+    _registry: Registry | None = None
 
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255, unique=True)
@@ -22,7 +23,7 @@ class Device(models.Model):
     config = models.JSONField(default=dict)
     interface = StrategyField(registry=lambda model: model._registry)
 
-    def use(self, *args: Any, **kwargs: Any) -> dict[Any, Any]:
+    def use(self, *args: typing.Any, **kwargs: typing.Any) -> dict[typing.Any, typing.Any]:
         raise NotImplementedError
 
     def __str__(self) -> str:
@@ -33,9 +34,9 @@ class Device(models.Model):
 
 
 class Sensor(Device):
-    _registry: type[SensorRegistry] = SensorRegistry
+    _registry: SensorRegistry = sensor_registry
 
     gpio_refs = models.JSONField(default=dict)
 
-    def use(self, *args: Any, **kwargs: Any) -> dict[Any, Any]:
+    def use(self, *args: typing.Any, **kwargs: typing.Any) -> dict[typing.Any, typing.Any]:
         return self.interface.read_input(self.gpio_refs, self.config)
