@@ -36,7 +36,5 @@ class Device(models.Model):
 class Sensor(Device):
     _registry: SensorRegistry = sensor_registry
 
-    gpio_refs = models.JSONField(default=dict)
-
     def use(self, *args: typing.Any, **kwargs: typing.Any) -> dict[typing.Any, typing.Any]:
-        return self.interface.read_input(self.gpio_refs, self.config)
+        return self.interface.read_input(self.config)

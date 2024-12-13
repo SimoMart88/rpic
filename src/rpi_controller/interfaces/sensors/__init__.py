@@ -10,7 +10,7 @@ class SensorRegistry(InterfaceRegistry):
 
 class SensorInterface(Interface):
     @abstractmethod
-    def read_input(self, gpio_config: dict[str, typing.Any], device_config: dict[str, typing.Any]) -> dict[str, typing.Any]:
+    def read_input(self, config: dict[str, typing.Any]) -> dict[str, typing.Any]:
         ...
 
 
