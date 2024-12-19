@@ -13,6 +13,7 @@ class InterfaceRegistry(Registry):
 class Interface(ABC):
     label: str
     config_class = None
+    template_name = None
 
     def __init__(self, context: typing.Any) -> None:
         self.context = context
