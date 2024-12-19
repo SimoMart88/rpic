@@ -1,7 +1,13 @@
+from __future__ import annotations
 import typing
 from abc import ABC
 
 from strategy_field.registry import Registry
+
+
+if typing.TYPE_CHECKING:
+    from django.forms import Form
+
 
 
 class InterfaceRegistry(Registry):
@@ -12,8 +18,8 @@ class InterfaceRegistry(Registry):
 
 class Interface(ABC):
     label: str
-    config_class = None
-    template_name = None
+    config_form: Form | None = None
+    template_name: str | None = None
 
     def __init__(self, context: typing.Any) -> None:
         self.context = context

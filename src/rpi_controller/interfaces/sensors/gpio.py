@@ -15,7 +15,7 @@ https://learn.adafruit.com/dht-humidity-sensing-on-raspberry-pi-with-gdocs-loggi
 
 class Dht22SensorInterface(SensorInterface):
 
-    # TODO: implement and configure config_class
+    # TODO: implement and configure config_form
     # TODO: implement and configure template_name
 
     def read_input(self) -> dict[str, typing.Any]:
