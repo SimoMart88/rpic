@@ -18,8 +18,8 @@ class InterfaceRegistry(Registry):
 
 class Interface(ABC):
     label: str
-    config_form: Form | None = None
-    template_name: str | None = None
+    config_form: Form
+    template_name: str
 
     def __init__(self, context: typing.Any) -> None:
         self.context = context

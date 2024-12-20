@@ -1,24 +1,28 @@
 import typing
 import board
 import adafruit_dht
+from django import forms
 from rpi_controller.interfaces.sensors import SensorInterface, sensor_registry
 from rpi_controller.interfaces.exceptions import (InterfaceUserConfigurationException,
                                                   InterfaceConfigurationException,
                                                   InterfaceRuntimeException)
 
 
-"""
-Implementation based on this example
-https://learn.adafruit.com/dht-humidity-sensing-on-raspberry-pi-with-gdocs-logging/python-setup
-"""
+class Dht22SensorInterfaceForm(forms.Form):
+    gpio_pin = forms.CharField(label="GPIO ping reference", max_length=3)
+
 
 
 class Dht22SensorInterface(SensorInterface):
 
-    # TODO: implement and configure config_form
-    # TODO: implement and configure template_name
+    config_form = Dht22SensorInterfaceForm
+    template_name = "rpi_controller/interfaces/sensors/dht22.html"
 
     def read_input(self) -> dict[str, typing.Any]:
+        """
+        Implementation based on this example
+        https://learn.adafruit.com/dht-humidity-sensing-on-raspberry-pi-with-gdocs-logging/python-setup
+        """
         try:
             gpio_pin = self.context.config['gpio_pin']
         except KeyError:
