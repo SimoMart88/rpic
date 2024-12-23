@@ -22,7 +22,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # django-environ configuration
 env = environ.Env(
     DEBUG=(bool, False),
-    THIRDPARTY_APPS=(list, [])
+    THIRDPARTY_APPS=(list, []),
+    STATIC_ROOT=(str, BASE_DIR / '.data/static'),
 )
 
 
@@ -133,7 +134,7 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
-
+STATIC_ROOT = env('STATIC_ROOT')
 STATIC_URL = 'static/'
 
 # Default primary key field type

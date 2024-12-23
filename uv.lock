@@ -228,6 +228,18 @@ wheels = [
 ]
 
 [[package]]
+name = "click"
+version = "8.1.7"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "colorama", marker = "platform_system == 'Windows'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/96/d3/f04c7bfcf5c1862a2a5b845c6b2b360488cf47af55dfa79c98f6a6bf98b5/click-8.1.7.tar.gz", hash = "sha256:ca9853ad459e787e2192211578cc907e7594e294c7ccc834310722b41b9ca6de", size = 336121 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/00/2e/d53fa4befbf2cfa713304affc7ca780ce4fc1fd8710527771b58311a3229/click-8.1.7-py3-none-any.whl", hash = "sha256:ae74fb96c20a0277a1d615f1e4d73c8414f5a98db8b799a7931d1582f3390c28", size = 97941 },
+]
+
+[[package]]
 name = "colorama"
 version = "0.4.6"
 source = { registry = "https://pypi.org/simple" }
@@ -363,6 +375,18 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/65/d8/a607ee443b54a4db4ad28902328b906ae6218aa556fb9b3ac45c0bcb313d/Django-4.2.16.tar.gz", hash = "sha256:6f1616c2786c408ce86ab7e10f792b8f15742f7b7b7460243929cb371e7f1dad", size = 10436023 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/94/2c/6b6c7e493d5ea789416918658ebfa16be7a64c77610307497ed09a93c8c4/Django-4.2.16-py3-none-any.whl", hash = "sha256:1ddc333a16fc139fd253035a1606bb24261951bbc3a6ca256717fa06cc41a898", size = 7992936 },
+]
+
+[[package]]
+name = "django-click"
+version = "2.4.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "click" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/c3/22/6197a48b9facca10ecdb95a9341721cd7a89548b7464ed06d6c527348a35/django_click-2.4.0.tar.gz", hash = "sha256:ef935b611040d123b60e88eb2952c4838b4538b14d248114128fcccb4418685d", size = 9096 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a7/2b/295a2e4b5e7daef075cbb3b72bdbf3fe307fcb2c87213d2df8382fa039a7/django_click-2.4.0-py2.py3-none-any.whl", hash = "sha256:3c64a31cf25e54d3fccaea3af8d46d0b63511da2722e5888612aeee4d81e46d4", size = 7879 },
 ]
 
 [[package]]
@@ -843,6 +867,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "adafruit-circuitpython-dht" },
     { name = "django" },
+    { name = "django-click" },
     { name = "django-environ" },
     { name = "django-strategy-field" },
     { name = "setuptools" },
@@ -866,6 +891,7 @@ dev = [
 requires-dist = [
     { name = "adafruit-circuitpython-dht", specifier = ">=4.0.6" },
     { name = "django", specifier = ">=4.2.16" },
+    { name = "django-click", specifier = ">=2.4.0" },
     { name = "django-environ", specifier = ">=0.11.2" },
     { name = "django-strategy-field", specifier = ">=3.1.0" },
     { name = "setuptools", specifier = ">=75.6.0" },
