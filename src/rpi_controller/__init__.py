@@ -1,0 +1,2 @@
+import django_stubs_ext as django_stubs
+django_stubs.monkeypatch()
