@@ -1,17 +1,5 @@
-import typing
-from abc import abstractmethod
+from .gpio import Dht22SensorInterface
 
-from rpi_controller.interfaces import Interface, InterfaceRegistry
-
-
-class SensorRegistry(InterfaceRegistry):
-    pass
-
-
-class SensorInterface(Interface):
-    @abstractmethod
-    def read_input(self) -> dict[str, typing.Any]:
-        ...
-
-
-sensor_registry = SensorRegistry(SensorInterface)
+__all__ = [
+    'Dht22SensorInterface',
+]

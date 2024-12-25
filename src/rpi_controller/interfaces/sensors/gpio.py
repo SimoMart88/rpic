@@ -2,7 +2,8 @@ import typing
 import board
 import adafruit_dht
 from django import forms
-from rpi_controller.interfaces.sensors import SensorInterface, sensor_registry
+from rpi_controller.interfaces.sensors.base import SensorInterface
+from rpi_controller.interfaces.sensors.registry import sensor_registry
 from rpi_controller.interfaces.exceptions import (InterfaceUserConfigurationException,
                                                   InterfaceConfigurationException,
                                                   InterfaceRuntimeException)
@@ -15,6 +16,7 @@ class Dht22SensorInterfaceForm(forms.Form):
 
 class Dht22SensorInterface(SensorInterface):
 
+    label = "DHT22"
     config_form = Dht22SensorInterfaceForm
     template_name = "rpi_controller/interfaces/sensors/dht22.html"
 
