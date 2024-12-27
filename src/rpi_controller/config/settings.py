@@ -22,7 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # django-environ configuration
 env = environ.Env(
     DEBUG=(bool, False),
-    THIRDPARTY_APPS=(list, []),
+    LOCAL_APPS=(list, []),
     STATIC_ROOT=(str, BASE_DIR / '.data/static'),
 )
 
@@ -54,12 +54,17 @@ USER_APPS = [
     'rpi_controller'
 ]
 
-THIRDPARTY_APPS = env.list("THIRDPARTY_APPS")
+THIRDPARTY_APPS = [
+    "admin_extra_buttons"
+]
+
+LOCAL_APPS = env.list("LOCAL_APPS")
 
 INSTALLED_APPS = [
     *DEFAULT_APPS,
     *USER_APPS,
-    *THIRDPARTY_APPS
+    *THIRDPARTY_APPS,
+    *LOCAL_APPS
 ]
 
 MIDDLEWARE = [

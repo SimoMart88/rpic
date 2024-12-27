@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
     "adafruit-circuitpython-dht>=4.0.6",
+    "django-admin-extra-buttons>=1.5.8",
     "django-click>=2.4.0",
     "django-environ>=0.11.2",
     "django-strategy-field>=3.1.0",
@@ -27,6 +28,7 @@ dev-dependencies = [
     "ruff>=0.8.0",
     "types-setuptools>=75.6.0.20241126",
     "django-extensions>=3.2.3",
+    "django-webtest>=1.9.12",
 ]
 
 [tool.commitizen]
