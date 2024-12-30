@@ -1,12 +1,3 @@
-{% extends "admin_extra_buttons/action_page.html" %}
-{% block action-content %}
-    <h1>{{ original.name }} ({{ original.interface.label }})</h1>
-    {{ admin_form.form.non_field_errors }}
-    <form method="post" id="config-form">
-        {% csrf_token %}
-        {% for fieldset in admin_form %}
-            {% include "admin/includes/fieldset.html" %}
-        {% endfor %}
-        <input type="submit" value="Save" />
-    </form>
-{% endblock %}
+{% extends "admin/device/input_form.html" %}
+
+{% block action-content-title %}<h1>{{ original.name }} ({{ original.interface.label }})</h1>{% endblock %}

@@ -1,6 +1,8 @@
 import typing
-from django.contrib import admin
+from django.contrib import admin, messages
 from admin_extra_buttons.mixins import ExtraButtonsMixin
+from django import forms
+from django.core.exceptions import ValidationError
 from django.contrib.admin.helpers import AdminForm
 from django.http.response import HttpResponseRedirect, Http404
 from django.template.response import TemplateResponse
@@ -18,6 +20,26 @@ if typing.TYPE_CHECKING:
 
 
 BLACK_ON_GREEN = 'background-color:#88FF88;color:black'
+BLACK_ON_YELLOW = 'background-color:#FFFF66;color:black'
+
+
+def is_args(value: typing.Any) -> bool:
+    if not isinstance(value, list):
+        raise ValidationError("Argument must be a list")
+
+    return True
+
+
+def is_kwargs(value: typing.Any) -> bool:
+    if not isinstance(value, dict):
+        raise ValidationError("Keyword argument must be a dictionary")
+
+    return True
+
+
+class TestForm(forms.Form):
+    input_args = forms.JSONField(required=False, initial=[], validators=[is_args])
+    input_kwargs = forms.JSONField(required=False, initial={}, validators=[is_kwargs])
 
 
 class DeviceAdmin(ExtraButtonsMixin, admin.ModelAdmin["Device"]):
@@ -55,6 +77,32 @@ class DeviceAdmin(ExtraButtonsMixin, admin.ModelAdmin["Device"]):
             config_form, [("", {"fields": form_class.declared_fields})], {}   # type: ignore[arg-type, dict-item]
         )
         return TemplateResponse(request, "admin/device/configure.html", context)
+
+    @button(html_attrs={'style': BLACK_ON_YELLOW})
+    def test(self, request: "HttpRequest", pk: str) -> "HttpResponse":
+        obj: "Device" = self.get_object_or_404(request, pk)
+        context: dict[str, typing.Any] = self.get_common_context(request, pk, title="Interface test")
+        form_class: typing.Type[Form] = TestForm
+        context["output_render_template"] = obj.interface.template_name
+
+        if request.method == "POST":
+            config_form = form_class(request.POST)
+            if config_form.is_valid():
+                try:
+                    output: dict[str, typing.Any] = obj.use(
+                        *config_form.cleaned_data["input_args"], **config_form.cleaned_data["input_kwargs"]
+                    )
+                    self.message_user(request, "Tested interface {}".format(obj.name))
+                    context.update(**output)
+                except Exception as ex:
+                    self.message_user(request, str(ex), messages.ERROR)
+        else:
+            config_form = form_class(initial={k: v for k, v in obj.config.items() if k in form_class.declared_fields})
+
+        context["admin_form"] = AdminForm(
+            config_form, [("", {"fields": form_class.declared_fields})], {}   # type: ignore[arg-type, dict-item]
+        )
+        return TemplateResponse(request, "admin/device/test.html", context)
 
 
 admin.site.register(Sensor, DeviceAdmin)

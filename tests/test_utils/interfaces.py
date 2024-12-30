@@ -10,6 +10,7 @@ class DummySensorInterfaceForm(forms.Form):
 class DummySensorInterface(SensorInterface):
     label = "idummy"
     config_form = DummySensorInterfaceForm
+    template_name = "dummy/test.html"
 
     def read_input(self) -> dict[str, typing.Any]:
         return {"dummy_key": "dummy_value"}
