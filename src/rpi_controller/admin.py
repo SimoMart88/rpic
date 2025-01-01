@@ -43,8 +43,8 @@ class TestForm(forms.Form):
 
 
 class DeviceAdmin(ExtraButtonsMixin, admin.ModelAdmin["Device"]):
-    list_display = ["name", "slug", "visible", "enabled", "interface_label"]
-    list_filter = ["visible", "enabled", "interface"]
+    list_display = ["name", "slug", "visible", "interface_label"]
+    list_filter = ["visible", "interface"]
     readonly_fields = ["config"]
 
     def get_object_or_404(self, request: "HttpRequest", pk: str) -> "Device":
@@ -89,11 +89,10 @@ class DeviceAdmin(ExtraButtonsMixin, admin.ModelAdmin["Device"]):
             config_form = form_class(request.POST)
             if config_form.is_valid():
                 try:
-                    output: dict[str, typing.Any] = obj.use(
+                    context["device_data"]: dict[str, typing.Any] = obj.use(
                         *config_form.cleaned_data["input_args"], **config_form.cleaned_data["input_kwargs"]
                     )
                     self.message_user(request, "Tested interface {}".format(obj.name))
-                    context.update(**output)
                 except Exception as ex:
                     self.message_user(request, str(ex), messages.ERROR)
         else:

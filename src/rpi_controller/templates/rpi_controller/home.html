@@ -1,0 +1,21 @@
+{% extends 'rpi_controller/base.html' %}
+
+{% load django_bootstrap5 %}
+
+{% block content %}
+    <div class="card-columns">
+        <h1>Sensors</h1>
+        {% for sensor in sensors %}
+            <div class="card" style="display: inline-block">
+                <div class="card-body">
+                    <h3 class="card-title">{{ sensor.name }}</h3>
+                </div>
+                <div class="card-body">
+                    {% with device_data=sensor.use %}
+                        {% include sensor.interface.template_name %}
+                    {% endwith %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

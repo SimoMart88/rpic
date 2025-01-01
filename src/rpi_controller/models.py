@@ -11,8 +11,7 @@ from rpi_controller.interfaces.sensors.registry import sensor_registry
 class Device(models.Model):
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255, unique=True)
-    visible = models.BooleanField(default=True)
-    enabled = models.BooleanField(default=True)
+    visible = models.BooleanField(default=False)
     config = models.JSONField(default=dict)
     interface = StrategyField()
 

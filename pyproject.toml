@@ -7,6 +7,7 @@ requires-python = ">=3.9"
 dependencies = [
     "adafruit-circuitpython-dht>=4.0.6",
     "django-admin-extra-buttons>=1.5.8",
+    "django-bootstrap5>=24.3",
     "django-click>=2.4.0",
     "django-environ>=0.11.2",
     "django-strategy-field>=3.1.0",

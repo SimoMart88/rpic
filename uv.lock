@@ -396,6 +396,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/ea/81/1a590014b6d87b6544cfaf21d06a6c584cfbc84bb41e33acfc9fd3e5af7f/django_admin_extra_buttons-1.5.8.tar.gz", hash = "sha256:48dc9d470ade3f5f29c80753af4d367c08947d02c9a5757aa7a9223eda6812c5", size = 995588 }
 
 [[package]]
+name = "django-bootstrap5"
+version = "24.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/64/ef/c37f1c2f5a40919217251ad6b2c825bfcec0e8ed5024b5c6df874cbc8caf/django_bootstrap5-24.3.tar.gz", hash = "sha256:ca5ec5568fc2a3fc239f0cb8ce41a7df3802b8c4af930d7f64451784ec7ddc16", size = 54344 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e8/11/e5ab1d37bae5bd4e10e240c99601f450db618f6d370d75e742f9104778b9/django_bootstrap5-24.3-py3-none-any.whl", hash = "sha256:98f7916f9f7f9c34dfe157f7c062a28ebf6d17ff95307bef260ba794ba34e2a0", size = 26321 },
+]
+
+[[package]]
 name = "django-click"
 version = "2.4.0"
 source = { registry = "https://pypi.org/simple" }
@@ -910,6 +922,7 @@ dependencies = [
     { name = "adafruit-circuitpython-dht" },
     { name = "django" },
     { name = "django-admin-extra-buttons" },
+    { name = "django-bootstrap5" },
     { name = "django-click" },
     { name = "django-environ" },
     { name = "django-strategy-field" },
@@ -938,6 +951,7 @@ requires-dist = [
     { name = "adafruit-circuitpython-dht", specifier = ">=4.0.6" },
     { name = "django", specifier = ">=4.2.16" },
     { name = "django-admin-extra-buttons", specifier = ">=1.5.8" },
+    { name = "django-bootstrap5", specifier = ">=24.3" },
     { name = "django-click", specifier = ">=2.4.0" },
     { name = "django-environ", specifier = ">=0.11.2" },
     { name = "django-strategy-field", specifier = ">=3.1.0" },
