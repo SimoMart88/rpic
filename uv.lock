@@ -917,7 +917,7 @@ wheels = [
 [[package]]
 name = "rpi-controller"
 version = "0.1.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "adafruit-circuitpython-dht" },
     { name = "django" },
@@ -927,6 +927,7 @@ dependencies = [
     { name = "django-environ" },
     { name = "django-strategy-field" },
     { name = "setuptools" },
+    { name = "uwsgi" },
 ]
 
 [package.dev-dependencies]
@@ -956,6 +957,7 @@ requires-dist = [
     { name = "django-environ", specifier = ">=0.11.2" },
     { name = "django-strategy-field", specifier = ">=3.1.0" },
     { name = "setuptools", specifier = ">=75.6.0" },
+    { name = "uwsgi", specifier = ">=2.0.28" },
 ]
 
 [package.metadata.requires-dev]
@@ -1107,6 +1109,12 @@ sdist = { url = "https://files.pythonhosted.org/packages/e1/34/943888654477a574a
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a6/ab/7e5f53c3b9d14972843a647d8d7a853969a58aecc7559cb3267302c94774/tzdata-2024.2-py2.py3-none-any.whl", hash = "sha256:a48093786cdcde33cad18c2555e8532f34422074448fbc874186f0abd79565cd", size = 346586 },
 ]
+
+[[package]]
+name = "uwsgi"
+version = "2.0.28"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/24/c2/d58480aadc9a1f420dd96fc43cf0dcd8cb5ededb95cab53743529c23b6cd/uwsgi-2.0.28.tar.gz", hash = "sha256:79ca1891ef2df14508ab0471ee8c0eb94bd2d51d03f32f90c4bbe557ab1e99d0", size = 816212 }
 
 [[package]]
 name = "virtualenv"

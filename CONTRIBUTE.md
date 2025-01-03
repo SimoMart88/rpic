@@ -12,6 +12,17 @@ uv sync
 source .venv/bin/activate
 ```
 
+# Known Issues
+
+## uWSGI installation
+If uWSGI dependency installation fails for an LD problem, run the following command before the "uv sync":
+```shell
+uv tool install 'git+https://github.com/bluss/sysconfigpatcher'
+sysconfigpatcher $HOME/.local/share/uv/python/<python installation reference>
+```
+
+See here for more details: https://github.com/astral-sh/uv/issues/8966#issuecomment-2466513707
+
 # Code commit
 Commit you code using `cz commit`.
 This will automatically:
