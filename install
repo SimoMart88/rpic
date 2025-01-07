@@ -1,0 +1,87 @@
+#!/bin/bash
+
+RPIC_OPT_FOLDER=${RPIC_OPT:-"/opt/rpic"}
+RPIC_DEPS_FOLDER=${RPIC_OPT_FOLDER}/deps
+RPIC_APP_FOLDER=${RPIC_OPT_FOLDER}/app
+RPIC_OPT_BACKUP_FOLDER=${RPIC_OPT_FOLDER}/backup
+RPIC_WORKSPACE_FOLDER=${RPIC_WORKSPACE:-"/var/rpic"}
+RPIC_WORKSPACE_BACKUP_FOLDER=${RPIC_WORKSPACE_FOLDER}/backup
+SYSTEMD_FOLDER=/etc/systemd/system/
+
+# Install uv if needed
+mkdir -p "${RPIC_DEPS_FOLDER}"
+UV_VERSION=$("${RPIC_DEPS_FOLDER}/uv --version")
+IS_UV_AVAILABLE=$?
+if [ "${IS_UV_AVAILABLE}" != "0" ] ; then
+  echo "Installing uv..."
+  curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR="${RPIC_DEPS_FOLDER}" sh
+  UV_VERSION=$("${RPIC_DEPS_FOLDER}/uv --version")
+fi
+echo "- uv version: ${UV_VERSION}"
+
+# Self update uv
+echo "Upgrading uv..."
+"${RPIC_DEPS_FOLDER}/uv" self update
+
+# Stop rpic service if available
+echo "Stopping rpic service..."
+systemctl stop rpic.service
+
+# Backup opt and var folder
+echo "Performing app folder backup..."
+mkdir -p "${RPIC_APP_FOLDER}" "${RPIC_OPT_BACKUP_FOLDER}"
+mv "${RPIC_APP_FOLDER}/*" "${RPIC_OPT_BACKUP_FOLDER}" || exit 1
+echo "Performing workspace folder backup..."
+mkdir -p "${RPIC_WORKSPACE_FOLDER}" "${RPIC_WORKSPACE_BACKUP_FOLDER}"
+cp -r "${RPIC_WORKSPACE_FOLDER}" "${RPIC_WORKSPACE_BACKUP_FOLDER}" || exit 1
+
+# Install app
+echo "Installing application..."
+export VIRTUAL_ENV="${RPIC_APP_FOLDER}/venv"
+mkdir -p "${VIRTUAL_ENV}"
+"${RPIC_DEPS_FOLDER}/uv" sync --cache-dir="${RPIC_WORKSPACE_FOLDER}/uv-cache" --frozen --no-dev --no-editable || exit 1
+cp uwsgi.ini "${RPIC_APP_FOLDER}"
+
+if [ -f "${RPIC_OPT_BACKUP_FOLDER}/.env" ] ; then
+  echo "Restoring .env file from backup..."
+  cp "${RPIC_OPT_BACKUP_FOLDER}/.env" "${RPIC_APP_FOLDER}/.env" || exit 1
+else
+  echo "Creating new .env file..."
+  {
+    echo "SECRET_KEY=\"$(${VIRTUAL_ENV}/bin/django-admin shell -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())')\"" ;
+    echo "ALLOWED_HOSTS=\"*\"" ;
+    echo "DATABASE_URL=\"sqlite://${RPIC_WORKSPACE_FOLDER}/rpi-controller.db\"" ;
+    echo "DJANGO_SUPERUSER_USERNAME=\"admin\"" ;
+    echo "DJANGO_SUPERUSER_EMAIL=\"admin@local.host\"" ;
+    echo "DJANGO_SUPERUSER_PASSWORD=\"Admin123!\"" ;
+    echo "STATIC_ROOT=\"${RPIC_WORKSPACE_FOLDER}/static\"" ;
+    echo "DJANGO_SETTINGS_MODULE=\"rpi_controller.config.settings\"" ;
+  } >> "${RPIC_APP_FOLDER}/.env" || exit 1
+fi
+
+echo "Performing application upgrade..."
+"${VIRTUAL_ENV}/bin/django-admin" upgrade
+
+echo "Configuring systemd service..."
+{
+  echo "[Unit]"
+  echo "Description=uWSGI RPIC"
+  echo ""
+  echo "[Service]"
+  echo "ExecStart=${VIRTUAL_ENV}/bin/uwsgi --ini ${RPIC_APP_FOLDER}/uwsgi.ini"
+  echo "RuntimeDirectory=uwsgi"
+  echo "Restart=always"
+  echo "KillSignal=SIGQUIT"
+  echo "Type=notify"
+  echo "StandardError=syslog"
+  echo "NotifyAccess=all"
+  echo ""
+  echo "[Install]"
+  echo "WantedBy=multi-user.target"
+} > "${SYSTEMD_FOLDER}/rpic.service" || exit 1
+systemctl daemon-reload || exit 1
+
+# Start rpic service
+echo "Starting rpic service..."
+systemctl enable rpic.service || exit 1
+systemctl start rpic.service || exit 1

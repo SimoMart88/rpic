@@ -22,6 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # django-environ configuration
 env = environ.Env(
     DEBUG=(bool, False),
+    ALLOWED_HOSTS=(list, []),
     LOCAL_APPS=(list, []),
     STATIC_ROOT=(str, BASE_DIR / '.data/static'),
     STATIC_URL=(str, '/static/'),
