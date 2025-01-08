@@ -14,6 +14,8 @@ dependencies = [
     "django>=4.2.16",
     "setuptools>=75.6.0",
     "uwsgi>=2.0.28",
+    "django-stubs>=5.1.1",
+    "django-stubs-ext>=5.1.1",
 ]
 
 [build-system]
@@ -24,8 +26,6 @@ build-backend = "hatchling.build"
 package = true
 dev-dependencies = [
     "commitizen>=4.0.0",
-    "django-stubs>=5.1.1",
-    "django-stubs-ext>=5.1.1",
     "factory-boy>=3.3.1",
     "mypy>=1.13.0",
     "pre-commit>=4.0.1",

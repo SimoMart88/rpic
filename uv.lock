@@ -926,6 +926,8 @@ dependencies = [
     { name = "django-click" },
     { name = "django-environ" },
     { name = "django-strategy-field" },
+    { name = "django-stubs" },
+    { name = "django-stubs-ext" },
     { name = "setuptools" },
     { name = "uwsgi" },
 ]
@@ -934,8 +936,6 @@ dependencies = [
 dev = [
     { name = "commitizen" },
     { name = "django-extensions" },
-    { name = "django-stubs" },
-    { name = "django-stubs-ext" },
     { name = "django-webtest" },
     { name = "factory-boy" },
     { name = "mypy" },
@@ -956,6 +956,8 @@ requires-dist = [
     { name = "django-click", specifier = ">=2.4.0" },
     { name = "django-environ", specifier = ">=0.11.2" },
     { name = "django-strategy-field", specifier = ">=3.1.0" },
+    { name = "django-stubs", specifier = ">=5.1.1" },
+    { name = "django-stubs-ext", specifier = ">=5.1.1" },
     { name = "setuptools", specifier = ">=75.6.0" },
     { name = "uwsgi", specifier = ">=2.0.28" },
 ]
@@ -964,8 +966,6 @@ requires-dist = [
 dev = [
     { name = "commitizen", specifier = ">=4.0.0" },
     { name = "django-extensions", specifier = ">=3.2.3" },
-    { name = "django-stubs", specifier = ">=5.1.1" },
-    { name = "django-stubs-ext", specifier = ">=5.1.1" },
     { name = "django-webtest", specifier = ">=1.9.12" },
     { name = "factory-boy", specifier = ">=3.3.1" },
     { name = "mypy", specifier = ">=1.13.0" },
