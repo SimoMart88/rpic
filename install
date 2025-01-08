@@ -10,45 +10,44 @@ SYSTEMD_FOLDER=/etc/systemd/system/
 
 # Install uv if needed
 mkdir -p "${RPIC_DEPS_FOLDER}"
-UV_VERSION=$("${RPIC_DEPS_FOLDER}/uv --version")
+"${RPIC_DEPS_FOLDER}/uv" --version
 IS_UV_AVAILABLE=$?
 if [ "${IS_UV_AVAILABLE}" != "0" ] ; then
-  echo "Installing uv..."
+  echo "[ Installing uv... ]"
   curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR="${RPIC_DEPS_FOLDER}" sh
-  UV_VERSION=$("${RPIC_DEPS_FOLDER}/uv --version")
+  "${RPIC_DEPS_FOLDER}/uv" --version
 fi
-echo "- uv version: ${UV_VERSION}"
 
 # Self update uv
-echo "Upgrading uv..."
+echo "[ Upgrading uv... ]"
 "${RPIC_DEPS_FOLDER}/uv" self update
 
 # Stop rpic service if available
-echo "Stopping rpic service..."
+echo "[ Stopping rpic service... ]"
 systemctl stop rpic.service
 
 # Backup opt and var folder
-echo "Performing app folder backup..."
+echo "[ Performing app folder backup... ]"
 mkdir -p "${RPIC_APP_FOLDER}" "${RPIC_OPT_BACKUP_FOLDER}"
-mv "${RPIC_APP_FOLDER}/*" "${RPIC_OPT_BACKUP_FOLDER}" || exit 1
-echo "Performing workspace folder backup..."
+rsync -a --delete "${RPIC_APP_FOLDER}/" "${RPIC_OPT_BACKUP_FOLDER}" || exit 1
+echo "[ Performing workspace folder backup... ]"
 mkdir -p "${RPIC_WORKSPACE_FOLDER}" "${RPIC_WORKSPACE_BACKUP_FOLDER}"
-cp -r "${RPIC_WORKSPACE_FOLDER}" "${RPIC_WORKSPACE_BACKUP_FOLDER}" || exit 1
+rsync -a --delete "${RPIC_WORKSPACE_FOLDER}/" "${RPIC_WORKSPACE_BACKUP_FOLDER}" --exclude "backup"|| exit 1
 
 # Install app
-echo "Installing application..."
-export VIRTUAL_ENV="${RPIC_APP_FOLDER}/venv"
-mkdir -p "${VIRTUAL_ENV}"
+echo "[ Installing application... ]"
+export UV_PROJECT_ENVIRONMENT="${RPIC_APP_FOLDER}/venv"
+mkdir -p "${UV_PROJECT_ENVIRONMENT}"
 "${RPIC_DEPS_FOLDER}/uv" sync --cache-dir="${RPIC_WORKSPACE_FOLDER}/uv-cache" --frozen --no-dev --no-editable || exit 1
 cp uwsgi.ini "${RPIC_APP_FOLDER}"
 
 if [ -f "${RPIC_OPT_BACKUP_FOLDER}/.env" ] ; then
-  echo "Restoring .env file from backup..."
+  echo "[ Restoring .env file from backup... ]"
   cp "${RPIC_OPT_BACKUP_FOLDER}/.env" "${RPIC_APP_FOLDER}/.env" || exit 1
 else
-  echo "Creating new .env file..."
+  echo "[ Creating new .env file... ]"
   {
-    echo "SECRET_KEY=\"$(${VIRTUAL_ENV}/bin/django-admin shell -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())')\"" ;
+    echo "SECRET_KEY=\"$(${UV_PROJECT_ENVIRONMENT}/bin/django-admin shell -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())')\"" ;
     echo "ALLOWED_HOSTS=\"*\"" ;
     echo "DATABASE_URL=\"sqlite://${RPIC_WORKSPACE_FOLDER}/rpi-controller.db\"" ;
     echo "DJANGO_SUPERUSER_USERNAME=\"admin\"" ;
@@ -58,17 +57,22 @@ else
     echo "DJANGO_SETTINGS_MODULE=\"rpi_controller.config.settings\"" ;
   } >> "${RPIC_APP_FOLDER}/.env" || exit 1
 fi
+echo "[ Loading .env file... ]"
+set -o allexport
+source "${RPIC_APP_FOLDER}/.env"
+set +o allexport
 
-echo "Performing application upgrade..."
-"${VIRTUAL_ENV}/bin/django-admin" upgrade
+echo "[ Performing application upgrade... ]"
+"${UV_PROJECT_ENVIRONMENT}/bin/django-admin" upgrade || exit 1
 
-echo "Configuring systemd service..."
+echo "[ Configuring systemd service... ]"
 {
   echo "[Unit]"
   echo "Description=uWSGI RPIC"
   echo ""
   echo "[Service]"
   echo "ExecStart=${VIRTUAL_ENV}/bin/uwsgi --ini ${RPIC_APP_FOLDER}/uwsgi.ini"
+  echo "EnvironmentFile=${RPIC_APP_FOLDER}/.env"
   echo "RuntimeDirectory=uwsgi"
   echo "Restart=always"
   echo "KillSignal=SIGQUIT"
@@ -82,6 +86,6 @@ echo "Configuring systemd service..."
 systemctl daemon-reload || exit 1
 
 # Start rpic service
-echo "Starting rpic service..."
+echo "[ Starting rpic service... ]"
 systemctl enable rpic.service || exit 1
 systemctl start rpic.service || exit 1
