@@ -37,26 +37,30 @@ rsync -a --delete "${RPIC_WORKSPACE_FOLDER}/" "${RPIC_WORKSPACE_BACKUP_FOLDER}" 
 # Install app
 echo "[ Installing application... ]"
 export UV_PROJECT_ENVIRONMENT="${RPIC_APP_FOLDER}/venv"
-mkdir -p "${UV_PROJECT_ENVIRONMENT}"
-"${RPIC_DEPS_FOLDER}/uv" sync --cache-dir="${RPIC_WORKSPACE_FOLDER}/uv-cache" --frozen --no-dev --no-editable || exit 1
+mkdir -p "${UV_PROJECT_ENVIRONMENT}" "${RPIC_WORKSPACE_FOLDER}/deps/uv-cache"
+"${RPIC_DEPS_FOLDER}/uv" sync --cache-dir="${RPIC_WORKSPACE_FOLDER}/deps/uv-cache" --frozen --no-dev --no-editable || exit 1
 cp uwsgi.ini "${RPIC_APP_FOLDER}"
 
 if [ -f "${RPIC_OPT_BACKUP_FOLDER}/.env" ] ; then
-  echo "[ Restoring .env file from backup... ]"
-  cp "${RPIC_OPT_BACKUP_FOLDER}/.env" "${RPIC_APP_FOLDER}/.env" || exit 1
+  echo "[ Restoring required config from .env file backup... ]"
+  DJANGO_SECRET_KEY=$(grep SECRET_KEY "${RPIC_OPT_BACKUP_FOLDER}/.env")
 else
-  echo "[ Creating new .env file... ]"
-  {
-    echo "SECRET_KEY=\"$(${UV_PROJECT_ENVIRONMENT}/bin/django-admin shell -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())')\"" ;
-    echo "ALLOWED_HOSTS=\"*\"" ;
-    echo "DATABASE_URL=\"sqlite://${RPIC_WORKSPACE_FOLDER}/rpi-controller.db\"" ;
-    echo "DJANGO_SUPERUSER_USERNAME=\"admin\"" ;
-    echo "DJANGO_SUPERUSER_EMAIL=\"admin@local.host\"" ;
-    echo "DJANGO_SUPERUSER_PASSWORD=\"Admin123!\"" ;
-    echo "STATIC_ROOT=\"${RPIC_WORKSPACE_FOLDER}/static\"" ;
-    echo "DJANGO_SETTINGS_MODULE=\"rpi_controller.config.settings\"" ;
-  } >> "${RPIC_APP_FOLDER}/.env" || exit 1
+  echo "[ Generating required config for .env file... ]"
+  DJANGO_SECRET_KEY="SECRET_KEY=\"$(${UV_PROJECT_ENVIRONMENT}/bin/django-admin shell -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())')\""
 fi
+echo "[ Updating .env file... ]"
+{
+  echo "${DJANGO_SECRET_KEY}" ;
+  echo "ALLOWED_HOSTS=\"*\"" ;
+  echo "DATABASE_URL=\"sqlite:///${RPIC_WORKSPACE_FOLDER}/rpi-controller.db\"" ;
+  echo "DJANGO_SUPERUSER_USERNAME=\"admin\"" ;
+  echo "DJANGO_SUPERUSER_EMAIL=\"admin@local.host\"" ;
+  echo "DJANGO_SUPERUSER_PASSWORD=\"Admin123!\"" ;
+  echo "STATIC_URL=\"/static/\"" ;
+  echo "STATIC_ROOT=\"${RPIC_WORKSPACE_FOLDER}/static\"" ;
+  echo "DJANGO_SETTINGS_MODULE=\"rpi_controller.config.settings\"" ;
+} > "${RPIC_APP_FOLDER}/.env" || exit 1
+
 echo "[ Loading .env file... ]"
 set -o allexport
 source "${RPIC_APP_FOLDER}/.env"
@@ -68,10 +72,10 @@ echo "[ Performing application upgrade... ]"
 echo "[ Configuring systemd service... ]"
 {
   echo "[Unit]"
-  echo "Description=uWSGI RPIC"
+  echo "Description=RPIC web service"
   echo ""
   echo "[Service]"
-  echo "ExecStart=${VIRTUAL_ENV}/bin/uwsgi --ini ${RPIC_APP_FOLDER}/uwsgi.ini"
+  echo "ExecStart=${UV_PROJECT_ENVIRONMENT}/bin/uwsgi --ini ${RPIC_APP_FOLDER}/uwsgi.ini"
   echo "EnvironmentFile=${RPIC_APP_FOLDER}/.env"
   echo "RuntimeDirectory=uwsgi"
   echo "Restart=always"
