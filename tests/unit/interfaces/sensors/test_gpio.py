@@ -2,6 +2,8 @@ from __future__ import annotations
 import pytest
 import typing
 from unittest import mock
+from datetime import timedelta
+from django.utils import timezone
 
 from rpi_controller.interfaces.sensors.gpio import Dht22SensorInterface
 from rpi_controller.interfaces.sensors.utils.dht import DHT_GOOD, DHT_BAD_DATA
@@ -37,6 +39,27 @@ def test_dht22sensor(monkeypatch: MonkeyPatch, mock_pigpio: None) -> None:
     sensor_input = sensor_interface.read_input()
     assert sensor_input['temperature'] == 22
     assert sensor_input['humidity'] == 50
+
+
+@pytest.mark.django_db()
+def test_dht22sensor_refresh_min_interval_not_reached(monkeypatch: MonkeyPatch) -> None:
+    from test_utils.factories import SensorFactory
+
+    prev_last_status_updated = timezone.now() - timedelta(seconds=10)
+    expected_status = {"actual_status": "OLD"}
+
+    sensor = SensorFactory(
+        config={'gpio_pin': 7, 'refresh_min_interval': 180},
+        last_status_updated=prev_last_status_updated,
+        status=expected_status
+    )
+
+    sensor_interface = Dht22SensorInterface(sensor)
+    sensor_input = sensor_interface.read_input()
+
+    assert sensor_input == expected_status
+    assert sensor.status == expected_status
+    assert sensor.last_status_updated == prev_last_status_updated
 
 
 @pytest.mark.django_db()

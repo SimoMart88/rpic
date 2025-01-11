@@ -26,6 +26,7 @@ env = environ.Env(
     LOCAL_APPS=(list, []),
     STATIC_ROOT=(str, BASE_DIR / '.data/static'),
     STATIC_URL=(str, '/static/'),
+    TIME_ZONE=(str, 'UTC'),
 )
 
 
@@ -133,7 +134,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = env('TIME_ZONE')
 
 USE_I18N = True
 

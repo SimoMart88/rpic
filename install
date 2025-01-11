@@ -6,7 +6,10 @@ RPIC_APP_FOLDER=${RPIC_OPT_FOLDER}/app
 RPIC_OPT_BACKUP_FOLDER=${RPIC_OPT_FOLDER}/backup
 RPIC_WORKSPACE_FOLDER=${RPIC_WORKSPACE:-"/var/rpic"}
 RPIC_WORKSPACE_BACKUP_FOLDER=${RPIC_WORKSPACE_FOLDER}/backup
-SYSTEMD_FOLDER=/etc/systemd/system/
+RPIC_APP_DEBUG=${RPIC_DEBUG:-"False"}
+RPIC_APP_TIME_ZONE=${RPIC_TIME_ZONE:-"UTC"}
+SYSTEMD_FOLDER=${SYSTEMD_PATH:-"/etc/systemd/system/"}
+
 
 # Install system-level dependency
 echo "[ Installing system-level dependencies... ]"
@@ -61,6 +64,8 @@ else
 fi
 echo "[ Updating .env file... ]"
 {
+  echo "DEBUG=\"${RPIC_APP_DEBUG}\"" ;
+  echo "TIME_ZONE=\"${RPIC_APP_TIME_ZONE}\"" ;
   echo "${DJANGO_SECRET_KEY}" ;
   echo "ALLOWED_HOSTS=\"*\"" ;
   echo "DATABASE_URL=\"sqlite:///${RPIC_WORKSPACE_FOLDER}/rpi-controller.db\"" ;

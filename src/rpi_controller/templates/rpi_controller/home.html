@@ -1,5 +1,6 @@
 {% extends 'rpi_controller/base.html' %}
 
+{% load tz %}
 {% load django_bootstrap5 %}
 
 {% block content %}
@@ -7,13 +8,16 @@
         <h1>Sensors</h1>
         {% for sensor in sensors %}
             <div class="card" style="display: inline-block">
-                <div class="card-body">
+                <div class="card-header">
                     <h3 class="card-title">{{ sensor.name }}</h3>
                 </div>
                 <div class="card-body">
                     {% with device_data=sensor.use %}
                         {% include sensor.interface.template_name %}
                     {% endwith %}
+                </div>
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Last status update: {{ sensor.last_status_updated|localtime }}</h6>
                 </div>
             </div>
         {% endfor %}

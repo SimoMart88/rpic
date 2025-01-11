@@ -1,5 +1,7 @@
 import typing
 import pigpio
+from datetime import timedelta
+from django.utils import timezone
 from django import forms
 from rpi_controller.interfaces.sensors.utils import dht
 from rpi_controller.interfaces.sensors.base import SensorInterface
@@ -11,6 +13,7 @@ from rpi_controller.interfaces.exceptions import (InterfaceUserConfigurationExce
 
 class Dht22SensorInterfaceForm(forms.Form):
     gpio_pin = forms.CharField(label="GPIO ping reference", max_length=3)
+    refresh_min_interval = forms.IntegerField(label="Sensor refresh minimum interval (in seconds)", min_value=5)
 
 
 
@@ -21,10 +24,11 @@ class Dht22SensorInterface(SensorInterface):
     template_name = "rpi_controller/interfaces/sensors/dht22.html"
 
     def read_input(self) -> dict[str, typing.Any]:
-        """
-        Implementation based on this example
-        https://learn.adafruit.com/dht-humidity-sensing-on-raspberry-pi-with-gdocs-logging/python-setup
-        """
+        if self.context.last_status_updated and self.context.last_status_updated + timedelta(
+                seconds=self.context.config.get("refresh_min_interval", 60)
+        ) > timezone.now():
+            return self.context.status or {} | {"update_last_status_datetime": False}
+
         try:
             gpio_pin_raw: str = self.context.config['gpio_pin']
         except KeyError:
@@ -35,6 +39,7 @@ class Dht22SensorInterface(SensorInterface):
         except ValueError:
             raise InterfaceConfigurationException(f'"{gpio_pin_raw}" is not a valid GPIO pin')
 
+        #TODO: Implement a lock mechanism to avoid concurrent connection to the sensor
         pi = pigpio.pi()
         if not pi.connected:
             raise InterfaceRuntimeException('Could not connect to pigpio')
