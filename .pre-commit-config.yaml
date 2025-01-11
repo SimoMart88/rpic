@@ -15,6 +15,21 @@ repos:
     - python
   repo: local
 - hooks:
+  - id: mypy
+    name: mypy
+    entry: mypy
+    args:
+      - "--config-file"
+      - ".mypy.ini"
+    language: python
+    types:
+      - python
+    stages:
+      - pre-commit
+    additional_dependencies:
+      - packaging
+  repo: local
+- hooks:
   - args:
     - --baseline
     - .secrets.baseline
@@ -27,18 +42,18 @@ repos:
 - hooks:
   - id: check-ast
   - id: check-executables-have-shebangs
-  - exclude: "(?x)(\n  ^docker/|\n  ^devops/|\n  ^docs/\n)\n"
-    id: check-shebang-scripts-are-executable
-  - args:
+  - id: check-shebang-scripts-are-executable
+    exclude: "(?x)(\n  ^docker/|\n  ^devops/|\n  ^docs/\n)\n"
+  - id: name-tests-test
+    args:
     - --django
-    exclude: ^(tests/_extras/.*|docs)
-    id: name-tests-test
+    exclude: ^(tests/test_utils/.*|docs)
   - id: trailing-whitespace
   - id: debug-statements
     stages:
     - pre-commit
-  - exclude: .bumpversion.cfg
-    id: end-of-file-fixer
+  - id: end-of-file-fixer
+    exclude: .bumpversion.cfg
     stages:
     - pre-commit
   - id: check-merge-conflict

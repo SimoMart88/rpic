@@ -22,7 +22,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # django-environ configuration
 env = environ.Env(
     DEBUG=(bool, False),
-    THIRDPARTY_APPS=(list, [])
+    ALLOWED_HOSTS=(list, []),
+    LOCAL_APPS=(list, []),
+    STATIC_ROOT=(str, BASE_DIR / '.data/static'),
+    STATIC_URL=(str, '/static/'),
+    TIME_ZONE=(str, 'UTC'),
 )
 
 
@@ -50,15 +54,21 @@ DEFAULT_APPS = [
 ]
 
 USER_APPS = [
-    'rpi_controller.core'
+    'rpi_controller'
 ]
 
-THIRDPARTY_APPS = env.list("THIRDPARTY_APPS")
+THIRDPARTY_APPS = [
+    "admin_extra_buttons",
+    "django_bootstrap5",
+]
+
+LOCAL_APPS = env.list("LOCAL_APPS")
 
 INSTALLED_APPS = [
     *DEFAULT_APPS,
     *USER_APPS,
-    *THIRDPARTY_APPS
+    *THIRDPARTY_APPS,
+    *LOCAL_APPS
 ]
 
 MIDDLEWARE = [
@@ -124,7 +134,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = env('TIME_ZONE')
 
 USE_I18N = True
 
@@ -133,8 +143,8 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
-
-STATIC_URL = 'static/'
+STATIC_ROOT = env('STATIC_ROOT')
+STATIC_URL = env('STATIC_URL')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

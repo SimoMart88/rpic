@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class CoreConfig(AppConfig):
+class Config(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'rpi_controller.core'
+    name = 'rpi_controller'

@@ -1,0 +1,18 @@
+{% extends "admin_extra_buttons/action_page.html" %}
+
+{% block action-content %}
+    {% block action-content-title %}<h1>{{ original }}</h1>{% endblock %}
+    {% block action-content-form %}
+        {{ admin_form.form.non_field_errors }}
+        <form method="post" id="config-form">
+            {% csrf_token %}
+            {% for fieldset in admin_form %}
+                {% include "admin/includes/fieldset.html" %}
+            {% endfor %}
+            <div class="submit-row">
+                <input type="submit" value="Submit" />
+            </div>
+        </form>
+    {% endblock %}
+    {% block action-content-extra %}{% endblock %}
+{% endblock %}

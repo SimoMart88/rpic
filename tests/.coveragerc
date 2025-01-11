@@ -1,0 +1,32 @@
+[run]
+branch = True
+source = src
+source_pkgs = rpi_controller
+relative_files = True
+omit =
+    **/migrations/**
+    **/rpi_controller/interfaces/sensors/utils/dht.py
+
+
+[report]
+# Regexes for lines to exclude from consideration
+exclude_lines =
+    pragma: no cover
+    pragma: no-cover
+    pass
+    if settings.DEBUG:
+    if typing.TYPE_CHECKING
+    if TYPE_CHECKING
+    if __name__ == .__main__.:
+    except Exception
+    raise NotImplementedError
+    @abc.abstractmethod
+    @abstractmethod
+
+
+fail_under=85
+precision=2
+ignore_errors = True
+
+[html]
+directory = ./.build/coverage
