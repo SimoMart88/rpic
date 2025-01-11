@@ -6,9 +6,9 @@ A controller for GPIO sensors and devices on RaspberryPI
   - OS: Raspberry Pi OS (Legacy) Lite (see https://www.raspberrypi.com/software/operating-systems/)
 
 ## Installation
-- Download release file into the target RaspberryPI `curl -LsSf <URL>`
+- Download release file into the target RaspberryPI
 - Unzip the file into a temp folder
-- Run `./install` inside the temp folder
+- Run `sudo ./install` inside the temp folder
 
 ### Post-installation
 - Connect to the admin UI: (https://<Raspberry IP address>/admin)
