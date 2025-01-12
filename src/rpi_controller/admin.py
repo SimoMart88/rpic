@@ -45,7 +45,7 @@ class TestForm(forms.Form):
 class DeviceAdmin(ExtraButtonsMixin, admin.ModelAdmin["Device"]):
     list_display = ["name", "slug", "visible", "interface_label"]
     list_filter = ["visible", "interface"]
-    readonly_fields = ["config"]
+    readonly_fields = ["config", "status", "last_status_updated"]
 
     def get_object_or_404(self, request: "HttpRequest", pk: str) -> "Device":
         try:

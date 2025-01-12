@@ -8,13 +8,21 @@ RPIC_WORKSPACE_FOLDER=${RPIC_WORKSPACE:-"/var/rpic"}
 RPIC_WORKSPACE_BACKUP_FOLDER=${RPIC_WORKSPACE_FOLDER}/backup
 RPIC_APP_DEBUG=${RPIC_DEBUG:-"False"}
 RPIC_APP_TIME_ZONE=${RPIC_TIME_ZONE:-"UTC"}
+RPIC_APP_DB_URL=${RPIC_DB_URL}
+RPIC_APP_DB_NAME="rpic"
 SYSTEMD_FOLDER=${SYSTEMD_PATH:-"/etc/systemd/system/"}
 
+PASSWORD_GEN_COMMAND="head /dev/urandom | tr -dc 'A-Za-z0-9()*+,-.:<=>?^_{|}' | head -c 13"
 
 # Install system-level dependency
 echo "[ Installing system-level dependencies... ]"
 apt update
 apt install python3 python3-dev pigpiod
+
+
+if [[ "${RPIC_APP_DB_URL}" == "" ]] ; then
+  apt install postgresql
+fi
 
 # Start pigpiod service
 echo "[ Starting pigpiod service... ]"
@@ -58,9 +66,27 @@ cp uwsgi.ini "${RPIC_APP_FOLDER}"
 if [ -f "${RPIC_OPT_BACKUP_FOLDER}/.env" ] ; then
   echo "[ Restoring required config from .env file backup... ]"
   DJANGO_SECRET_KEY=$(grep SECRET_KEY "${RPIC_OPT_BACKUP_FOLDER}/.env")
+  DATABASE_URL=$(grep DATABASE_URL "${RPIC_OPT_BACKUP_FOLDER}/.env")
+  DJANGO_SUPERUSER_PASSWORD=$(grep DJANGO_SUPERUSER_PASSWORD "${RPIC_OPT_BACKUP_FOLDER}/.env")
 else
   echo "[ Generating required config for .env file... ]"
   DJANGO_SECRET_KEY="SECRET_KEY=\"$(${UV_PROJECT_ENVIRONMENT}/bin/django-admin shell -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())')\""
+  if [[ "${RPIC_APP_DB_URL}" == "" ]] ; then
+    echo "--> Configuring Postgresql..."
+    DB_PASSWORD=$("${PASSWORD_GEN_COMMAND}")
+    echo " =======> Postgresql DB password: \"${DB_PASSWORD}\" <==========="
+    sudo -u postgres psql template1 -c "ALTER USER postgres with encrypted password '${DB_PASSWORD}'"
+    sudo -u postgres psql template1 -c "CREATE DATABASE ${RPIC_APP_DB_NAME}"
+    sudo sed -i  '/^local *all *postgres *peer/ s/peer/md5/' /etc/postgresql/*/main/pg_hba.conf
+    systemctl restart postgresql
+    DATABASE_URL="DATABASE_URL=\"postgres://postgres:${DB_PASSWORD}@localhost:5432/${RPIC_APP_DB_NAME}\""
+  else
+    DATABASE_URL="${RPIC_APP_DB_URL}"
+  fi
+  echo "--> Configuring Django..."
+  DJANGO_ADMIN_PASSWORD=$("${PASSWORD_GEN_COMMAND}")
+  echo " =======> Django Admin password: \"${DJANGO_ADMIN_PASSWORD}\" <==========="
+  DJANGO_SUPERUSER_PASSWORD="DJANGO_SUPERUSER_PASSWORD=\"${DJANGO_ADMIN_PASSWORD}\""
 fi
 echo "[ Updating .env file... ]"
 {
@@ -68,14 +94,16 @@ echo "[ Updating .env file... ]"
   echo "TIME_ZONE=\"${RPIC_APP_TIME_ZONE}\"" ;
   echo "${DJANGO_SECRET_KEY}" ;
   echo "ALLOWED_HOSTS=\"*\"" ;
-  echo "DATABASE_URL=\"sqlite:///${RPIC_WORKSPACE_FOLDER}/rpi-controller.db\"" ;
+  echo "${DATABASE_URL}" ;
   echo "DJANGO_SUPERUSER_USERNAME=\"admin\"" ;
   echo "DJANGO_SUPERUSER_EMAIL=\"admin@local.host\"" ;
-  echo "DJANGO_SUPERUSER_PASSWORD=\"Admin123!\"" ;
+  echo "${DJANGO_SUPERUSER_PASSWORD}" ;
   echo "STATIC_URL=\"/static/\"" ;
   echo "STATIC_ROOT=\"${RPIC_WORKSPACE_FOLDER}/static\"" ;
   echo "DJANGO_SETTINGS_MODULE=\"rpi_controller.config.settings\"" ;
 } > "${RPIC_APP_FOLDER}/.env" || exit 1
+
+chmod 700 "${RPIC_APP_FOLDER}/.env"
 
 echo "[ Loading .env file... ]"
 set -o allexport
