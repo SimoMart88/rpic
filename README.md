@@ -9,6 +9,8 @@ A controller for GPIO sensors and devices on RaspberryPI
 - Download release file into the target RaspberryPI
 - Unzip the file into a temp folder
 - Run `sudo ./install` inside the temp folder
+- During the first installation, automatically generated passwords (Postgresql, Django Admin, etc...) will be prompted
+  - If you miss it, we can find it in the /opt/rpic/app/.env
 
 ### Post-installation
 - Connect to the admin UI: (https://<Raspberry IP address>/admin)

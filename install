@@ -12,7 +12,6 @@ RPIC_APP_DB_URL=${RPIC_DB_URL}
 RPIC_APP_DB_NAME="rpic"
 SYSTEMD_FOLDER=${SYSTEMD_PATH:-"/etc/systemd/system/"}
 
-PASSWORD_GEN_COMMAND="head /dev/urandom | tr -dc 'A-Za-z0-9()*+,-.:<=>?^_{|}' | head -c 13"
 
 # Install system-level dependency
 echo "[ Installing system-level dependencies... ]"
@@ -73,7 +72,7 @@ else
   DJANGO_SECRET_KEY="SECRET_KEY=\"$(${UV_PROJECT_ENVIRONMENT}/bin/django-admin shell -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())')\""
   if [[ "${RPIC_APP_DB_URL}" == "" ]] ; then
     echo "--> Configuring Postgresql..."
-    DB_PASSWORD=$("${PASSWORD_GEN_COMMAND}")
+    DB_PASSWORD=$(head /dev/urandom | tr -dc 'A-Za-z0-9()*+,-.:<=>?^_{|}' | head -c 13)
     echo " =======> Postgresql DB password: \"${DB_PASSWORD}\" <==========="
     sudo -u postgres psql template1 -c "ALTER USER postgres with encrypted password '${DB_PASSWORD}'"
     sudo -u postgres psql template1 -c "CREATE DATABASE ${RPIC_APP_DB_NAME}"
@@ -84,7 +83,7 @@ else
     DATABASE_URL="${RPIC_APP_DB_URL}"
   fi
   echo "--> Configuring Django..."
-  DJANGO_ADMIN_PASSWORD=$("${PASSWORD_GEN_COMMAND}")
+  DJANGO_ADMIN_PASSWORD=$(head /dev/urandom | tr -dc 'A-Za-z0-9()*+,-.:<=>?^_{|}' | head -c 13)
   echo " =======> Django Admin password: \"${DJANGO_ADMIN_PASSWORD}\" <==========="
   DJANGO_SUPERUSER_PASSWORD="DJANGO_SUPERUSER_PASSWORD=\"${DJANGO_ADMIN_PASSWORD}\""
 fi
