@@ -25,9 +25,9 @@ class Dht22SensorInterface(SensorInterface):
     template_name = "rpi_controller/interfaces/sensors/dht22.html"
 
     def read_input(self) -> dict[str, typing.Any]:
-        if self.context.last_status_updated and self.context.last_status_updated + timedelta(
+        if self.context.last_status_updated and timezone.now() < self.context.last_status_updated + timedelta(
                 seconds=self.context.config.get("refresh_min_interval", 60)
-        ) > timezone.now():
+        ):
             return self.context.status or {} | {"update_last_status_datetime": False}
 
         with transaction.atomic():
