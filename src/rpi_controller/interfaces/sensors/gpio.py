@@ -38,7 +38,9 @@ class Dht22SensorInterface(SensorInterface):
                 self.context.slug, self.context.last_status_updated, next_refresh_datetime, now
             )
             if now < next_refresh_datetime:
-                return self.context.status or {} | {"update_last_status_datetime": False}
+                status = {"update_last_status_datetime": False}
+                status.update(**self.context.status or {})
+                return status
 
         with transaction.atomic():
             # Lock model object to avoid concurrent read on the same sensor
