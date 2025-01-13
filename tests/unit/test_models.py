@@ -47,4 +47,5 @@ def test_sensor_use_skip_last_status_datetime_update() -> None:
 
     dummy_sensor_skip_last.use()
 
-    assert not dummy_sensor_skip_last.last_status_updated  # Sanity check
+    assert not dummy_sensor_skip_last.last_status_updated
+    assert "update_last_status_datetime" not in dummy_sensor_skip_last.status

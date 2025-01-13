@@ -6,8 +6,12 @@ from django.utils.text import slugify
 from strategy_field.fields import StrategyField
 
 import typing
+import logging
 
 from rpi_controller.interfaces.sensors.registry import sensor_registry
+
+
+logger = logging.getLogger(__name__)
 
 
 class Device(models.Model):
@@ -38,7 +42,9 @@ class Sensor(Device):
     interface = StrategyField(registry=sensor_registry)
 
     def use(self, *args: typing.Any, **kwargs: typing.Any) -> dict[typing.Any, typing.Any]:
+        logger.info("[Sensor '%s'] Read input with config: %s", self.slug, self.config)
         status = self.interface.read_input()
+        logger.info("[Sensor '%s'] Read input result: %s", self.slug, status)
 
         if status.pop('update_last_status_datetime', True):
             self.last_status_updated = timezone.now()

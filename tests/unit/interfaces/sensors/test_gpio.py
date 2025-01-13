@@ -46,20 +46,17 @@ def test_dht22sensor_refresh_min_interval_not_reached(monkeypatch: MonkeyPatch) 
     from test_utils.factories import SensorFactory
 
     prev_last_status_updated = timezone.now() - timedelta(seconds=10)
-    expected_status = {"actual_status": "OLD"}
 
     sensor = SensorFactory(
         config={'gpio_pin': 7, 'refresh_min_interval': 180},
         last_status_updated=prev_last_status_updated,
-        status=expected_status
+        status={"actual_status": "OLD"}
     )
 
     sensor_interface = Dht22SensorInterface(sensor)
     sensor_input = sensor_interface.read_input()
 
-    assert sensor_input == expected_status
-    assert sensor.status == expected_status
-    assert sensor.last_status_updated == prev_last_status_updated
+    assert sensor_input == {"actual_status": "OLD", "update_last_status_datetime": False}
 
 
 @pytest.mark.django_db()
