@@ -4,6 +4,7 @@ import typing
 from unittest import mock
 
 from rpi_controller.interfaces.sensors.gpio import Dht22SensorInterface
+from rpi_controller.interfaces.sensors.utils.dht import DHT_GOOD, DHT_BAD_DATA
 from rpi_controller.interfaces.exceptions import (InterfaceUserConfigurationException,
                                                   InterfaceConfigurationException,
                                                   InterfaceRuntimeException)
@@ -14,25 +15,23 @@ if typing.TYPE_CHECKING:
 
 
 @pytest.fixture()
-def mock_board(monkeypatch: MonkeyPatch) -> str:
-    gpio_pin = 'D0'
+def mock_pigpio(monkeypatch: MonkeyPatch) -> None:
     monkeypatch.setattr(
-        'rpi_controller.interfaces.sensors.gpio.board',
-        mock.Mock(spec=[gpio_pin], gpio_pin=mock.Mock())
+        'rpi_controller.interfaces.sensors.gpio.pigpio.pi',
+        mock.Mock(return_value=mock.Mock(connected=True))
     )
-    return gpio_pin
 
 
 @pytest.mark.django_db()
-def test_dht22sensor(monkeypatch: MonkeyPatch, mock_board: str) -> None:
+def test_dht22sensor(monkeypatch: MonkeyPatch, mock_pigpio: None) -> None:
     from test_utils.factories import SensorFactory
 
     monkeypatch.setattr(
-        'rpi_controller.interfaces.sensors.gpio.adafruit_dht.DHT22',
-        mock.Mock(return_value=mock.Mock(temperature=22, humidity=50))
+        'rpi_controller.interfaces.sensors.gpio.dht.Sensor',
+        mock.Mock(return_value=mock.Mock(spec=['read'], read=mock.Mock(return_value=(0, 0, DHT_GOOD, 22, 50))))
     )
 
-    sensor = SensorFactory(config={'gpio_pin': mock_board})
+    sensor = SensorFactory(config={'gpio_pin': 7})
 
     sensor_interface = Dht22SensorInterface(sensor)
     sensor_input = sensor_interface.read_input()
@@ -52,23 +51,43 @@ def test_dht22sensor_userconfig_error(monkeypatch:MonkeyPatch) -> None:
 
 
 @pytest.mark.django_db()
-def test_dht22sensor_config_error(monkeypatch: MonkeyPatch, mock_board: str) -> None:
+def test_dht22sensor_interfaceconfig_error(monkeypatch:MonkeyPatch) -> None:
     from test_utils.factories import SensorFactory
 
-    gpio_pin = f'{mock_board}-ERROR'
-    sensor = SensorFactory(config={'gpio_pin': gpio_pin})
+    sensor = SensorFactory(config={'gpio_pin': 'INVALID'})
 
-    with pytest.raises(InterfaceConfigurationException, match=f'"{gpio_pin}" is not a valid GPIO pin'):
+    with pytest.raises(InterfaceConfigurationException, match='"INVALID" is not a valid GPIO pin'):
         sensor_interface = Dht22SensorInterface(sensor)
         sensor_interface.read_input()
 
 
 @pytest.mark.django_db()
-def test_dht22sensor_interface_error(monkeypatch: MonkeyPatch, mock_board: str) -> None:
+def test_dht22sensor_pigpio_connection_error(monkeypatch: MonkeyPatch) -> None:
     from test_utils.factories import SensorFactory
 
-    sensor = SensorFactory(config={'gpio_pin': mock_board})
+    monkeypatch.setattr(
+        'rpi_controller.interfaces.sensors.gpio.pigpio.pi',
+        mock.Mock(return_value=mock.Mock(connected=False))
+    )
 
-    with pytest.raises(InterfaceRuntimeException, match='Failed to read DHT22 sensor'):
+    sensor = SensorFactory(config={'gpio_pin': 7})
+
+    with pytest.raises(InterfaceRuntimeException, match='Could not connect to pigpio'):
+        sensor_interface = Dht22SensorInterface(sensor)
+        sensor_interface.read_input()
+
+
+@pytest.mark.django_db()
+def test_dht22sensor_interface_error(monkeypatch: MonkeyPatch, mock_pigpio: None) -> None:
+    from test_utils.factories import SensorFactory
+
+    monkeypatch.setattr(
+        'rpi_controller.interfaces.sensors.gpio.dht.Sensor',
+        mock.Mock(return_value=mock.Mock(spec=['read'], read=mock.Mock(return_value=(0, 0, DHT_BAD_DATA, 22, 50))))
+    )
+
+    sensor = SensorFactory(config={'gpio_pin': 7})
+
+    with pytest.raises(InterfaceRuntimeException, match='DHT22 sensor read failure'):
         sensor_interface = Dht22SensorInterface(sensor)
         sensor_interface.read_input()

@@ -8,7 +8,18 @@ RPIC_WORKSPACE_FOLDER=${RPIC_WORKSPACE:-"/var/rpic"}
 RPIC_WORKSPACE_BACKUP_FOLDER=${RPIC_WORKSPACE_FOLDER}/backup
 SYSTEMD_FOLDER=/etc/systemd/system/
 
+# Install system-level dependency
+echo "[ Installing system-level dependencies... ]"
+apt update
+apt install python3 python3-dev pigpiod
+
+# Start pigpiod service
+echo "[ Starting pigpiod service... ]"
+systemctl enable pigpiod.service || exit 1
+systemctl restart pigpiod.service || exit 1
+
 # Install uv if needed
+echo "[ Checking uv installation... ]"
 mkdir -p "${RPIC_DEPS_FOLDER}"
 "${RPIC_DEPS_FOLDER}/uv" --version
 IS_UV_AVAILABLE=$?

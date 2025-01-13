@@ -1,7 +1,7 @@
 import typing
-import board
-import adafruit_dht
+import pigpio
 from django import forms
+from rpi_controller.interfaces.sensors.utils import dht
 from rpi_controller.interfaces.sensors.base import SensorInterface
 from rpi_controller.interfaces.sensors.registry import sensor_registry
 from rpi_controller.interfaces.exceptions import (InterfaceUserConfigurationException,
@@ -26,23 +26,29 @@ class Dht22SensorInterface(SensorInterface):
         https://learn.adafruit.com/dht-humidity-sensing-on-raspberry-pi-with-gdocs-logging/python-setup
         """
         try:
-            gpio_pin = self.context.config['gpio_pin']
+            gpio_pin_raw: str = self.context.config['gpio_pin']
         except KeyError:
             raise InterfaceUserConfigurationException('gpio_pin not defined in config')
 
         try:
-            board_pin = getattr(board, gpio_pin)
-        except AttributeError:
-            try:
-                board_pin = getattr(board, f'D{gpio_pin}')
-            except AttributeError:
-                raise InterfaceConfigurationException(f'"{gpio_pin}" is not a valid GPIO pin')
+            gpio_pin: int = int(gpio_pin_raw)
+        except ValueError:
+            raise InterfaceConfigurationException(f'"{gpio_pin_raw}" is not a valid GPIO pin')
+
+        pi = pigpio.pi()
+        if not pi.connected:
+            raise InterfaceRuntimeException('Could not connect to pigpio')
 
         try:
-            sensor = adafruit_dht.DHT22(board_pin)
-            return {'temperature': sensor.temperature, 'humidity': sensor.humidity}
+            sensor = dht.Sensor(pi, gpio_pin)
+            _, _, status, temperature, humidity = sensor.read()
         except Exception as e:
-            raise InterfaceRuntimeException('Failed to read DHT22 sensor') from e
+            raise InterfaceRuntimeException('DHT22 sensor unexpected error') from e
+
+        if status == dht.DHT_GOOD:
+            return {'temperature': temperature, 'humidity': humidity}
+        else:
+            raise InterfaceRuntimeException('DHT22 sensor read failure')
 
 
 sensor_registry.register(Dht22SensorInterface)
