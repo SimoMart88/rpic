@@ -2,6 +2,7 @@ import typing
 import pigpio
 from datetime import timedelta
 from django.utils import timezone
+from django.db import transaction
 from django import forms
 from rpi_controller.interfaces.sensors.utils import dht
 from rpi_controller.interfaces.sensors.base import SensorInterface
@@ -29,31 +30,34 @@ class Dht22SensorInterface(SensorInterface):
         ) > timezone.now():
             return self.context.status or {} | {"update_last_status_datetime": False}
 
-        try:
-            gpio_pin_raw: str = self.context.config['gpio_pin']
-        except KeyError:
-            raise InterfaceUserConfigurationException('gpio_pin not defined in config')
+        with transaction.atomic():
+            # Lock model object to avoid concurrent read on the same sensor
+            context = type(self.context).objects.select_for_update().get(id=self.context.id)
 
-        try:
-            gpio_pin: int = int(gpio_pin_raw)
-        except ValueError:
-            raise InterfaceConfigurationException(f'"{gpio_pin_raw}" is not a valid GPIO pin')
+            try:
+                gpio_pin_raw: str = context.config['gpio_pin']
+            except KeyError:
+                raise InterfaceUserConfigurationException('gpio_pin not defined in config')
 
-        #TODO: Implement a lock mechanism to avoid concurrent connection to the sensor
-        pi = pigpio.pi()
-        if not pi.connected:
-            raise InterfaceRuntimeException('Could not connect to pigpio')
+            try:
+                gpio_pin: int = int(gpio_pin_raw)
+            except ValueError:
+                raise InterfaceConfigurationException(f'"{gpio_pin_raw}" is not a valid GPIO pin')
 
-        try:
-            sensor = dht.Sensor(pi, gpio_pin)
-            _, _, status, temperature, humidity = sensor.read()
-        except Exception as e:
-            raise InterfaceRuntimeException('DHT22 sensor unexpected error') from e
+            pi = pigpio.pi()
+            if not pi.connected:
+                raise InterfaceRuntimeException('Could not connect to pigpio')
 
-        if status == dht.DHT_GOOD:
-            return {'temperature': temperature, 'humidity': humidity}
-        else:
-            raise InterfaceRuntimeException('DHT22 sensor read failure')
+            try:
+                sensor = dht.Sensor(pi, gpio_pin)
+                _, _, status, temperature, humidity = sensor.read()
+            except Exception as e:
+                raise InterfaceRuntimeException('DHT22 sensor unexpected error') from e
+
+            if status == dht.DHT_GOOD:
+                return {'temperature': temperature, 'humidity': humidity}
+            else:
+                raise InterfaceRuntimeException('DHT22 sensor read failure')
 
 
 sensor_registry.register(Dht22SensorInterface)
