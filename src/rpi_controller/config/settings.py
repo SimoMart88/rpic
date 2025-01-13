@@ -27,6 +27,8 @@ env = environ.Env(
     STATIC_ROOT=(str, BASE_DIR / '.data/static'),
     STATIC_URL=(str, '/static/'),
     TIME_ZONE=(str, 'UTC'),
+    LOGGING_LEVEL=(str, 'ERROR'),
+    LOGGING_FILE=(str, '.data/rpi_controller.log'),
 )
 
 
@@ -150,3 +152,45 @@ STATIC_URL = env('STATIC_URL')
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s - %(asctime)s - %(name)s %(funcName)s:%(lineno)d :: %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S'
+        },
+        'short': {
+            'format': '%(levelname)s - %(name)s %(funcName)s:%(lineno)d :: %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S'
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'ERROR',
+            'class': 'logging.StreamHandler',
+            'formatter': 'short',
+            'stream': 'ext://sys.stderr',
+        },
+        'logfile': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': env('LOGGING_FILE'),
+            'formatter': 'verbose'
+        },
+    },
+    'loggers': {
+        'django': {
+            'level': 'ERROR',
+            'handlers': ['console'],
+            'propagate': False,
+        },
+        'rpi_controller': {
+            'level': env('LOGGING_LEVEL'),
+            'handlers': ['console', 'logfile'],
+            'propagate': False,
+        }
+    }
+}

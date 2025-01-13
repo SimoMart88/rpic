@@ -1,5 +1,6 @@
 import typing
 import pigpio
+import logging
 from datetime import timedelta
 from django.utils import timezone
 from django.db import transaction
@@ -17,6 +18,8 @@ class Dht22SensorInterfaceForm(forms.Form):
     refresh_min_interval = forms.IntegerField(label="Sensor refresh minimum interval (in seconds)", min_value=5)
 
 
+logger = logging.getLogger(__name__)
+
 
 class Dht22SensorInterface(SensorInterface):
 
@@ -25,10 +28,17 @@ class Dht22SensorInterface(SensorInterface):
     template_name = "rpi_controller/interfaces/sensors/dht22.html"
 
     def read_input(self) -> dict[str, typing.Any]:
-        if self.context.last_status_updated and timezone.now() < self.context.last_status_updated + timedelta(
+        now = timezone.now()
+        if self.context.last_status_updated:
+            next_refresh_datetime = self.context.last_status_updated + timedelta(
                 seconds=self.context.config.get("refresh_min_interval", 60)
-        ):
-            return self.context.status or {} | {"update_last_status_datetime": False}
+            )
+            logger.info(
+                "[Sensor '%s'] Check if status update is required. Last update: %s | Next refresh: %s | Now: %s",
+                self.context.slug, self.context.last_status_updated, next_refresh_datetime, now
+            )
+            if now < next_refresh_datetime:
+                return self.context.status or {} | {"update_last_status_datetime": False}
 
         with transaction.atomic():
             # Lock model object to avoid concurrent read on the same sensor
@@ -44,13 +54,18 @@ class Dht22SensorInterface(SensorInterface):
             except ValueError:
                 raise InterfaceConfigurationException(f'"{gpio_pin_raw}" is not a valid GPIO pin')
 
+            logger.info("[Sensor '%s'] Trying connection to the pigpio service", context.slug)
             pi = pigpio.pi()
             if not pi.connected:
+                logger.error("[Sensor '%s'] Failed to connect to pigpio service", context.slug)
                 raise InterfaceRuntimeException('Could not connect to pigpio')
 
+            logger.info("[Sensor '%s'] Trying read data using pigpio service", context.slug)
             try:
                 sensor = dht.Sensor(pi, gpio_pin)
-                _, _, status, temperature, humidity = sensor.read()
+                sensor_output = sensor.read()
+                logger.info("[Sensor '%s'] pigpio service raw output: %s", context.slug, sensor_output)
+                _, _, status, temperature, humidity = sensor_output
             except Exception as e:
                 raise InterfaceRuntimeException('DHT22 sensor unexpected error') from e
 
