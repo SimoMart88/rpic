@@ -12,10 +12,6 @@ A controller for GPIO sensors and devices on RaspberryPI
 - During the first installation, automatically generated passwords (Postgresql, Django Admin, etc...) will be prompted
   - If you miss it, we can find it in the /opt/rpic/app/.env
 
-### Post-installation
-- Connect to the admin UI: (https://<Raspberry IP address>/admin)
-- Change password for the admin user (default is 'Admin123!')
-
 # Future improvements
 * Expose the application and the static content through Nginx
   * For small environment uWSGI could be enough, for medium to large environment Nginx would be better
@@ -24,4 +20,3 @@ A controller for GPIO sensors and devices on RaspberryPI
 
 # TODO
 * Implement HLA
-* Configure logging
