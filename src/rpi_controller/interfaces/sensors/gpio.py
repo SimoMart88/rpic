@@ -10,7 +10,8 @@ from rpi_controller.interfaces.sensors.base import SensorInterface
 from rpi_controller.interfaces.sensors.registry import sensor_registry
 from rpi_controller.interfaces.exceptions import (InterfaceUserConfigurationException,
                                                   InterfaceConfigurationException,
-                                                  InterfaceRuntimeException)
+                                                  InterfaceRuntimeException,
+                                                  InterfaceUpdateNotRequiredException)
 
 
 class Dht22SensorInterfaceForm(forms.Form):
@@ -29,18 +30,16 @@ class Dht22SensorInterface(SensorInterface):
 
     def read_input(self) -> dict[str, typing.Any]:
         now = timezone.now()
-        if self.context.last_status_updated:
-            next_refresh_datetime = self.context.last_status_updated + timedelta(
+        if self.context.last_status_update:
+            next_refresh_datetime = self.context.last_status_update + timedelta(
                 seconds=self.context.config.get("refresh_min_interval", 60)
             )
             logger.info(
                 "[Sensor '%s'] Check if status update is required. Last update: %s | Next refresh: %s | Now: %s",
-                self.context.slug, self.context.last_status_updated, next_refresh_datetime, now
+                self.context.slug, self.context.last_status_update, next_refresh_datetime, now
             )
             if now < next_refresh_datetime:
-                status = {"update_last_status_datetime": False}
-                status.update(**self.context.status or {})
-                return status
+                raise InterfaceUpdateNotRequiredException
 
         with transaction.atomic():
             # Lock model object to avoid concurrent read on the same sensor

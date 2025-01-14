@@ -2,6 +2,7 @@
 
 {% load tz %}
 {% load django_bootstrap5 %}
+{% load bootstrap_icons %}
 
 {% block content %}
     <div class="card-columns">
@@ -12,12 +13,25 @@
                     <h3 class="card-title">{{ sensor.name }}</h3>
                 </div>
                 <div class="card-body">
+                    {# TODO: Read data from status attribute #}
                     {% with device_data=sensor.use %}
                         {% include sensor.interface.template_name %}
                     {% endwith %}
                 </div>
-                <div class="card-body">
-                    <h6 class="card-subtitle mb-2 text-muted">Last status update: {{ sensor.last_status_updated|localtime }}</h6>
+                <div class="card-footer">
+                    <h6 class="card-subtitle mb-2 text-muted">
+                        Last status update: {{ sensor.last_status_update|localtime|date:"Y-m-d H:i:s" }}
+                    </h6>
+                    {% if sensor.last_update_status == sensor.UpdateStatus.NEW %}
+                        {% bs_icon 'question-circle' color='blue' %}
+                    {% elif sensor.last_update_status == sensor.UpdateStatus.SUCCESS %}
+                        {% bs_icon 'check-circle' color='green' %}
+                    {% else %}
+                        {% bs_icon 'exclamation-triangle' color='red' %}
+                        {# TODO: include tooltip with error message #}
+                    {% endif %}
+                    {# TODO: Include refresh button that retrieve new data from an API that internally calls sensor.use #}
+                    {# TODO: Run same call on page load asynchronously #}
                 </div>
             </div>
         {% endfor %}

@@ -17,6 +17,7 @@ dependencies = [
     "django-stubs-ext>=5.1.1",
     "pigpio>=1.78",
     "psycopg>=3.2.3",
+    "django-bootstrap-icons>=0.8.7",
 ]
 
 [build-system]

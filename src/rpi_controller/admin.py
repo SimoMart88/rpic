@@ -45,13 +45,15 @@ class TestForm(forms.Form):
 class DeviceAdmin(ExtraButtonsMixin, admin.ModelAdmin["Device"]):
     list_display = ["name", "slug", "visible", "interface_label"]
     list_filter = ["visible", "interface"]
-    readonly_fields = ["config", "status", "last_status_updated"]
+    readonly_fields = ["config", "status", "last_update_status", "last_status_update", "last_status_update_log"]
 
     def get_object_or_404(self, request: "HttpRequest", pk: str) -> "Device":
-        try:
-            return self.get_object(request, pk)
-        except Device.DoesNotExist:
+        obj = self.get_object(request, pk)
+
+        if not obj:
             raise Http404
+
+        return obj
 
     @admin.display(description="Interface")
     def interface_label(self, obj: "Device") -> str:

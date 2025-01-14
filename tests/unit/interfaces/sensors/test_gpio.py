@@ -9,7 +9,8 @@ from rpi_controller.interfaces.sensors.gpio import Dht22SensorInterface
 from rpi_controller.interfaces.sensors.utils.dht import DHT_GOOD, DHT_BAD_DATA
 from rpi_controller.interfaces.exceptions import (InterfaceUserConfigurationException,
                                                   InterfaceConfigurationException,
-                                                  InterfaceRuntimeException)
+                                                  InterfaceRuntimeException,
+                                                  InterfaceUpdateNotRequiredException)
 
 
 if typing.TYPE_CHECKING:
@@ -42,21 +43,20 @@ def test_dht22sensor(monkeypatch: MonkeyPatch, mock_pigpio: None) -> None:
 
 
 @pytest.mark.django_db()
-def test_dht22sensor_refresh_min_interval_not_reached(monkeypatch: MonkeyPatch) -> None:
+def test_dht22sensor_update_not_required(monkeypatch: MonkeyPatch) -> None:
     from test_utils.factories import SensorFactory
 
-    prev_last_status_updated = timezone.now() - timedelta(seconds=10)
+    prev_last_status_update = timezone.now() - timedelta(seconds=10)
 
     sensor = SensorFactory(
         config={'gpio_pin': 7, 'refresh_min_interval': 180},
-        last_status_updated=prev_last_status_updated,
+        last_status_update=prev_last_status_update,
         status={"actual_status": "OLD"}
     )
 
     sensor_interface = Dht22SensorInterface(sensor)
-    sensor_input = sensor_interface.read_input()
-
-    assert sensor_input == {"actual_status": "OLD", "update_last_status_datetime": False}
+    with pytest.raises(InterfaceUpdateNotRequiredException):
+        sensor_interface.read_input()
 
 
 @pytest.mark.django_db()

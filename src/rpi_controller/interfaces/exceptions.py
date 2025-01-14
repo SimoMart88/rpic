@@ -12,3 +12,7 @@ class InterfaceUserConfigurationException(InterfaceConfigurationException):
 
 class InterfaceRuntimeException(InterfaceException):
     pass
+
+
+class InterfaceUpdateNotRequiredException(InterfaceException):
+    pass

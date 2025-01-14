@@ -30,3 +30,4 @@ def test_home_sensors(django_app: "DjangoTestApp", dummy_sensor: "Sensor", templ
     response = django_app.get(url_home)
     assert response.status_code == 200
     assert dummy_sensor.name in response.text
+    assert "check-circle" in response.text
