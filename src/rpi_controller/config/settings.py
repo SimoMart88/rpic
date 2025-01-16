@@ -63,6 +63,7 @@ THIRDPARTY_APPS = [
     "admin_extra_buttons",
     "django_bootstrap5",
     "django_bootstrap_icons",
+    "rest_framework",
 ]
 
 LOCAL_APPS = env.list("LOCAL_APPS")
