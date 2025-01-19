@@ -2,38 +2,119 @@
 
 {% load tz %}
 {% load django_bootstrap5 %}
-{% load bootstrap_icons %}
 
 {% block content %}
     <div class="card-columns">
         <h1>Sensors</h1>
-        {% for sensor in sensors %}
+        {% for device in sensors %}
             <div class="card" style="display: inline-block">
                 <div class="card-header">
-                    <h3 class="card-title">{{ sensor.name }}</h3>
+                    <h3 id="{{ device.slug }}-name" class="card-title">{{ device.name }}</h3>
                 </div>
                 <div class="card-body">
-                    {# TODO: Read data from status attribute #}
-                    {% with device_data=sensor.use %}
-                        {% include sensor.interface.template_name %}
-                    {% endwith %}
+                    {% include device.interface.template_name %}
                 </div>
                 <div class="card-footer">
                     <h6 class="card-subtitle mb-2 text-muted">
-                        Last status update: {{ sensor.last_status_update|localtime|date:"Y-m-d H:i:s" }}
+                        Last status update:
                     </h6>
-                    {% if sensor.last_update_status == sensor.UpdateStatus.NEW %}
-                        {% bs_icon 'question-circle' color='blue' %}
-                    {% elif sensor.last_update_status == sensor.UpdateStatus.SUCCESS %}
-                        {% bs_icon 'check-circle' color='green' %}
-                    {% else %}
-                        {% bs_icon 'exclamation-triangle' color='red' %}
-                        {# TODO: include tooltip with error message #}
-                    {% endif %}
-                    {# TODO: Include refresh button that retrieve new data from an API that internally calls sensor.use #}
-                    {# TODO: Run same call on page load asynchronously #}
+                    <div class="container">
+                        <div class="row">
+                            <div class="col">
+                                <p id="{{ device.slug }}-last_status_update" class="small">
+                                    {{ device.last_status_update|localtime|date:"Y-m-d H:i:s" }}
+                                </p>
+                            </div>
+                            <div class="col">
+                                <p id="{{ device.slug }}-last_update_status">
+                                    {{ device.get_last_update_status_display }}
+                                </p>
+                            </div>
+                            <div class="col">
+                                <button id="{{ device.slug }}-refresh" type="button" class="btn btn-outline-primary">
+                                    <i class="bi bi-arrow-clockwise"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+            <script>
+                {# TODO: move common logic a dedicated JS file #}
+                // https://docs.djangoproject.com/en/5.1/howto/csrf/#acquiring-the-token-if-csrf-use-sessions-and-csrf-cookie-httponly-are-false
+
+                function getCookie(name) {
+                    let cookieValue = null;
+                    if (document.cookie && document.cookie !== '') {
+                        const cookies = document.cookie.split(';');
+                        for (let i = 0; i < cookies.length; i++) {
+                            const cookie = cookies[i].trim();
+                            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                                break;
+                            }
+                        }
+                    }
+                    return cookieValue;
+                }
+
+                function beautify_device_status_update(sensor_ref) {
+                    let last_update_status = `#${sensor_ref}-last_update_status`
+                    let img_new_html = '<i class="bi bi-question-circle h3"></i>'
+                    let img_success_html = '<i class="bi bi-check-circle h3"></i>'
+                    let img_failure_html = '<i class="bi bi-exclamation-circle h3"></i>'
+
+                    switch ($(last_update_status).text().trim()) {
+                        case 'NEW':
+                            $(last_update_status).html(img_new_html);
+                            break;
+                        case 'SUCCESS':
+                            $(last_update_status).html(img_success_html);
+                            break;
+                        default:
+                            $(last_update_status).html(img_failure_html);
+                    }
+                }
+
+                function update_device_status(sensor_ref, fields_to_update, api_url) {
+                    $.ajax({
+                        type: 'POST',
+                        url: api_url,
+                        headers: {'X-CSRFToken': csrf_token},
+                        mode: 'same-origin',
+                        success: function(response){
+                            for (let field of fields_to_update) {
+                                let response_field = response[field];
+                                if (response_field instanceof Object) {
+                                    for (let [key, value] of Object.entries(response_field)) {
+                                        $(`#${sensor_ref}-${field}-${key}`).text(value);
+                                    }
+                                } else {
+                                    $(`#${sensor_ref}-${field}`).text(response_field);
+                                }
+                            }
+
+                            beautify_device_status_update(sensor_ref);
+                        },
+                        error: function(response){
+                            console.log(`API ERROR => ${response}`)
+                        }
+                    });
+                }
+
+                const csrf_token = getCookie('csrftoken');
+                let func_args = ['{{ device.slug }}', ['status', 'last_status_update', 'last_update_status'], '{% url 'api-sensor-use' device.slug %}']
+
+                $(window).on('load', function() {
+                    update_device_status.apply(this, func_args);
+                });
+
+                $(document).ready( function() {
+                    $('#{{ device.slug }}-refresh').click(function () {
+                        update_device_status.apply(this, func_args);
+                    });
+                });
+            </script>
         {% endfor %}
     </div>
 {% endblock %}

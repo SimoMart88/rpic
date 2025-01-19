@@ -17,9 +17,9 @@ logger = logging.getLogger(__name__)
 
 class Device(models.Model):
     class UpdateStatus(models.TextChoices):
-        NEW = "NW"
-        SUCCESS = "SC"
-        FAILURE = "FA"
+        NEW = ("NW", 'NEW')
+        SUCCESS = ("SC", 'SUCCESS')
+        FAILURE = ("FA", 'FAILURE')
 
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255, unique=True, blank=True)

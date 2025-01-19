@@ -20,3 +20,4 @@ A controller for GPIO sensors and devices on RaspberryPI
 
 # TODO
 * Implement HLA
+* Implement Selenium tests for UI
