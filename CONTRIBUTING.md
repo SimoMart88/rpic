@@ -12,6 +12,10 @@ uv sync
 source .venv/bin/activate
 ```
 
+## Functional test
+In order to run functional tests with Selenium on your local environment, use '--selenium' option when running pytest
+`pytest --selenium`
+
 # Known Issues
 
 ## uWSGI installation

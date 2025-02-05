@@ -10,15 +10,32 @@ if typing.TYPE_CHECKING:
 
 
 @pytest.fixture
-def dummy_sensor() -> "Sensor":
+def dummy_sensor_update_not_required() -> "Sensor":
     from test_utils.factories import SensorFactory
-    return SensorFactory.create()
+    from rpi_controller.models import Sensor
+    from strategy_field.utils import fqn
+    from test_utils.interfaces import DummyUpdateNotRequiredSensorInterface
+
+    sensor = SensorFactory.create(
+        status={"dummy_key": "dummy_value_no_update"},
+        interface=fqn(DummyUpdateNotRequiredSensorInterface),
+        last_status_update_log="Previous log",
+        last_update_status=Sensor.UpdateStatus.SUCCESS
+    )
+    return sensor
 
 
 @pytest.fixture
-def admin_user() -> "User":
-    from test_utils.factories import SuperUserFactory
-    return SuperUserFactory.create()
+def dummy_sensor_error() -> "Sensor":
+    from test_utils.factories import SensorFactory
+    from strategy_field.utils import fqn
+    from test_utils.interfaces import DummyErrorSensorInterface
+
+    sensor = SensorFactory.create(
+        status={"dummy_key": "dummy_value"},
+        interface=fqn(DummyErrorSensorInterface),
+    )
+    return sensor
 
 
 @pytest.fixture

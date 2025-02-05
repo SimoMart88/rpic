@@ -62,6 +62,7 @@ def test_sensor_test(django_app_admin: "DjangoTestApp", dummy_sensor: "Sensor", 
 
     response = form.submit()
     assert response.status_code == 200
+    assert "Tested interface {} successfully".format(dummy_sensor.name) in response.text
     assert "dummy_value" in response.text
 
 
@@ -80,3 +81,15 @@ def test_sensor_test_input_error(django_app_admin: "DjangoTestApp", dummy_sensor
     response = form.submit()
     assert "Argument must be a list" in response.text
     assert "Keyword argument must be a dictionary" in response.text
+
+
+@pytest.mark.django_db
+def test_sensor_test_error(django_app_admin: "DjangoTestApp", dummy_sensor_error: "Sensor", templates_for_testing: "SettingsWrapper") -> None:
+    opts: "Options"["Sensor"] = dummy_sensor_error.__class__._meta
+
+    url_test: str = reverse(admin_urlname(opts, SafeString("test")), args=[dummy_sensor_error.pk])
+    response = django_app_admin.get(url_test)
+    form = response.forms["config-form"]
+    response = form.submit()
+
+    assert "Tested interface {} failure: {}".format(dummy_sensor_error.name, "Sensor error") in response.text

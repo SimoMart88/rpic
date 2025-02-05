@@ -23,9 +23,9 @@ class SensorSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Sensor
-        fields = ("name", "slug", "visible", "config", "status", "interface",
+        fields = ("name", "slug", "visible", "status", "interface",
                   "last_update_status", "last_status_update", "last_status_update_log")
-        read_only_fields = ("config", "status", "last_update_status", "last_status_update", "last_status_update_log")
+        read_only_fields = ("status", "last_update_status", "last_status_update", "last_status_update_log")
 
 
 class SensorViewSet(viewsets.ModelViewSet):

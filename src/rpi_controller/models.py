@@ -62,6 +62,7 @@ class Sensor(Device):
         except InterfaceUpdateNotRequiredException:
             logger.info("[Sensor '%s'] Status update not required")
         except InterfaceException as e:
+            self.last_status_update = timezone.now()
             self.last_status_update_log = str(e)
             self.last_update_status = self.UpdateStatus.FAILURE
             self.save()

@@ -6,7 +6,7 @@ from datetime import timedelta
 from django.utils import timezone
 
 from rpi_controller.interfaces.sensors.gpio import Dht22SensorInterface
-from rpi_controller.interfaces.sensors.utils.dht import DHT_GOOD, DHT_BAD_DATA
+from rpi_controller.interfaces.sensors.utils import dht
 from rpi_controller.interfaces.exceptions import (InterfaceUserConfigurationException,
                                                   InterfaceConfigurationException,
                                                   InterfaceRuntimeException,
@@ -21,7 +21,10 @@ if typing.TYPE_CHECKING:
 def mock_pigpio(monkeypatch: MonkeyPatch) -> None:
     monkeypatch.setattr(
         'rpi_controller.interfaces.sensors.gpio.pigpio.pi',
-        mock.Mock(return_value=mock.Mock(connected=True))
+        mock.Mock(return_value=mock.Mock(
+            connected=True,
+            get_current_tick=mock.Mock(return_value=0),
+        ))
     )
 
 
@@ -30,8 +33,8 @@ def test_dht22sensor(monkeypatch: MonkeyPatch, mock_pigpio: None) -> None:
     from test_utils.factories import SensorFactory
 
     monkeypatch.setattr(
-        'rpi_controller.interfaces.sensors.gpio.dht.Sensor',
-        mock.Mock(return_value=mock.Mock(spec=['read'], read=mock.Mock(return_value=(0, 0, DHT_GOOD, 22, 50))))
+        'rpi_controller.interfaces.sensors.gpio.dht.Sensor.read',
+        mock.Mock(return_value=(0, 0, dht.Sensor.Status.DHT_GOOD, 22, 50)),
     )
 
     sensor = SensorFactory(config={'gpio_pin': 7})
@@ -102,8 +105,8 @@ def test_dht22sensor_interface_error(monkeypatch: MonkeyPatch, mock_pigpio: None
     from test_utils.factories import SensorFactory
 
     monkeypatch.setattr(
-        'rpi_controller.interfaces.sensors.gpio.dht.Sensor',
-        mock.Mock(return_value=mock.Mock(spec=['read'], read=mock.Mock(return_value=(0, 0, DHT_BAD_DATA, 22, 50))))
+        'rpi_controller.interfaces.sensors.gpio.dht.Sensor.read',
+        mock.Mock(return_value=(0, 0, dht.Sensor.Status.DHT_BAD_DATA, 22, 50)),
     )
 
     sensor = SensorFactory(config={'gpio_pin': 7})

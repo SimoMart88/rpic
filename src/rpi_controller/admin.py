@@ -97,8 +97,8 @@ class DeviceAdmin(ExtraButtonsMixin, admin.ModelAdmin["Device"]):
                     if obj.last_update_status == obj.UpdateStatus.SUCCESS:
                         self.message_user(request, "Tested interface {} successfully".format(obj.name))
                     else:
-                        self.message_user(request, "Tested interface {} failure: %s".format(
-                            obj.name, ), messages.ERROR)
+                        self.message_user(request, "Tested interface {} failure: {}".format(
+                            obj.name, obj.last_status_update_log), messages.ERROR)
                 except Exception as ex:
                     self.message_user(request, str(ex), messages.ERROR)
         else:

@@ -4,10 +4,44 @@ from pathlib import Path
 
 
 if typing.TYPE_CHECKING:
+    from django.contrib.auth.models import User
+    from rpi_controller.models import Sensor
     from pytest_django.fixtures import SettingsWrapper
 
 
 BASE_DIR = Path(__file__).resolve().parent
+
+
+def pytest_addoption(parser):
+    parser.addoption(
+        '--selenium',
+        action='store_true',
+        dest='enable_selenium',
+        default=False,
+        help='Enable Selenium tests',
+    )
+    parser.addoption(
+        '--show-browser',
+        '-S',
+        action='store_true',
+        dest='show_browser',
+        default=False,
+        help='will display start browsers in selenium tests',
+    )
+
+
+def pytest_configure(config):
+    if not config.option.enable_selenium:
+        setattr(config.option, 'markexpr', 'not selenium')
+    else:
+        setattr(config.option, 'markexpr', 'selenium')
+
+    if not config.option.driver:
+        setattr(config.option, 'driver', 'chrome')
+
+    if not config.option.driver_path:
+        from webdriver_manager.chrome import ChromeDriverManager
+        setattr(config.option, 'driver_path', ChromeDriverManager().install())
 
 
 @pytest.fixture()
@@ -16,3 +50,15 @@ def templates_for_testing(settings: "SettingsWrapper") -> "SettingsWrapper":
     new_templates_config[0]["DIRS"].append(BASE_DIR / "test_utils" / "templates")
     settings.TEMPLATES = new_templates_config
     return settings
+
+
+@pytest.fixture
+def dummy_sensor() -> "Sensor":
+    from test_utils.factories import SensorFactory
+    return SensorFactory.create()
+
+
+@pytest.fixture
+def admin_user() -> "User":
+    from test_utils.factories import SuperUserFactory
+    return SuperUserFactory.create()

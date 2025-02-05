@@ -10,27 +10,33 @@ Original version: http://abyz.me.uk/rpi/pigpio/code/DHT.py
 
 import time
 import pigpio
+from enum import IntEnum
 
-DHTAUTO=0
-DHT11=1
-DHTXX=2
-
-DHT_GOOD=0
-DHT_BAD_CHECKSUM=1
-DHT_BAD_DATA=2
-DHT_TIMEOUT=3
 
 class Sensor:
    """
    A class to read the DHTXX temperature/humidity sensors.
    """
-   def __init__(self, pi, gpio, model=DHTAUTO, callback=None):
+   default_retry_number = 5
+
+   class Model(IntEnum):
+      DHTAUTO = 0
+      DHT11 = 1
+      DHT22 = 2
+
+   class Status(IntEnum):
+      DHT_GOOD = 0
+      DHT_BAD_CHECKSUM = 1
+      DHT_BAD_DATA = 2
+      DHT_TIMEOUT = 3
+
+   def __init__(self, pi, gpio, model=Model.DHTAUTO, callback=None):
       """
       Instantiate with the Pi and the GPIO connected to the
       DHT temperature and humidity sensor.
 
       Optionally the model of DHT may be specified.  It may be one
-      of DHT11, DHTXX, or DHTAUTO.  It defaults to DHTAUTO in which
+      of DHT11, DHT22, or DHTAUTO.  It defaults to DHTAUTO in which
       case the model of DHT is automatically determined.
 
       Optionally a callback may be specified.  If specified the
@@ -59,7 +65,7 @@ class Sensor:
       self._bits = 0
       self._code = 0
 
-      self._status = DHT_TIMEOUT
+      self._status = self.Status.DHT_TIMEOUT
       self._timestamp = time.time()
       self._temperature = 0.0
       self._humidity = 0.0
@@ -81,7 +87,7 @@ class Sensor:
          valid = False
       return (valid, t, h)
 
-   def _validate_DHTXX(self, b1, b2, b3, b4):
+   def _validate_DHT22(self, b1, b2, b3, b4):
       if b2 & 128:
          div = -10.0
       else:
@@ -97,7 +103,7 @@ class Sensor:
    def _decode_dhtxx(self):
       """
             +-------+-------+
-            | DHT11 | DHTXX |
+            | DHT11 | DHT22 |
             +-------+-------+
       Temp C| 0-50  |-40-125|
             +-------+-------+
@@ -111,8 +117,6 @@ class Sensor:
             +------+------+------+------+------+
       DHT21 |check-| temp | temp | RH%  | RH%  |
       DHT22 |sum   | LSB  | MSB  | LSB  | MSB  |
-      DHT33 |      |      |      |      |      |
-      DHT44 |      |      |      |      |      |
             +------+------+------+------+------+
       """
       b0 =  self._code        & 0xff
@@ -124,24 +128,24 @@ class Sensor:
       chksum = (b1 + b2 + b3 + b4) & 0xFF
 
       if chksum == b0:
-         if self._model == DHT11:
+         if self._model == self.Model.DHT11:
             valid, t, h = self._validate_DHT11(b1, b2, b3, b4)
-         elif self._model == DHTXX:
-            valid, t, h = self._validate_DHTXX(b1, b2, b3, b4)
+         elif self._model == self.Model.DHT22:
+            valid, t, h = self._validate_DHT22(b1, b2, b3, b4)
          else: # AUTO
             # Try DHTXX first.
-            valid, t, h = self._validate_DHTXX(b1, b2, b3, b4)
+            valid, t, h = self._validate_DHT22(b1, b2, b3, b4)
             if not valid:
                # try DHT11.
                valid, t, h = self._validate_DHT11(b1, b2, b3, b4)
          if valid:
             self._temperature = t
             self._humidity = h
-            self._status = DHT_GOOD
+            self._status = self.Status.DHT_GOOD
          else:
-            self._status = DHT_BAD_DATA
+            self._status = self.Status.DHT_BAD_DATA
       else:
-         self._status = DHT_BAD_CHECKSUM
+         self._status = self.Status.DHT_BAD_CHECKSUM
       self._new_data = True
 
    def _rising_edge(self, gpio, level, tick):
@@ -170,9 +174,9 @@ class Sensor:
    def _trigger(self):
       self._new_data = False
       self._timestamp = time.time()
-      self._status = DHT_TIMEOUT
+      self._status = self.Status.DHT_TIMEOUT
       self._pi.write(self._gpio, 0)
-      if self._model != DHTXX:
+      if self._model != self.Model.DHT22:
          time.sleep(0.018)
       else:
          time.sleep(0.001)
@@ -186,7 +190,7 @@ class Sensor:
          self._cb_id.cancel()
          self._cb_id = None
 
-   def read(self):
+   def read(self, retry=default_retry_number):
       """
       This triggers a read of the sensor.
 
@@ -203,7 +207,7 @@ class Sensor:
       3 DHT_TIMEOUT (no response from sensor)
       """
       self._trigger()
-      for i in range(5): # timeout after 0.25 seconds.
+      for i in range(retry): # timeout after 0.25 seconds with default value
          time.sleep(0.05)
          if self._new_data:
             break

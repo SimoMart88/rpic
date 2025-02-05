@@ -1,4 +1,6 @@
 import typing
+from unittest.mock import Mock
+
 from django import forms
 
 from rpi_controller.interfaces.exceptions import InterfaceUpdateNotRequiredException, InterfaceRuntimeException
@@ -16,6 +18,19 @@ class DummySensorInterface(SensorInterface):
 
     def read_input(self) -> dict[str, typing.Any]:
         return {"dummy_key": "dummy_value"}
+
+
+class UpdatedDummySensorInterface(DummySensorInterface):
+    label = "idummy-mock"
+    read_input_mock = Mock(
+        side_effect=[
+            {"dummy_key": "updated_dummy_value"},
+            {"dummy_key": "updated_dummy_value_another_time"}
+        ]
+    )
+
+    def read_input(self) -> dict[str, typing.Any]:
+        return self.read_input_mock()
 
 
 class DummyUpdateNotRequiredSensorInterface(SensorInterface):

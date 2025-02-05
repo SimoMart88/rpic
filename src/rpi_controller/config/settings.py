@@ -27,6 +27,7 @@ env = environ.Env(
     STATIC_ROOT=(str, BASE_DIR / '.data/static'),
     STATIC_URL=(str, '/static/'),
     TIME_ZONE=(str, 'UTC'),
+    COMPRESS_ENABLED=(bool, False),
     LOGGING_LEVEL=(str, 'ERROR'),
     LOGGING_FILE=(str, '.data/rpi_controller.log'),
 )
@@ -63,6 +64,7 @@ THIRDPARTY_APPS = [
     "admin_extra_buttons",
     "django_bootstrap5",
     "rest_framework",
+    "compressor",
 ]
 
 LOCAL_APPS = env.list("LOCAL_APPS")
@@ -149,10 +151,22 @@ USE_TZ = True
 STATIC_ROOT = env('STATIC_ROOT')
 STATIC_URL = env('STATIC_URL')
 
+STATICFILES_FINDERS = [
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+    "compressor.finders.CompressorFinder",
+]
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Django Compressor
+# https://django-compressor.readthedocs.io/en/stable/settings.html
+COMPRESS_ENABLED = env('COMPRESS_ENABLED')
+COMPRESS_OFFLINE = True
+COMPRESS_OUTPUT_DIR = "compressed"
 
 
 LOGGING = {
