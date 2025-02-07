@@ -31,6 +31,9 @@ def command(check_deploy: bool, admin_user: str, admin_email: str, admin_passwor
         static_root.mkdir(parents=True)
     call_command("collectstatic", interactive=False, **extra)
 
+    click.secho("Run compressor")
+    call_command("compress", force=True, **extra)
+
     click.secho("Run migrations")
     call_command("migrate", **extra)
 

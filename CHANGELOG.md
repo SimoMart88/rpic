@@ -1,3 +1,19 @@
+## 0.3.0 (2025-02-06)
+
+### Feat
+
+- **utils.js**: Move JavaScript code from the Homepage into a dedicate JavaScript file
+- **Home**: implement async status update
+- **api**: implement API for Sensor model
+- **settings**: implement logging support
+
+### Fix
+
+- **HomePage**: Fix NavBar on mobile
+- **Device**: implement support for "no update" operation using exceptions
+- **gpio**: DHT22 now properly return update_last_status_datetime key when status update is not required
+- **gpio**: fix DHT22 refresh_min_interval to avoid too frequent reads on the sensor
+
 ## 0.2.0 (2025-01-11)
 
 ### Feat

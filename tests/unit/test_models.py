@@ -24,28 +24,51 @@ def test_sensor_save_slugify() -> None:
 
 @pytest.mark.django_db()
 def test_sensor_use(dummy_sensor: Sensor) -> None:
+    expected_output = {"dummy_key": "dummy_value"}
+
     assert not dummy_sensor.status  # Sanity check
-    assert not dummy_sensor.last_status_updated  # Sanity check
+    assert not dummy_sensor.last_status_update  # Sanity check
+    assert not dummy_sensor.last_status_update_log  # Sanity check
+    assert dummy_sensor.last_update_status == dummy_sensor.UpdateStatus.NEW  # Sanity check
 
     output = dummy_sensor.use()
+    dummy_sensor.refresh_from_db()
 
-    expected_output = {"dummy_key": "dummy_value"}
     assert output == expected_output
     assert dummy_sensor.status == expected_output
-    assert dummy_sensor.last_status_updated
+    assert dummy_sensor.last_status_update
+    assert dummy_sensor.last_status_update_log  == "Sensor status updated successfully"
+    assert dummy_sensor.last_update_status == dummy_sensor.UpdateStatus.SUCCESS
 
 
 @pytest.mark.django_db()
-def test_sensor_use_skip_last_status_datetime_update() -> None:
-    from test_utils.factories import SensorFactory
-    from strategy_field.utils import fqn
-    from test_utils.interfaces import DummySkipLastDatetimeSensorInterface
+def test_sensor_use_update_not_required(dummy_sensor_update_not_required: Sensor) -> None:
+    original_status = dummy_sensor_update_not_required.status
 
-    dummy_sensor_skip_last = SensorFactory.create(interface=fqn(DummySkipLastDatetimeSensorInterface))
+    assert not dummy_sensor_update_not_required.last_status_update  # Sanity check
 
-    assert not dummy_sensor_skip_last.last_status_updated  # Sanity check
+    output = dummy_sensor_update_not_required.use()
+    dummy_sensor_update_not_required.refresh_from_db()
 
-    dummy_sensor_skip_last.use()
+    assert output == original_status
+    assert dummy_sensor_update_not_required.status == original_status
+    assert not dummy_sensor_update_not_required.last_status_update
+    assert dummy_sensor_update_not_required.last_status_update_log == "Previous log"
+    assert dummy_sensor_update_not_required.last_update_status == dummy_sensor_update_not_required.UpdateStatus.SUCCESS
 
-    assert not dummy_sensor_skip_last.last_status_updated
-    assert "update_last_status_datetime" not in dummy_sensor_skip_last.status
+
+@pytest.mark.django_db()
+def test_sensor_use_error(dummy_sensor_error: Sensor) -> None:
+    original_status = dummy_sensor_error.status
+
+    assert not dummy_sensor_error.last_status_update  # Sanity check
+    assert dummy_sensor_error.last_update_status == dummy_sensor_error.UpdateStatus.NEW  # Sanity check
+
+    output = dummy_sensor_error.use()
+    dummy_sensor_error.refresh_from_db()
+
+    assert output == original_status
+    assert dummy_sensor_error.status == original_status
+    assert dummy_sensor_error.last_status_update
+    assert dummy_sensor_error.last_status_update_log == "Sensor error"
+    assert dummy_sensor_error.last_update_status == dummy_sensor_error.UpdateStatus.FAILURE

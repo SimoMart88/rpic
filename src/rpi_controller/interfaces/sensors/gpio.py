@@ -10,12 +10,14 @@ from rpi_controller.interfaces.sensors.base import SensorInterface
 from rpi_controller.interfaces.sensors.registry import sensor_registry
 from rpi_controller.interfaces.exceptions import (InterfaceUserConfigurationException,
                                                   InterfaceConfigurationException,
-                                                  InterfaceRuntimeException)
+                                                  InterfaceRuntimeException,
+                                                  InterfaceUpdateNotRequiredException)
 
 
 class Dht22SensorInterfaceForm(forms.Form):
     gpio_pin = forms.CharField(label="GPIO ping reference", max_length=3)
     refresh_min_interval = forms.IntegerField(label="Sensor refresh minimum interval (in seconds)", min_value=5)
+    retry_number = forms.IntegerField(label="Sensor retry number", min_value=5)
 
 
 logger = logging.getLogger(__name__)
@@ -29,18 +31,16 @@ class Dht22SensorInterface(SensorInterface):
 
     def read_input(self) -> dict[str, typing.Any]:
         now = timezone.now()
-        if self.context.last_status_updated:
-            next_refresh_datetime = self.context.last_status_updated + timedelta(
+        if self.context.last_status_update:
+            next_refresh_datetime = self.context.last_status_update + timedelta(
                 seconds=self.context.config.get("refresh_min_interval", 60)
             )
             logger.info(
                 "[Sensor '%s'] Check if status update is required. Last update: %s | Next refresh: %s | Now: %s",
-                self.context.slug, self.context.last_status_updated, next_refresh_datetime, now
+                self.context.slug, self.context.last_status_update, next_refresh_datetime, now
             )
             if now < next_refresh_datetime:
-                status = {"update_last_status_datetime": False}
-                status.update(**self.context.status or {})
-                return status
+                raise InterfaceUpdateNotRequiredException
 
         with transaction.atomic():
             # Lock model object to avoid concurrent read on the same sensor
@@ -64,17 +64,17 @@ class Dht22SensorInterface(SensorInterface):
 
             logger.info("[Sensor '%s'] Trying read data using pigpio service", context.slug)
             try:
-                sensor = dht.Sensor(pi, gpio_pin)
-                sensor_output = sensor.read()
+                sensor = dht.Sensor(pi, gpio_pin, model=dht.Sensor.Model.DHT22)
+                sensor_output = sensor.read(self.context.config.get("retry_number", sensor.default_retry_number))
                 logger.info("[Sensor '%s'] pigpio service raw output: %s", context.slug, sensor_output)
                 _, _, status, temperature, humidity = sensor_output
             except Exception as e:
                 raise InterfaceRuntimeException('DHT22 sensor unexpected error') from e
 
-            if status == dht.DHT_GOOD:
+            if status == sensor.Status.DHT_GOOD:
                 return {'temperature': temperature, 'humidity': humidity}
             else:
-                raise InterfaceRuntimeException('DHT22 sensor read failure')
+                raise InterfaceRuntimeException(f'DHT22 sensor read failure ({sensor.Status(status).name})')
 
 
 sensor_registry.register(Dht22SensorInterface)

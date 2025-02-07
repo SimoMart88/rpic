@@ -45,13 +45,15 @@ class TestForm(forms.Form):
 class DeviceAdmin(ExtraButtonsMixin, admin.ModelAdmin["Device"]):
     list_display = ["name", "slug", "visible", "interface_label"]
     list_filter = ["visible", "interface"]
-    readonly_fields = ["config", "status", "last_status_updated"]
+    readonly_fields = ["config", "status", "last_update_status", "last_status_update", "last_status_update_log"]
 
     def get_object_or_404(self, request: "HttpRequest", pk: str) -> "Device":
-        try:
-            return self.get_object(request, pk)
-        except Device.DoesNotExist:
+        obj = self.get_object(request, pk)
+
+        if not obj:
             raise Http404
+
+        return obj
 
     @admin.display(description="Interface")
     def interface_label(self, obj: "Device") -> str:
@@ -83,16 +85,20 @@ class DeviceAdmin(ExtraButtonsMixin, admin.ModelAdmin["Device"]):
         obj: "Device" = self.get_object_or_404(request, pk)
         context: dict[str, typing.Any] = self.get_common_context(request, pk, title="Interface test")
         form_class: typing.Type[Form] = TestForm
-        context["output_render_template"] = obj.interface.template_name
+        context["device"]: "Device" = obj
 
         if request.method == "POST":
             config_form = form_class(request.POST)
             if config_form.is_valid():
                 try:
-                    context["device_data"]: dict[str, typing.Any] = obj.use(
+                    obj.use(
                         *config_form.cleaned_data["input_args"], **config_form.cleaned_data["input_kwargs"]
                     )
-                    self.message_user(request, "Tested interface {}".format(obj.name))
+                    if obj.last_update_status == obj.UpdateStatus.SUCCESS:
+                        self.message_user(request, "Tested interface {} successfully".format(obj.name))
+                    else:
+                        self.message_user(request, "Tested interface {} failure: {}".format(
+                            obj.name, obj.last_status_update_log), messages.ERROR)
                 except Exception as ex:
                     self.message_user(request, str(ex), messages.ERROR)
         else:
