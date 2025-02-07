@@ -10,7 +10,7 @@ A controller for GPIO sensors and devices on RaspberryPI
 - Unzip the file into a temp folder
 - Run `sudo ./install` inside the temp folder
 - During the first installation, automatically generated passwords (Postgresql, Django Admin, etc...) will be prompted
-  - If you miss it, we can find it in the /opt/rpic/app/.env
+  - If you miss it, we can find it in /opt/rpic/app/.env
 
 # Future improvements
 * Expose the application and the static content through Nginx
@@ -20,4 +20,3 @@ A controller for GPIO sensors and devices on RaspberryPI
 
 # TODO
 * Implement HLA
-* Implement Selenium tests for UI
