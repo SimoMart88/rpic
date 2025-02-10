@@ -5,15 +5,16 @@ from django import forms
 
 from rpi_controller.interfaces.exceptions import InterfaceUpdateNotRequiredException, InterfaceRuntimeException
 from rpi_controller.interfaces.sensors.base import SensorInterface
+from rpi_controller.interfaces.actuators.base import ActuatorInterface
 
 
-class DummySensorInterfaceForm(forms.Form):
+class DummyDeviceInterfaceForm(forms.Form):
     dummy_input = forms.CharField(max_length=3)
 
 
 class DummySensorInterface(SensorInterface):
-    label = "idummy"
-    config_form = DummySensorInterfaceForm
+    label = "dummysensor"
+    config_form = DummyDeviceInterfaceForm
     template_name = "dummy/test.html"
 
     def read_input(self) -> dict[str, typing.Any]:
@@ -21,7 +22,7 @@ class DummySensorInterface(SensorInterface):
 
 
 class UpdatedDummySensorInterface(DummySensorInterface):
-    label = "idummy-mock"
+    label = "dummysensor-mock"
     read_input_mock = Mock(
         side_effect=[
             {"dummy_key": "updated_dummy_value"},
@@ -33,19 +34,31 @@ class UpdatedDummySensorInterface(DummySensorInterface):
         return self.read_input_mock()
 
 
-class DummyUpdateNotRequiredSensorInterface(SensorInterface):
-    label = "idummy-update-not-required"
-    config_form = DummySensorInterfaceForm
-    template_name = "dummy/test.html"
+class DummyUpdateNotRequiredSensorInterface(DummySensorInterface):
+    label = "dummysensor-update-not-required"
 
     def read_input(self) -> dict[str, typing.Any]:
         raise InterfaceUpdateNotRequiredException
 
 
-class DummyErrorSensorInterface(SensorInterface):
-    label = "idummy-error"
-    config_form = DummySensorInterfaceForm
-    template_name = "dummy/test.html"
+class DummyErrorSensorInterface(DummySensorInterface):
+    label = "dummysensor-error"
 
     def read_input(self) -> dict[str, typing.Any]:
+        raise InterfaceRuntimeException("Sensor error")
+
+
+class DummyActuatorInterface(ActuatorInterface):
+    label = "dummyactuator"
+    config_form = DummyDeviceInterfaceForm
+    template_name = "dummy/test.html"
+
+    def control(self, *args: typing.Any, **kwargs: typing.Any) -> dict[typing.Any, typing.Any]:
+        return {"args": args, "kwargs": kwargs}
+
+
+class DummyActuatorErrorInterface(ActuatorInterface):
+    label = "dummyactuator-error"
+
+    def control(self, *args: typing.Any, **kwargs: typing.Any) -> dict[typing.Any, typing.Any]:
         raise InterfaceRuntimeException("Sensor error")
