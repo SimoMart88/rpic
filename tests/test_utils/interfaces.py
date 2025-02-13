@@ -57,8 +57,8 @@ class DummyActuatorInterface(ActuatorInterface):
         return {"args": args, "kwargs": kwargs}
 
 
-class DummyActuatorErrorInterface(ActuatorInterface):
+class DummyActuatorErrorInterface(DummyActuatorInterface):
     label = "dummyactuator-error"
 
     def control(self, *args: typing.Any, **kwargs: typing.Any) -> dict[typing.Any, typing.Any]:
-        raise InterfaceRuntimeException("Sensor error")
+        raise InterfaceRuntimeException("Actuator error")

@@ -110,5 +110,5 @@ def test_actuator_use_error(dummy_actuator_error: "Actuator") -> None:
     assert output == original_status
     assert dummy_actuator_error.status == original_status
     assert dummy_actuator_error.last_status_update
-    assert dummy_actuator_error.last_status_update_log == "Sensor error"
+    assert dummy_actuator_error.last_status_update_log == "Actuator error"
     assert dummy_actuator_error.last_update_status == dummy_actuator_error.UpdateStatus.FAILURE

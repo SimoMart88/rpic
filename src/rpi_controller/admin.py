@@ -7,7 +7,7 @@ from django.contrib.admin.helpers import AdminForm
 from django.http.response import HttpResponseRedirect, Http404
 from django.template.response import TemplateResponse
 
-from rpi_controller.models import Sensor
+from rpi_controller.models import Sensor, Actuator
 
 from admin_extra_buttons.decorators import button
 
@@ -111,3 +111,4 @@ class DeviceAdmin(ExtraButtonsMixin, admin.ModelAdmin["Device"]):
 
 
 admin.site.register(Sensor, DeviceAdmin)
+admin.site.register(Actuator, DeviceAdmin)
