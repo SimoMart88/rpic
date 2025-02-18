@@ -8,10 +8,9 @@ from django import forms
 from rpi_controller.interfaces.sensors.utils import dht
 from rpi_controller.interfaces.sensors.base import SensorInterface
 from rpi_controller.interfaces.sensors.registry import sensor_registry
-from rpi_controller.interfaces.exceptions import (InterfaceUserConfigurationException,
-                                                  InterfaceConfigurationException,
-                                                  InterfaceRuntimeException,
+from rpi_controller.interfaces.exceptions import (InterfaceRuntimeException,
                                                   InterfaceUpdateNotRequiredException)
+from rpi_controller.interfaces.utils.gpio import get_gpio_pin_from_config
 
 
 class Dht22SensorInterfaceForm(forms.Form):
@@ -45,16 +44,7 @@ class Dht22SensorInterface(SensorInterface):
         with transaction.atomic():
             # Lock model object to avoid concurrent read on the same sensor
             context = type(self.context).objects.select_for_update().get(id=self.context.id)
-
-            try:
-                gpio_pin_raw: str = context.config['gpio_pin']
-            except KeyError:
-                raise InterfaceUserConfigurationException('gpio_pin not defined in config')
-
-            try:
-                gpio_pin: int = int(gpio_pin_raw)
-            except ValueError:
-                raise InterfaceConfigurationException(f'"{gpio_pin_raw}" is not a valid GPIO pin')
+            gpio_pin = get_gpio_pin_from_config(context.config)
 
             logger.info("[Sensor '%s'] Trying connection to the pigpio service", context.slug)
             pi = pigpio.pi()

@@ -1,0 +1,12 @@
+<div>
+    <div class="form-check form-switch">
+        <h5>Active:</h5>
+        <input class="form-check-input" type="checkbox" role="switch" id="{{ device.slug }}-status-active" data-updater="update_checkbox" {% if device.status.active %}checked{% endif %}>
+    </div>
+    <script>
+        let active_field = $("{{ device.slug }}-status-active");
+        active_field.change(function() {
+            FieldChangers["change_checkbox"](active_field, '{% url 'api-sensor-use' device.slug %}');
+        });
+    </script>
+</div>

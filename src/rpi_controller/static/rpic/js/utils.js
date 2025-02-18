@@ -48,7 +48,13 @@ function update_device_status(device_ref, fields_to_update, api_url) {
                     let response_field = response[field];
                     if (response_field instanceof Object) {
                         for (let [key, value] of Object.entries(response_field)) {
-                            $(`#${device_ref}-${field}-${key}`).text(value);
+                            let field_to_update = $(`#${device_ref}-${field}-${key}`);
+                            let updater_name = field_to_update.attr('data-updater');
+                            if (updater_name !== undefined) {
+                                FieldUpdaters[updater_name](field_to_update, value)
+                            } else {
+                                field_to_update.text(value);
+                            }
                         }
                     } else {
                         $(`#${device_ref}-${field}`).text(response_field);
@@ -65,3 +71,39 @@ function update_device_status(device_ref, fields_to_update, api_url) {
         console.log("Auto-update is disabled by the cookie!");
     }
 }
+
+function change_device_status(update_data, success_function, error_function, api_url) {
+    $.ajax({
+        type: 'POST',
+        url: api_url,
+        data: update_data,
+        headers: {'X-CSRFToken': getCookie('csrftoken')},
+        mode: 'same-origin',
+        success: success_function,
+        error: error_function,
+    });
+}
+
+function update_checkbox(field, value) {
+    field.prop("checked", value);
+}
+
+function change_checkbox(field, api_url) {
+    function success(response) {
+        field.prop("checked", field.checked);
+    }
+
+    function error(response) {
+        field.prop("checked", !field.checked);
+    }
+
+    change_device_status({"active": field.checked}, success, error, api_url);
+}
+
+let FieldUpdaters = {
+    "update_checkbox": update_checkbox,
+};
+
+let FieldChangers = {
+    "change_checkbox": change_checkbox,
+};
