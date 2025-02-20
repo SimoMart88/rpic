@@ -5,27 +5,32 @@ import typing
 
 if typing.TYPE_CHECKING:
     from rpi_controller.models import Device, Sensor, Actuator
-
-
-@pytest.fixture
-def dummy_device() -> "Device":
-    from test_utils.factories import DeviceFactory
-    return DeviceFactory.create()
+    from _pytest.fixtures import TopRequest
 
 
 @pytest.mark.django_db()
-def test_device_str(dummy_device: "Device") -> None:
+@pytest.mark.parametrize("device_fixture_name", [
+    pytest.param("dummy_sensor", id="sensor"),
+    pytest.param("dummy_actuator", id="actuator"),
+])
+def test_device_str(device_fixture_name: "Device", request: "TopRequest") -> None:
+    dummy_device: "Device" = request.getfixturevalue(device_fixture_name)
     assert str(dummy_device) == dummy_device.name
 
 
 @pytest.mark.django_db()
-def test_device_save_slugify() -> None:
-    from test_utils.factories import DeviceFactory
+@pytest.mark.parametrize("device_fixture_name", [
+    pytest.param("dummy_sensor", id="sensor"),
+    pytest.param("dummy_actuator", id="actuator"),
+])
+def test_device_save_slugify(device_fixture_name: "Device", request: "TopRequest") -> None:
+    dummy_device: "Device" = request.getfixturevalue(device_fixture_name)
 
-    dummy_device_no_slug = DeviceFactory.create(name="String to Slugify", slug=None)
-    dummy_device_no_slug.save()
+    dummy_device.name = "String to Slugify"
+    dummy_device.slug = ""
+    dummy_device.save()
 
-    assert str(dummy_device_no_slug.slug) == "string-to-slugify"
+    assert str(dummy_device.slug) == "string-to-slugify"
 
 
 @pytest.mark.django_db()

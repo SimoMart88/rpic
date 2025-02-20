@@ -7,16 +7,17 @@ if typing.TYPE_CHECKING:
     from django.contrib.auth.models import User
     from rpi_controller.models import Sensor, Actuator
     from pytest_django.fixtures import SettingsWrapper
+    from pytest import Parser, Config
 
 
 BASE_DIR = Path(__file__).resolve().parent
 
 
-def pytest_addoption(parser):
+def pytest_addoption(parser: "Parser") -> None:
     parser.addoption(
-        '--selenium',
+        '--no-selenium',
         action='store_true',
-        dest='enable_selenium',
+        dest='disable_selenium',
         default=False,
         help='Enable Selenium tests',
     )
@@ -30,11 +31,9 @@ def pytest_addoption(parser):
     )
 
 
-def pytest_configure(config):
-    if not config.option.enable_selenium:
+def pytest_configure(config: Config) -> None:
+    if config.option.disable_selenium:
         setattr(config.option, 'markexpr', 'not selenium')
-    else:
-        setattr(config.option, 'markexpr', 'selenium')
 
     if not config.option.driver:
         setattr(config.option, 'driver', 'chrome')

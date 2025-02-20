@@ -59,6 +59,9 @@ class Device(models.Model):
     def __str__(self) -> str:
         return self.name
 
+    class Meta:
+        abstract = True
+
 
 class Sensor(Device):
     interface = StrategyField(registry=sensor_registry)
