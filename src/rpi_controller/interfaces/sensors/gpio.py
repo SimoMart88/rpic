@@ -30,13 +30,13 @@ class Dht22SensorInterface(SensorInterface):
 
     def read_input(self) -> dict[str, typing.Any]:
         now = timezone.now()
-        if self.context.last_status_update:
-            next_refresh_datetime = self.context.last_status_update + timedelta(
+        if self.context.last_status_update_time:
+            next_refresh_datetime = self.context.last_status_update_time + timedelta(
                 seconds=self.context.config.get("refresh_min_interval", 60)
             )
             logger.info(
                 "[Sensor '%s'] Check if status update is required. Last update: %s | Next refresh: %s | Now: %s",
-                self.context.slug, self.context.last_status_update, next_refresh_datetime, now
+                self.context.slug, self.context.last_status_update_time, next_refresh_datetime, now
             )
             if now < next_refresh_datetime:
                 raise InterfaceUpdateNotRequiredException

@@ -31,7 +31,7 @@ def pytest_addoption(parser: "Parser") -> None:
     )
 
 
-def pytest_configure(config: Config) -> None:
+def pytest_configure(config: "Config") -> None:
     if config.option.disable_selenium:
         setattr(config.option, 'markexpr', 'not selenium')
 

@@ -13,7 +13,7 @@ if typing.TYPE_CHECKING:
 class SensorSerializer(serializers.HyperlinkedModelSerializer):
     interface = serializers.SerializerMethodField()
     last_update_status = serializers.SerializerMethodField()
-    last_status_update = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
+    last_status_update_time = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
 
     def get_interface(self, obj: Sensor) -> str:
         return obj._meta.get_field("interface").registry.get_name(obj.interface)
@@ -24,8 +24,8 @@ class SensorSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Sensor
         fields = ("name", "slug", "visible", "status", "interface",
-                  "last_update_status", "last_status_update", "last_status_update_log")
-        read_only_fields = ("status", "last_update_status", "last_status_update", "last_status_update_log")
+                  "last_update_status", "last_status_update_time", "last_status_update_log")
+        read_only_fields = ("status", "last_update_status", "last_status_update_time", "last_status_update_log")
 
 
 class SensorViewSet(viewsets.ModelViewSet):

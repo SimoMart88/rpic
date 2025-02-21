@@ -28,7 +28,7 @@ class Device(models.Model):
     config = models.JSONField(default=dict)
     status = models.JSONField(default=dict, help_text="The current status of the device")
     last_update_status = models.CharField(max_length=2, choices=UpdateStatus.choices, default=UpdateStatus.NEW)
-    last_status_update = models.DateTimeField(null=True, blank=True)
+    last_status_update_time = models.DateTimeField(null=True, blank=True)
     last_status_update_log = models.TextField(null=True, blank=True)
 
     def use(self, *args: typing.Any, **kwargs: typing.Any) -> dict[typing.Any, typing.Any]:
@@ -45,13 +45,13 @@ class Device(models.Model):
         return self.status
 
     def _set_success(self) -> None:
-        self.last_status_update = timezone.now()
+        self.last_status_update_time = timezone.now()
         self.last_status_update_log = f"{self.__class__.__name__} status updated successfully"
         self.last_update_status = self.UpdateStatus.SUCCESS
         self.save()
 
     def _set_failure(self, error_message: str) -> None:
-        self.last_status_update = timezone.now()
+        self.last_status_update_time = timezone.now()
         self.last_status_update_log = error_message
         self.last_update_status = self.UpdateStatus.FAILURE
         self.save()

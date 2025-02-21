@@ -31,8 +31,8 @@
                     <div class="container">
                         <div class="row">
                             <div class="col">
-                                <p id="{{ device.slug }}-last_status_update" class="small">
-                                    {{ device.last_status_update|localtime|date:"Y-m-d H:i:s" }}
+                                <p id="{{ device.slug }}-last_status_update_time" class="small">
+                                    {{ device.last_status_update_time|localtime|date:"Y-m-d H:i:s" }}
                                 </p>
                             </div>
                             <div class="col">
@@ -50,7 +50,7 @@
                 </div>
             </div>
             <script>
-                let func_args_{{ device.id }} = ['{{ device.slug }}', ['status', 'last_status_update', 'last_update_status'], '{% url 'api-sensor-use' device.slug %}']
+                let func_args_{{ device.id }} = ['{{ device.slug }}', ['status', 'last_status_update_time', 'last_update_status'], '{% url 'api-sensor-use' device.slug %}']
 
                 $(window).on('load', function() {
                     update_device_status.apply(this, func_args_{{ device.id }});

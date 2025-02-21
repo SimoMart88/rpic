@@ -23,7 +23,7 @@ def dummy_sensor_ui(dummy_sensor: "Sensor") -> "Sensor":
     dummy_sensor.interface = fqn(UpdatedDummySensorInterface)
     dummy_sensor.visible = True
     dummy_sensor.status = {"dummy_key": "dummy_value"}
-    dummy_sensor.last_status_update = datetime.strptime("1900-01-01 00:00:00", "%Y-%m-%d %H:%M:%S")
+    dummy_sensor.last_status_update_time = datetime.strptime("1900-01-01 00:00:00", "%Y-%m-%d %H:%M:%S")
     dummy_sensor.last_update_status = dummy_sensor.UpdateStatus.SUCCESS
     dummy_sensor.last_status_update_log = "Dummy Sensor OK"
     dummy_sensor.save()
@@ -41,8 +41,8 @@ def test_home_page_sensor_auto_update_disabled(selenium: "WebDriver", live_serve
     dummy_sensor_card = selenium.find_element(By.ID, dummy_sensor_ui.slug)
     status_dummy_key = dummy_sensor_card.find_element(By.ID, f"{ dummy_sensor_ui.slug }-status-dummy_key")
     assert status_dummy_key.text == dummy_sensor_ui.status["dummy_key"]
-    last_status_update = dummy_sensor_card.find_element(By.ID, f"{ dummy_sensor_ui.slug }-last_status_update")
-    assert last_status_update.text == dummy_sensor_ui.last_status_update.strftime("%Y-%m-%d %H:%M:%S")
+    last_status_update_time = dummy_sensor_card.find_element(By.ID, f"{ dummy_sensor_ui.slug }-last_status_update_time")
+    assert last_status_update_time.text == dummy_sensor_ui.last_status_update_time.strftime("%Y-%m-%d %H:%M:%S")
     last_update_status = dummy_sensor_card.find_element(By.ID, f"{ dummy_sensor_ui.slug }-last_update_status")
     assert last_update_status.text == dummy_sensor_ui.get_last_update_status_display()
     assert last_update_status.get_attribute("title") == dummy_sensor_ui.last_status_update_log
@@ -61,7 +61,7 @@ def test_home_page_sensor_with_auto_update(selenium: "WebDriver", live_server: "
     )
     assert WebDriverWait(selenium, 5).until(
         expected_conditions.text_to_be_present_in_element(
-            (By.ID, f"{ dummy_sensor_ui.slug }-last_status_update"),
+            (By.ID, f"{ dummy_sensor_ui.slug }-last_status_update_time"),
             localtime(now()).strftime("%Y-%m-%d %H:%M:%S")
         )
     )

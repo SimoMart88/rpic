@@ -21,7 +21,7 @@ def test_sensor_api_get(django_api: "APIClient", dummy_sensor: "Sensor") -> None
         'visible': False,
         'status': {},
         'interface': 'dummysensor',
-        'last_status_update': None,
+        'last_status_update_time': None,
         'last_status_update_log': None,
         'last_update_status': 'NEW',
     }
@@ -40,7 +40,7 @@ def test_sensor_api_use(django_api: "APIClient", dummy_sensor: "Sensor") -> None
         'visible': False,
         'status': {'dummy_key': 'dummy_value'},
         'interface': 'dummysensor',
-        'last_status_update': '2000-01-01 01:00:00',
+        'last_status_update_time': '2000-01-01 01:00:00',
         'last_status_update_log': 'Sensor status updated successfully',
         'last_update_status': 'SUCCESS',
     }

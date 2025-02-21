@@ -49,11 +49,11 @@ def test_dht22sensor(monkeypatch: MonkeyPatch, mock_pigpio: None) -> None:
 def test_dht22sensor_update_not_required() -> None:
     from test_utils.factories import SensorFactory
 
-    prev_last_status_update = timezone.now() - timedelta(seconds=10)
+    prev_last_status_update_time = timezone.now() - timedelta(seconds=10)
 
     sensor = SensorFactory(
         config={'gpio_pin': 7, 'refresh_min_interval': 180},
-        last_status_update=prev_last_status_update,
+        last_status_update_time=prev_last_status_update_time,
         status={"actual_status": "OLD"}
     )
 
