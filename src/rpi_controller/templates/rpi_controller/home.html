@@ -50,7 +50,7 @@
                 </div>
             </div>
             <script>
-                let func_args_{{ device.id }} = ['{{ device.slug }}', ['status', 'last_status_update_time', 'last_update_status'], '{% url 'api-sensor-use' device.slug %}']
+                let func_args_{{ device.id }} = ['{{ device.slug }}', ['status', 'last_status_update_time', 'last_update_status'], '{% url 'api-sensor-read-status' device.slug %}']
 
                 $(window).on('load', function() {
                     update_device_status.apply(this, func_args_{{ device.id }});

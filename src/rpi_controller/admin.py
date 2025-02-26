@@ -55,6 +55,9 @@ class DeviceAdmin(ExtraButtonsMixin, admin.ModelAdmin["Device"]):
 
         return obj
 
+    def run_test(self, obj: "Device", *args: typing.Any, **kwargs: typing.Any) -> None:
+        raise NotImplementedError
+
     @admin.display(description="Interface")
     def interface_label(self, obj: "Device") -> str:
         return str(obj.interface.label)
@@ -91,9 +94,8 @@ class DeviceAdmin(ExtraButtonsMixin, admin.ModelAdmin["Device"]):
             config_form = form_class(request.POST)
             if config_form.is_valid():
                 try:
-                    obj.use(
-                        *config_form.cleaned_data["input_args"], **config_form.cleaned_data["input_kwargs"]
-                    )
+                    self.run_test(obj, *config_form.cleaned_data["input_args"], **config_form.cleaned_data["input_kwargs"])
+
                     if obj.last_update_status == obj.UpdateStatus.SUCCESS:
                         self.message_user(request, "Tested interface {} successfully".format(obj.name))
                     else:
@@ -110,5 +112,15 @@ class DeviceAdmin(ExtraButtonsMixin, admin.ModelAdmin["Device"]):
         return TemplateResponse(request, "admin/device/test.html", context)
 
 
-admin.site.register(Sensor, DeviceAdmin)
-admin.site.register(Actuator, DeviceAdmin)
+class SensorAdmin(DeviceAdmin):
+    def run_test(self, obj: "Device", *args: typing.Any, **kwargs: typing.Any) -> None:
+        obj.read_status()
+
+
+class ActuatorAdmin(DeviceAdmin):
+    def run_test(self, obj: "Device", *args: typing.Any, **kwargs: typing.Any) -> None:
+        obj.update_status(*args, **kwargs)
+
+
+admin.site.register(Sensor, SensorAdmin)
+admin.site.register(Actuator, ActuatorAdmin)

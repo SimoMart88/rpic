@@ -30,7 +30,7 @@ def test_sensor_api_get(django_api: "APIClient", dummy_sensor: "Sensor") -> None
 @pytest.mark.django_db()
 @freeze_time("2000-01-01 00:00:00")
 def test_sensor_api_use(django_api: "APIClient", dummy_sensor: "Sensor") -> None:
-    url = reverse('api-sensor-use', args=[dummy_sensor.slug])
+    url = reverse('api-sensor-read-status', args=[dummy_sensor.slug])
 
     response = django_api.post(url, {})
 

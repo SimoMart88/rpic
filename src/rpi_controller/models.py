@@ -31,8 +31,11 @@ class Device(models.Model):
     last_status_update_time = models.DateTimeField(null=True, blank=True)
     last_status_update_log = models.TextField(null=True, blank=True)
 
-    def use(self, *args: typing.Any, **kwargs: typing.Any) -> dict[typing.Any, typing.Any]:
-        raise NotImplementedError
+    def read_status(self) -> dict[typing.Any, typing.Any]:
+        raise NotImplementedError("Status read not supported")
+
+    def update_status(self, *args: typing.Any, **kwargs: typing.Any) -> dict[typing.Any, typing.Any]:
+        raise NotImplementedError("Status update not supported")
 
     def save(self, *args: typing.Any, **kwargs: typing.Any) -> None:
         if not self.slug:
@@ -66,7 +69,7 @@ class Device(models.Model):
 class Sensor(Device):
     interface = StrategyField(registry=sensor_registry)
 
-    def use(self, *args: typing.Any, **kwargs: typing.Any) -> dict[typing.Any, typing.Any]:
+    def read_status(self) -> dict[typing.Any, typing.Any]:
         try:
             logger.info("[Sensor '%s'] Read input with config: %s", self.slug, self.config)
             self.status = self.interface.read_input()
@@ -84,7 +87,7 @@ class Sensor(Device):
 class Actuator(Device):
     interface = StrategyField(registry=actuator_registry)
 
-    def use(self, *args: typing.Any, **kwargs: typing.Any) -> dict[typing.Any, typing.Any]:
+    def update_status(self, *args: typing.Any, **kwargs: typing.Any) -> dict[typing.Any, typing.Any]:
         try:
             logger.info("[Actuator '%s'] Control actuator with input: '%s' + '%s'", self.slug, args, kwargs)
             self.status = self.interface.control(*args, **kwargs)

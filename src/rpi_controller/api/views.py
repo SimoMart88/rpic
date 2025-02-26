@@ -34,9 +34,9 @@ class SensorViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'head']
     lookup_field = 'slug'
 
-    @decorators.action(methods=['post'], detail=True)
-    def use(self, request: "Request", *args: typing.Any, **kwargs: typing.Any) -> "Response":
+    @decorators.action(methods=['post'], detail=True, url_path='read-status')
+    def read_status(self, request: "Request", *args: typing.Any, **kwargs: typing.Any) -> "Response":
         sensor = self.get_object()
-        sensor.use()
+        sensor.read_status()
         serializer = self.get_serializer(sensor)
         return Response(serializer.data)
