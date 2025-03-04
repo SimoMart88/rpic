@@ -1,5 +1,5 @@
 import typing
-from rest_framework import viewsets, serializers, decorators
+from rest_framework import viewsets, serializers, decorators, status
 from rest_framework.response import Response
 
 from rpi_controller.models import Sensor, Actuator
@@ -48,9 +48,16 @@ class SensorViewSet(viewsets.ModelViewSet):
     @decorators.action(methods=['post'], detail=True, url_path='read-status')
     def read_status(self, request: "Request", *args: typing.Any, **kwargs: typing.Any) -> "Response":
         sensor = self.get_object()
-        sensor.read_status()
+        response_status = status.HTTP_200_OK
+
+        try:
+            sensor.read_status()
+        except Exception:
+            response_status = status.HTTP_500_INTERNAL_SERVER_ERROR
+
         serializer = self.get_serializer(sensor)
-        return Response(serializer.data)
+        return Response(serializer.data, status=response_status)
+
 
 
 class ActuatorViewSet(viewsets.ModelViewSet):
@@ -62,6 +69,12 @@ class ActuatorViewSet(viewsets.ModelViewSet):
     @decorators.action(methods=['post'], detail=True, url_path='update-status')
     def update_status(self, request: "Request", *args: typing.Any, **kwargs: typing.Any) -> "Response":
         actuator = self.get_object()
-        actuator.update_status(**request.data)
+        response_status = status.HTTP_200_OK
+
+        try:
+            actuator.update_status(**request.data)
+        except Exception:
+            response_status = status.HTTP_500_INTERNAL_SERVER_ERROR
+
         serializer = self.get_serializer(actuator)
-        return Response(serializer.data)
+        return Response(serializer.data, status=response_status)

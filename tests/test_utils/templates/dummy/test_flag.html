@@ -1,13 +1,13 @@
 <div>
+    <div class="dummy">
+        <h1>Dummy Value:</h1>
+        <p id="{{ device.slug }}-status-dummy_key">{{ device.status.dummy_key }}</p>
+    </div>
     <div class="flag">
         <h5>Flag:</h5>
         <div class="form-check form-switch">
             <input class="form-check-input" type="checkbox" role="switch" id="{{ device.slug }}-status-flag" data-updater="update_checkbox" {% if device.status.flag %}checked{% endif %}>
         </div>
-    </div>
-    <div class="config-value">
-        <h5>Config value:</h5>
-        <p id="{{ device.slug }}-status-config_value">{{ device.status.config_value }}</p>
     </div>
     <script>
         let flag_field_a_{{ device.id }} = $("#{{ device.slug }}-status-flag");

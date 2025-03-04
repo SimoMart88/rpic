@@ -1,0 +1,9 @@
+{% extends 'rpi_controller/fragments/device_details.html' %}
+
+{% block device_script %}
+<script>
+    let func_args_s_{{ device.id }} = ['{{ device.slug }}', '{% url 'api-sensor-read-status' device.slug %}', "POST"];
+    register_auto_update(func_args_s_{{ device.id }});
+    register_refresh_button('#{{ device.slug }}-refresh', func_args_s_{{ device.id }});
+</script>
+{% endblock %}

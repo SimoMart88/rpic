@@ -59,6 +59,15 @@ class DummyActuatorInterface(ActuatorInterface):
 
 class DummyActuatorErrorInterface(DummyActuatorInterface):
     label = "dummyactuator-error"
+    template_name = "dummy/test_flag.html"
 
     def control(self, *args: typing.Any, **kwargs: typing.Any) -> dict[typing.Any, typing.Any]:
         raise InterfaceRuntimeException("Actuator error")
+
+
+class UpdatedDummyActuatorInterface(DummyActuatorInterface):
+    label = "dummyactuator-mock"
+    template_name = "dummy/test_flag.html"
+
+    def control(self, *args: typing.Any, **kwargs: typing.Any) -> dict[typing.Any, typing.Any]:
+        return {"flag": kwargs["flag"]}

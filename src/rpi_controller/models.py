@@ -80,6 +80,7 @@ class Sensor(Device):
             logger.info("[Sensor '%s'] Status update not required")
         except InterfaceException as e:
             self._set_failure(str(e))
+            raise
 
         return self._get_status_db_value()
 
@@ -96,5 +97,6 @@ class Actuator(Device):
             self._set_success()
         except InterfaceException as e:
             self._set_failure(str(e))
+            raise
 
         return self._get_status_db_value()

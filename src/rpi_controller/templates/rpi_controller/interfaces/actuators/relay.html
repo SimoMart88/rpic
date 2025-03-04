@@ -4,9 +4,11 @@
         <input class="form-check-input" type="checkbox" role="switch" id="{{ device.slug }}-status-active" data-updater="update_checkbox" {% if device.status.active %}checked{% endif %}>
     </div>
     <script>
-        let active_field = $("{{ device.slug }}-status-active");
-        active_field.change(function() {
-            FieldChangers["change_checkbox"](active_field, '{% url 'api-sensor-use' device.slug %}');
+        let active_field_a_{{ device.id }} = $("{{ device.slug }}-status-active");
+        active_field_a_{{ device.id }}.change(function() {
+            FieldChangers["change_checkbox"](
+                "{{ device.slug }}", active_field_a_{{ device.id }}, {"active": active_field_a_{{ device.id }}.prop('checked')},
+                '{% url 'api-actuator-update-status' device.slug %}');
         });
     </script>
 </div>

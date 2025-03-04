@@ -95,14 +95,10 @@ class DeviceAdmin(ExtraButtonsMixin, admin.ModelAdmin["Device"]):
             if config_form.is_valid():
                 try:
                     self.run_test(obj, *config_form.cleaned_data["input_args"], **config_form.cleaned_data["input_kwargs"])
-
-                    if obj.last_update_status == obj.UpdateStatus.SUCCESS:
-                        self.message_user(request, "Tested interface {} successfully".format(obj.name))
-                    else:
-                        self.message_user(request, "Tested interface {} failure: {}".format(
-                            obj.name, obj.last_status_update_log), messages.ERROR)
+                    self.message_user(request, "Tested interface {} successfully".format(obj.name))
                 except Exception as ex:
-                    self.message_user(request, str(ex), messages.ERROR)
+                    self.message_user(request, "Tested interface {} failure: {}".format(
+                        obj.name, str(ex)), messages.ERROR)
         else:
             config_form = form_class(initial={k: v for k, v in obj.config.items() if k in form_class.declared_fields})
 
