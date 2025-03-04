@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+
 from django.db import models
 from django.utils import timezone
 from django.utils.text import slugify
@@ -11,6 +12,7 @@ import logging
 from rpi_controller.interfaces.sensors.registry import sensor_registry
 from rpi_controller.interfaces.actuators.registry import actuator_registry
 from rpi_controller.interfaces.exceptions import InterfaceUpdateNotRequiredException, InterfaceException
+from rpi_controller.exceptions import SensorException, ActuatorException
 
 
 logger = logging.getLogger(__name__)
@@ -78,9 +80,14 @@ class Sensor(Device):
             self._set_success()
         except InterfaceUpdateNotRequiredException:
             logger.info("[Sensor '%s'] Status update not required")
-        except InterfaceException as e:
-            self._set_failure(str(e))
-            raise
+        except InterfaceException as ex:
+            error_message = f"(Interface Error): {ex}"
+            self._set_failure(error_message)
+            raise SensorException(error_message)
+        except Exception as ex:
+            error_message = f"(Unexpected Error): {ex}"
+            self._set_failure(error_message)
+            raise SensorException(error_message)
 
         return self._get_status_db_value()
 
@@ -95,8 +102,13 @@ class Actuator(Device):
             logger.info("[Actuator '%s'] Control result: %s", self.slug, self.status)
 
             self._set_success()
-        except InterfaceException as e:
-            self._set_failure(str(e))
-            raise
+        except InterfaceException as ex:
+            error_message = f"(Interface Error): {ex}"
+            self._set_failure(error_message)
+            raise ActuatorException(error_message)
+        except Exception as ex:
+            error_message = f"(Unexpected Error): {ex}"
+            self._set_failure(error_message)
+            raise ActuatorException(error_message)
 
         return self._get_status_db_value()

@@ -125,5 +125,5 @@ def test_device_test_error(django_app_admin: "DjangoTestApp", device_fixture_nam
     response = form.submit()
 
     assert "Tested interface {} failure: {}".format(
-        dummy_device.name, f"{dummy_device.__class__.__name__} error"
+        dummy_device.name, f"(Interface Error): {dummy_device.__class__.__name__} error"
     ) in response.text

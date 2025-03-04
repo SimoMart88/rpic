@@ -87,7 +87,7 @@ def test_home_page_device_auto_update_disabled(selenium: "WebDriver", live_serve
     last_status_update_time = dummy_device_card.find_element(By.ID, f"{ dummy_device.slug }-last_status_update_time")
     assert last_status_update_time.text == dummy_device.last_status_update_time.strftime("%Y-%m-%d %H:%M:%S")
     last_update_status = dummy_device_card.find_element(By.ID, f"{ dummy_device.slug }-last_update_status")
-    assert last_update_status.text == dummy_device.get_last_update_status_display()
+    assert last_update_status.text == dummy_device.get_last_update_status_display()  # type: ignore[attr-defined]
     assert last_update_status.get_attribute("title") == dummy_device.last_status_update_log
 
 
@@ -150,7 +150,7 @@ def test_home_page_sensor_update_error(selenium: "WebDriver", live_server: "Live
     last_status_update_time = dummy_device_card.find_element(By.ID, f"{ dummy_sensor_ui_error.slug }-last_status_update_time")
     assert last_status_update_time.text == dummy_sensor_ui_error.last_status_update_time.strftime("%Y-%m-%d %H:%M:%S")
     last_update_status = dummy_device_card.find_element(By.ID, f"{ dummy_sensor_ui_error.slug }-last_update_status")
-    assert last_update_status.text == dummy_sensor_ui_error.get_last_update_status_display()
+    assert last_update_status.text == dummy_sensor_ui_error.get_last_update_status_display()  # type: ignore[attr-defined]
     assert last_update_status.get_attribute("title") == dummy_sensor_ui_error.last_status_update_log
 
     refresh_button = selenium.find_element(By.ID, f"{dummy_sensor_ui_error.slug}-refresh")
@@ -166,9 +166,7 @@ def test_home_page_sensor_update_error(selenium: "WebDriver", live_server: "Live
     assert WebDriverWait(selenium, 5).until(
         lambda d: last_update_status.find_element(By.CLASS_NAME, 'bi-exclamation-circle')
     )
-    assert last_update_status.get_attribute("title") == "Sensor error"
-
-
+    assert last_update_status.get_attribute("title") == "(Interface Error): Sensor error"
 
 
 @pytest.mark.selenium
@@ -202,7 +200,7 @@ def test_home_page_actuator_refresh_button(selenium: "WebDriver", live_server: "
 
     dummy_actuator_card = selenium.find_element(By.ID, dummy_actuator_ui.slug)
     last_update_status = dummy_actuator_card.find_element(By.ID, f"{dummy_actuator_ui.slug}-last_update_status")
-    assert last_update_status.text == dummy_actuator_ui.get_last_update_status_display()
+    assert last_update_status.text == dummy_actuator_ui.get_last_update_status_display()  # type: ignore[attr-defined]
 
     refresh_button = selenium.find_element(By.ID, f"{dummy_actuator_ui.slug}-refresh")
     refresh_button.click()
@@ -277,7 +275,7 @@ def test_home_page_actuator_change_status_error(selenium: "WebDriver", live_serv
     assert WebDriverWait(selenium, 5).until(
         lambda d: last_update_status.find_element(By.CLASS_NAME, 'bi-exclamation-circle')
     )
-    assert last_update_status.get_attribute("title") == "Actuator error"
+    assert last_update_status.get_attribute("title") == "(Interface Error): Actuator error"
 
     dummy_actuator_ui_error.refresh_from_db()
     assert not dummy_actuator_ui_error.status.get("flag", None)

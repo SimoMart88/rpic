@@ -2,7 +2,7 @@ from __future__ import annotations
 import pytest
 import typing
 
-from rpi_controller.interfaces.exceptions import InterfaceException
+from rpi_controller.exceptions import SensorException, ActuatorException
 
 if typing.TYPE_CHECKING:
     from rpi_controller.models import Device, Sensor, Actuator
@@ -76,16 +76,18 @@ def test_sensor_read_status_error(dummy_sensor_error: "Sensor") -> None:
     assert not dummy_sensor_error.last_status_update_time  # Sanity check
     assert dummy_sensor_error.last_update_status == dummy_sensor_error.UpdateStatus.NEW  # Sanity check
 
-    with pytest.raises(InterfaceException) as ex:
+    expected_error_message = "(Interface Error): Sensor error"
+
+    with pytest.raises(SensorException) as ex:
         output = dummy_sensor_error.read_status()
         assert output == original_status
-        assert str(ex) == "Sensor error"
+        assert str(ex) == expected_error_message
 
     dummy_sensor_error.refresh_from_db()
 
     assert dummy_sensor_error.status == original_status
     assert dummy_sensor_error.last_status_update_time
-    assert dummy_sensor_error.last_status_update_log == "Sensor error"
+    assert dummy_sensor_error.last_status_update_log == expected_error_message
     assert dummy_sensor_error.last_update_status == dummy_sensor_error.UpdateStatus.FAILURE
 
 
@@ -125,14 +127,16 @@ def test_actuator_use_error(dummy_actuator_error: "Actuator") -> None:
     assert not dummy_actuator_error.last_status_update_time  # Sanity check
     assert dummy_actuator_error.last_update_status == dummy_actuator_error.UpdateStatus.NEW  # Sanity check
 
-    with pytest.raises(InterfaceException) as ex:
+    expected_error = "(Interface Error): Actuator error"
+
+    with pytest.raises(ActuatorException) as ex:
         output = dummy_actuator_error.update_status("my_args", my_kwargs="my_kwargs")
         assert output == original_status
-        assert str(ex) == "Actuator error"
+        assert str(ex) == expected_error
 
     dummy_actuator_error.refresh_from_db()
 
     assert dummy_actuator_error.status == original_status
     assert dummy_actuator_error.last_status_update_time
-    assert dummy_actuator_error.last_status_update_log == "Actuator error"
+    assert dummy_actuator_error.last_status_update_log == expected_error
     assert dummy_actuator_error.last_update_status == dummy_actuator_error.UpdateStatus.FAILURE
