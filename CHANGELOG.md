@@ -1,3 +1,20 @@
+## 0.4.0 (2025-03-07)
+
+### Feat
+
+- **DeviceException**: implement custom exceptions for Device models
+- **Home**: implement support for Actuators in home page
+- **Actuator**: implement API
+- **Device**: use method has been replaced by read_status and update_status
+- **ActuatorInterface**: Implement support for relay and mock actuators
+- **Admin**: Implement support for Actuator in Admin console
+- **Actuator**: Implement support for Actuators as Django model
+
+### Fix
+
+- **Device**: rename last_status_update attribute to last_status_update_time to avoid confusion with last_update_status
+- **Model**: restored Device as an abstract model
+
 ## 0.3.0 (2025-02-06)
 
 ### Feat
