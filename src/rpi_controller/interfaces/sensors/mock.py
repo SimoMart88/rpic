@@ -16,7 +16,7 @@ class MockSensorInterface(SensorInterface):
 
     def read_input(self) -> dict[str, typing.Any]:
         return {
-            "mock_key": "mock_value",
+            "counter": self.context.status.get("counter", 0) + 1,
             "user_input_key": self.context.config.get('user_input_value', 'not configured')
         }
 

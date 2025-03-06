@@ -1,6 +1,6 @@
 import factory
 from strategy_field.utils import fqn
-from test_utils.interfaces import DummySensorInterface
+from test_utils.interfaces import DummySensorInterface, DummyActuatorInterface
 from django.contrib.auth import get_user_model
 
 
@@ -12,6 +12,17 @@ class SensorFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = 'rpi_controller.Sensor'
+        django_get_or_create = ('slug',)
+
+
+class ActuatorFactory(factory.django.DjangoModelFactory):
+    slug = factory.Sequence(lambda n: 'Actuator-%d' % n)
+    name = factory.Sequence(lambda n: 'Actuator %d' % n)
+    interface = fqn(DummyActuatorInterface)
+
+
+    class Meta:
+        model = 'rpi_controller.Actuator'
         django_get_or_create = ('slug',)
 
 

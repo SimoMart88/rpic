@@ -2,10 +2,11 @@ from __future__ import annotations
 import typing
 import pytest
 from rest_framework.test import APIClient
+from strategy_field.utils import fqn
 
 if typing.TYPE_CHECKING:
     from django.contrib.auth.models import User
-    from rpi_controller.models import Sensor
+    from rpi_controller.models import Sensor, Actuator
     from django_webtest import DjangoTestApp
 
 
@@ -13,7 +14,6 @@ if typing.TYPE_CHECKING:
 def dummy_sensor_update_not_required() -> "Sensor":
     from test_utils.factories import SensorFactory
     from rpi_controller.models import Sensor
-    from strategy_field.utils import fqn
     from test_utils.interfaces import DummyUpdateNotRequiredSensorInterface
 
     sensor = SensorFactory.create(
@@ -28,7 +28,6 @@ def dummy_sensor_update_not_required() -> "Sensor":
 @pytest.fixture
 def dummy_sensor_error() -> "Sensor":
     from test_utils.factories import SensorFactory
-    from strategy_field.utils import fqn
     from test_utils.interfaces import DummyErrorSensorInterface
 
     sensor = SensorFactory.create(
@@ -36,6 +35,18 @@ def dummy_sensor_error() -> "Sensor":
         interface=fqn(DummyErrorSensorInterface),
     )
     return sensor
+
+
+@pytest.fixture
+def dummy_actuator_error() -> "Actuator":
+    from test_utils.factories import ActuatorFactory
+    from test_utils.interfaces import DummyActuatorErrorInterface
+
+    actuator = ActuatorFactory.create(
+        status={"dummy_key": "dummy_value"},
+        interface=fqn(DummyActuatorErrorInterface),
+    )
+    return actuator
 
 
 @pytest.fixture

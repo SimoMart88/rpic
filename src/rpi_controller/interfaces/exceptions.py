@@ -10,6 +10,10 @@ class InterfaceUserConfigurationException(InterfaceConfigurationException):
     pass
 
 
+class InterfaceUserInputException(InterfaceConfigurationException):
+    pass
+
+
 class InterfaceRuntimeException(InterfaceException):
     pass
 

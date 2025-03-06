@@ -1,6 +1,5 @@
 {% extends 'rpi_controller/base.html' %}
 
-{% load tz %}
 {% load static %}
 {% load django_bootstrap5 %}
 {% load compress %}
@@ -15,53 +14,11 @@
 
 {% block content %}
     <div class="card-columns">
-        <h1>Sensors</h1>
-        {% for device in sensors %}
-            <div id="{{ device.slug }}" class="card" style="display: inline-block">
-                <div class="card-header">
-                    <h3 id="{{ device.slug }}-name" class="card-title">{{ device.name }}</h3>
-                </div>
-                <div class="card-body">
-                    {% include device.interface.template_name %}
-                </div>
-                <div class="card-footer">
-                    <h6 class="card-subtitle mb-2 text-muted">
-                        Last status update:
-                    </h6>
-                    <div class="container">
-                        <div class="row">
-                            <div class="col">
-                                <p id="{{ device.slug }}-last_status_update" class="small">
-                                    {{ device.last_status_update|localtime|date:"Y-m-d H:i:s" }}
-                                </p>
-                            </div>
-                            <div class="col">
-                                <span id="{{ device.slug }}-last_update_status" title="{{ device.last_status_update_log }}">
-                                    {{ device.get_last_update_status_display }}
-                                </span>
-                            </div>
-                            <div class="col">
-                                <button id="{{ device.slug }}-refresh" type="button" class="btn btn-outline-primary">
-                                    <i class="bi bi-arrow-clockwise"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <script>
-                let func_args = ['{{ device.slug }}', ['status', 'last_status_update', 'last_update_status'], '{% url 'api-sensor-use' device.slug %}']
-
-                $(window).on('load', function() {
-                    update_device_status.apply(this, func_args);
-                });
-
-                $(document).ready( function() {
-                    $('#{{ device.slug }}-refresh').click(function () {
-                        update_device_status.apply(this, func_args);
-                    });
-                });
-            </script>
-        {% endfor %}
+        {%  with sensors as devices %}
+            {% include 'rpi_controller/fragments/sensor_details.html' %}
+        {% endwith %}
+        {%  with actuators as devices %}
+            {% include 'rpi_controller/fragments/actuator_details.html' %}
+        {% endwith %}
     </div>
 {% endblock %}

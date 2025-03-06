@@ -7,7 +7,7 @@ from django.contrib.admin.helpers import AdminForm
 from django.http.response import HttpResponseRedirect, Http404
 from django.template.response import TemplateResponse
 
-from rpi_controller.models import Sensor
+from rpi_controller.models import Sensor, Actuator
 
 from admin_extra_buttons.decorators import button
 
@@ -45,7 +45,7 @@ class TestForm(forms.Form):
 class DeviceAdmin(ExtraButtonsMixin, admin.ModelAdmin["Device"]):
     list_display = ["name", "slug", "visible", "interface_label"]
     list_filter = ["visible", "interface"]
-    readonly_fields = ["config", "status", "last_update_status", "last_status_update", "last_status_update_log"]
+    readonly_fields = ["config", "status", "last_update_status", "last_status_update_time", "last_status_update_log"]
 
     def get_object_or_404(self, request: "HttpRequest", pk: str) -> "Device":
         obj = self.get_object(request, pk)
@@ -54,6 +54,9 @@ class DeviceAdmin(ExtraButtonsMixin, admin.ModelAdmin["Device"]):
             raise Http404
 
         return obj
+
+    def run_test(self, obj: "Device", *args: typing.Any, **kwargs: typing.Any) -> None:
+        raise NotImplementedError
 
     @admin.display(description="Interface")
     def interface_label(self, obj: "Device") -> str:
@@ -91,16 +94,11 @@ class DeviceAdmin(ExtraButtonsMixin, admin.ModelAdmin["Device"]):
             config_form = form_class(request.POST)
             if config_form.is_valid():
                 try:
-                    obj.use(
-                        *config_form.cleaned_data["input_args"], **config_form.cleaned_data["input_kwargs"]
-                    )
-                    if obj.last_update_status == obj.UpdateStatus.SUCCESS:
-                        self.message_user(request, "Tested interface {} successfully".format(obj.name))
-                    else:
-                        self.message_user(request, "Tested interface {} failure: {}".format(
-                            obj.name, obj.last_status_update_log), messages.ERROR)
+                    self.run_test(obj, *config_form.cleaned_data["input_args"], **config_form.cleaned_data["input_kwargs"])
+                    self.message_user(request, "Tested interface {} successfully".format(obj.name))
                 except Exception as ex:
-                    self.message_user(request, str(ex), messages.ERROR)
+                    self.message_user(request, "Tested interface {} failure: {}".format(
+                        obj.name, str(ex)), messages.ERROR)
         else:
             config_form = form_class(initial={k: v for k, v in obj.config.items() if k in form_class.declared_fields})
 
@@ -110,4 +108,15 @@ class DeviceAdmin(ExtraButtonsMixin, admin.ModelAdmin["Device"]):
         return TemplateResponse(request, "admin/device/test.html", context)
 
 
-admin.site.register(Sensor, DeviceAdmin)
+class SensorAdmin(DeviceAdmin):
+    def run_test(self, obj: "Device", *args: typing.Any, **kwargs: typing.Any) -> None:
+        obj.read_status()
+
+
+class ActuatorAdmin(DeviceAdmin):
+    def run_test(self, obj: "Device", *args: typing.Any, **kwargs: typing.Any) -> None:
+        obj.update_status(*args, **kwargs)
+
+
+admin.site.register(Sensor, SensorAdmin)
+admin.site.register(Actuator, ActuatorAdmin)
