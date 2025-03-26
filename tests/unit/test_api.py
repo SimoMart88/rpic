@@ -47,7 +47,7 @@ def test_sensor_api_read_status(django_api: "APIClient", dummy_sensor: "Sensor")
         'visible': False,
         'status': {'dummy_key': 'dummy_value'},
         'interface': 'dummysensor',
-        'last_status_update_time': '2000-01-01 01:00:00',
+        'last_status_update_time': '2000-01-01 00:00:00',
         'last_status_update_log': 'Sensor status updated successfully',
         'last_update_status': 'SUCCESS',
     }
@@ -66,7 +66,7 @@ def test_actuator_api_update_status(django_api: "APIClient", dummy_actuator: "Ac
         'visible': False,
         'status': {'args': [], 'kwargs': {'updated_key': ['updated_value']}},
         'interface': 'dummyactuator',
-        'last_status_update_time': '2000-01-01 01:00:00',
+        'last_status_update_time': '2000-01-01 00:00:00',
         'last_status_update_log': 'Actuator status updated successfully',
         'last_update_status': 'SUCCESS',
     }

@@ -18,7 +18,7 @@ class InterfaceRegistry(Registry):
 
 class Interface(ABC):
     label: str
-    config_form: Form
+    config_form: type[Form]
     template_name: str
 
     def __init__(self, context: typing.Any) -> None:
