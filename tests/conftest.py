@@ -43,6 +43,11 @@ def pytest_configure(config: "Config") -> None:
         setattr(config.option, 'driver_path', ChromeDriverManager().install())
 
 
+@pytest.fixture(autouse=True)
+def common_tests_settings(settings: "SettingsWrapper") -> None:
+    settings.TIME_ZONE = "Etc/UTC"
+
+
 @pytest.fixture()
 def templates_for_testing(settings: "SettingsWrapper") -> "SettingsWrapper":
     new_templates_config = settings.TEMPLATES

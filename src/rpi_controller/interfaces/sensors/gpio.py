@@ -54,8 +54,8 @@ class Dht22SensorInterface(SensorInterface):
 
             logger.info("[Sensor '%s'] Trying read data using pigpio service", context.slug)
             try:
-                sensor = dht.Sensor(pi, gpio_pin, model=dht.Sensor.Model.DHT22)
-                sensor_output = sensor.read(self.context.config.get("retry_number", sensor.default_retry_number))
+                sensor = dht.Sensor(pi, gpio_pin, model=dht.Sensor.Model.DHT22)  # type: ignore[no-untyped-call]
+                sensor_output = sensor.read(self.context.config.get("retry_number", sensor.default_retry_number))  # type: ignore[no-untyped-call]
                 logger.info("[Sensor '%s'] pigpio service raw output: %s", context.slug, sensor_output)
                 _, _, status, temperature, humidity = sensor_output
             except Exception as e:

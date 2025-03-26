@@ -1,4 +1,7 @@
 # rpi-controller
+
+[![Test](https://github.com/SimoMart88/rpi-controller/actions/workflows/test.yml/badge.svg)](https://github.com/SimoMart88/rpi-controller/actions/workflows/test.yml)
+
 A controller for GPIO sensors and devices on RaspberryPI
 
 ## Compatibility
@@ -22,6 +25,7 @@ A controller for GPIO sensors and devices on RaspberryPI
 ## Features
 * Use a qualified relationship to link Controller with Sensors and Actuators to include labels
   * Validate this relationship against interface on form save
+* Implement a telemetry system to track device status changes in time
 
 ## Infrastructure
 * Expose the application and the static content through Nginx

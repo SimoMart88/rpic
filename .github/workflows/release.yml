@@ -1,0 +1,40 @@
+name: Release
+on:
+  workflow_run:
+    workflows:
+      - 'test'
+    branches:
+      - main
+    types:
+      - completed
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    permissions:
+      contents: write
+    steps:
+      - name: 'Check out repository code'
+        uses: actions/checkout@v4
+      - name: 'Retrieve version from pyproject.toml'
+        id: version
+        run: echo "tag=$(grep -m 1 version pyproject.toml | grep -Po '(\d+\.)+\d+')" >> $GITHUB_OUTPUT
+      - name: 'Archive Release'
+        uses: thedoctor0/zip-release@0.7.5
+        with:
+          type: 'zip'
+          exclusions: '/.git /.github /tests pytest.ini .*'
+          filename: 'RPIC-${{ steps.version.outputs.tag }}.zip'
+      - name: 'Create Release'
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: 'RPIC-${{ steps.version.outputs.tag }}.zip'
+          artifactErrorsFailBuild: true
+          bodyFile: 'CHANGELOG.md'
+          tag: ${{ steps.version.outputs.tag }}
+          commit: main
+          token: ${{ secrets.GITHUB_TOKEN }}

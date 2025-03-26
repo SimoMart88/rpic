@@ -21,15 +21,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # django-environ configuration
 env = environ.Env(
+    SECRET_KEY=(str, 'local'),
     DEBUG=(bool, False),
     ALLOWED_HOSTS=(list, []),
     LOCAL_APPS=(list, []),
-    STATIC_ROOT=(str, BASE_DIR / '.data/static'),
+    STATIC_ROOT=(str, BASE_DIR / '~data/static'),
     STATIC_URL=(str, '/static/'),
     TIME_ZONE=(str, 'UTC'),
     COMPRESS_ENABLED=(bool, False),
     LOGGING_LEVEL=(str, 'ERROR'),
-    LOGGING_FILE=(str, '.data/rpi_controller.log'),
+    LOGGING_FILE=(str, '~data/rpi_controller.log'),
 )
 
 

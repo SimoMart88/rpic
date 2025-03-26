@@ -1,0 +1,87 @@
+name: test
+on:
+  push:
+    branches:
+      - feature/*
+      - bugfix/*
+  pull_request:
+    branches:
+      - main
+      - develop
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+jobs:
+  code-checks:
+    name: 'Code Checks'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Check out repository code'
+        uses: actions/checkout@v4
+      - name: 'Install uv'
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+      - name: 'Install the project'
+        run: uv sync --dev
+      - name: 'Run Ruff checks'
+        run: uv run ruff check
+      - name: 'Run MyPy Checks'
+        run: uv run mypy --config-file .mypy.ini
+  unit-test:
+    name: 'Unit Test'
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: postgres:16
+        env:
+          POSTGRES_DATABASE: rpic
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USERNAME: postgres
+        ports:
+          - 15432:5432
+    env:
+      DATABASE_URL: "postgres://postgres:postgres@localhost:15432/rpic"
+      DJANGO_SETTINGS_MODULE: 'rpi_controller.config.settings'
+    steps:
+      - name: 'Check out repository code'
+        uses: actions/checkout@v4
+      - name: 'Install OS dependencies'
+        run: sudo apt install -y firefox
+      - name: 'Install uv'
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+      - name: 'Install the project'
+        run: uv sync --dev
+      - name: 'Configure application workspace'
+        run: mkdir ./~data
+      - name: 'Run tests'
+        run: uv run pytest tests --create-db --cov --cov-report xml:coverage.xml
+      - name: 'Upload Coverage artifact'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage.xml
+          retention-days: 1
+  code-coverage:
+    name: 'Code Coverage'
+    needs:
+      - 'unit-test'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Download Coverage artifact'
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage
+      - name: 'Code Coverage Report'
+        uses: irongut/CodeCoverageSummary@v1.3.0
+        with:
+          filename: coverage.xml
+          thresholds: '60 85'
+          badge: true
+          output: console
+
+  # TODO: when public, move coverage to a remote service (like Codecov) then include badge in README
