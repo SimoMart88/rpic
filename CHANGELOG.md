@@ -1,3 +1,9 @@
+## 0.4.2 (2025-03-28)
+
+### Fix
+
+- **utils.js**: fix empty data management in read_device_status function
+
 ## 0.4.1 (2025-03-27)
 
 ### Fix
