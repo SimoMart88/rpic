@@ -5,7 +5,7 @@
 A controller for GPIO sensors and devices on RaspberryPI
 
 ## Compatibility
-- Tested on RaspberryPi 1b+ (https://www.raspberrypi.com/products/raspberry-pi-1-model-b-plus/)
+- Tested on RaspberryPi 1b
   - OS: Raspberry Pi OS (Legacy) Lite (see https://www.raspberrypi.com/software/operating-systems/)
 
 ## Installation
