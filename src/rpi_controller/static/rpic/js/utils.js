@@ -68,11 +68,12 @@ function render_device_status(device_ref, updated_data) {
 
 
 function read_device_status(device_ref, api_url, http_method = 'GET', data = {}) {
+    let GET_data = JSON.stringify(data)
     $.ajax({
         type: http_method,
         url: api_url,
         headers: {'X-CSRFToken': getCookie('csrftoken')},
-        data: JSON.stringify(data),
+        data: (GET_data !== "{}") ? GET_data: null,
         contentType: 'application/json',
         mode: 'same-origin',
         success: function(response){
