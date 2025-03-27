@@ -13,13 +13,13 @@ from rpi_controller.interfaces.exceptions import (InterfaceRuntimeException,
 from rpi_controller.interfaces.utils.gpio import get_gpio_pin_from_config
 
 
+logger = logging.getLogger(__name__)
+
+
 class Dht22SensorInterfaceForm(forms.Form):
     gpio_pin = forms.CharField(label="GPIO ping reference", max_length=3)
     refresh_min_interval = forms.IntegerField(label="Sensor refresh minimum interval (in seconds)", min_value=5)
     retry_number = forms.IntegerField(label="Sensor retry number", min_value=5)
-
-
-logger = logging.getLogger(__name__)
 
 
 class Dht22SensorInterface(SensorInterface):
