@@ -18,14 +18,13 @@ if typing.TYPE_CHECKING:
 def test_relayactuator(monkeypatch: MonkeyPatch) -> None:
     from test_utils.factories import ActuatorFactory
 
-    monkeypatch.setattr(
-        'rpi_controller.interfaces.actuators.gpio.RPi',
-        mock.Mock()
-    )
+    class MockedRelayActuatorInterface(RelayActuatorInterface):
+        def _get_gpio_client(self) -> mock.Mock:
+            return mock.Mock()
 
     actuator = ActuatorFactory(config={'gpio_pin': 7})
 
-    actuator_interface = RelayActuatorInterface(actuator)
+    actuator_interface = MockedRelayActuatorInterface(actuator)
     actuator_output = actuator_interface.control(True)
     assert actuator_output['active'] is True
 
@@ -67,15 +66,14 @@ def test_relayactuator_interfaceuserinput_error() -> None:
 def test_relayactuator_interface_error(monkeypatch: MonkeyPatch) -> None:
     from test_utils.factories import ActuatorFactory
 
-    monkeypatch.setattr(
-        'rpi_controller.interfaces.actuators.gpio.RPi',
-        mock.Mock(GPIO=mock.Mock(
-            output=mock.Mock(side_effect=InterfaceRuntimeException("ERROR"))
-        ))
-    )
+    class MockedRelayActuatorInterface(RelayActuatorInterface):
+        def _get_gpio_client(self) -> mock.Mock:
+            return mock.Mock(
+                output=mock.Mock(side_effect=InterfaceRuntimeException("ERROR"))
+            )
 
     actuator = ActuatorFactory(config={'gpio_pin': 7})
 
     with pytest.raises(InterfaceRuntimeException, match='Relay unexpected error'):
-        actuator_interface = RelayActuatorInterface(actuator)
+        actuator_interface = MockedRelayActuatorInterface(actuator)
         actuator_interface.control(True)

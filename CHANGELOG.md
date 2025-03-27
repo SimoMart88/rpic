@@ -1,3 +1,11 @@
+## 0.4.1 (2025-03-27)
+
+### Fix
+
+- **RelayActuator**: fix missing JQuery ID reference in relay template
+- **RelayActuatorInterface**: fixed RPi.GPIO import problem by moving import to a local method
+- **RelayActuatorInterface**: include debug logs
+
 ## 0.4.0 (2025-03-07)
 
 ### Feat

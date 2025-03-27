@@ -13,13 +13,13 @@ from rpi_controller.interfaces.exceptions import (InterfaceRuntimeException,
 from rpi_controller.interfaces.utils.gpio import get_gpio_pin_from_config
 
 
+logger = logging.getLogger(__name__)
+
+
 class Dht22SensorInterfaceForm(forms.Form):
     gpio_pin = forms.CharField(label="GPIO ping reference", max_length=3)
     refresh_min_interval = forms.IntegerField(label="Sensor refresh minimum interval (in seconds)", min_value=5)
     retry_number = forms.IntegerField(label="Sensor retry number", min_value=5)
-
-
-logger = logging.getLogger(__name__)
 
 
 class Dht22SensorInterface(SensorInterface):
@@ -46,7 +46,7 @@ class Dht22SensorInterface(SensorInterface):
             context = type(self.context).objects.select_for_update().get(id=self.context.id)
             gpio_pin = get_gpio_pin_from_config(context.config)
 
-            logger.info("[Sensor '%s'] Trying connection to the pigpio service", context.slug)
+            logger.info("[Sensor '%s'] Trying connect to the pigpio service", context.slug)
             pi = pigpio.pi()
             if not pi.connected:
                 logger.error("[Sensor '%s'] Failed to connect to pigpio service", context.slug)
@@ -59,6 +59,7 @@ class Dht22SensorInterface(SensorInterface):
                 logger.info("[Sensor '%s'] pigpio service raw output: %s", context.slug, sensor_output)
                 _, _, status, temperature, humidity = sensor_output
             except Exception as e:
+                logger.info("[Sensor '%s'] Unexpected error: %s", context.slug, e)
                 raise InterfaceRuntimeException('DHT22 sensor unexpected error') from e
 
             if status == sensor.Status.DHT_GOOD:
