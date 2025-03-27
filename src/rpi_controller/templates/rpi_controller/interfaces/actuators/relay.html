@@ -6,7 +6,7 @@
         </div>
     </div>
     <script>
-        let active_field_a_{{ device.id }} = $("{{ device.slug }}-status-active");
+        let active_field_a_{{ device.id }} = $("#{{ device.slug }}-status-active");
         active_field_a_{{ device.id }}.change(function() {
             FieldChangers["change_checkbox"](
                 "{{ device.slug }}", active_field_a_{{ device.id }}, {"active": active_field_a_{{ device.id }}.prop('checked')},
