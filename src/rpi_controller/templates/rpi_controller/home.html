@@ -1,0 +1,24 @@
+{% extends 'rpi_controller/base.html' %}
+
+{% load static %}
+{% load django_bootstrap5 %}
+{% load compress %}
+
+{% block bootstrap5_extra_head %}
+    {{ block.super }}
+
+    {% compress js %}
+        <script src="{% static 'rpic/js/utils.js' %}"></script>
+    {% endcompress %}
+{% endblock %}
+
+{% block content %}
+    <div class="card-columns">
+        {%  with sensors as devices %}
+            {% include 'rpi_controller/fragments/sensor_details.html' %}
+        {% endwith %}
+        {%  with actuators as devices %}
+            {% include 'rpi_controller/fragments/actuator_details.html' %}
+        {% endwith %}
+    </div>
+{% endblock %}

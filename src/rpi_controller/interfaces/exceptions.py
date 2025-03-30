@@ -1,0 +1,22 @@
+class InterfaceException(Exception):
+    pass
+
+
+class InterfaceConfigurationException(InterfaceException):
+    pass
+
+
+class InterfaceUserConfigurationException(InterfaceConfigurationException):
+    pass
+
+
+class InterfaceUserInputException(InterfaceConfigurationException):
+    pass
+
+
+class InterfaceRuntimeException(InterfaceException):
+    pass
+
+
+class InterfaceUpdateNotRequiredException(InterfaceException):
+    pass

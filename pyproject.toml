@@ -1,0 +1,54 @@
+[project]
+name = "rpi-controller"
+version = "0.4.2"
+description = "A controller for GPIO sensors and devices on RaspberryPI"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "django-admin-extra-buttons>=1.5.8",
+    "django-bootstrap5>=24.3",
+    "django-click>=2.4.0",
+    "django-environ>=0.11.2",
+    "django-strategy-field>=3.1.0",
+    "django>=4.2.16",
+    "setuptools>=75.6.0",
+    "uwsgi>=2.0.28",
+    "django-stubs>=5.1.1",
+    "django-stubs-ext>=5.1.1",
+    "pigpio>=1.78",
+    "psycopg>=3.2.3",
+    "djangorestframework>=3.15.2",
+    "django-compressor>=4.5.1",
+    "rpi-gpio>=0.7.1",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+package = true
+dev-dependencies = [
+    "commitizen>=4.0.0",
+    "factory-boy>=3.3.1",
+    "mypy>=1.13.0",
+    "pre-commit>=4.0.1",
+    "pytest-cov>=6.0.0",
+    "pytest-django>=4.9.0",
+    "pytest>=8.3.4",
+    "ruff>=0.8.0",
+    "types-setuptools>=75.6.0.20241126",
+    "django-extensions>=3.2.3",
+    "django-webtest>=1.9.12",
+    "freezegun>=1.5.1",
+    "pytest-selenium>=4.1.0",
+    "webdriver-manager>=4.0.2",
+]
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+tag_format = "$version"
+version_scheme = "pep440"
+version_provider = "pep621"
+update_changelog_on_bump = true
+major_version_zero = true

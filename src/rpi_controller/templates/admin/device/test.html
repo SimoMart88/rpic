@@ -1,0 +1,9 @@
+{% extends "admin/device/input_form.html" %}
+
+{% block action-content-title %}<h1>{{ original.name }} ({{ original.interface.label }})</h1>{% endblock %}
+{% block action-content-extra %}
+    <fieldset class="tabular">
+        <h2>Output</h2>
+        {% include original.interface.template_name %}
+    </fieldset>
+{% endblock %}
