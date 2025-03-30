@@ -1,12 +1,8 @@
 name: 'Release'
 on:
-  workflow_run:
-    workflows:
-      - 'Test'
+  push:
     branches:
       - main
-    types:
-      - completed
 concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}"
   cancel-in-progress: true
@@ -14,7 +10,6 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     permissions:
       contents: write
     steps:
