@@ -27,7 +27,7 @@ jobs:
         uses: thedoctor0/zip-release@0.7.5
         with:
           type: 'zip'
-          exclusions: '/.git /.github /tests pytest.ini .*'
+          exclusions: '/.git* /*.github /tests* pytest.ini .*'
           filename: 'RPIC-${{ steps.version.outputs.tag }}.zip'
       - name: 'Create Release'
         uses: ncipollo/release-action@v1
