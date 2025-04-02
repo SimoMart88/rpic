@@ -6,6 +6,7 @@ from django import forms
 from rpi_controller.interfaces.exceptions import InterfaceUpdateNotRequiredException, InterfaceRuntimeException
 from rpi_controller.interfaces.sensors.base import SensorInterface
 from rpi_controller.interfaces.actuators.base import ActuatorInterface
+from rpi_controller.interfaces.controllers.base import ControllerInterface
 
 
 class DummyDeviceInterfaceForm(forms.Form):
@@ -71,3 +72,20 @@ class UpdatedDummyActuatorInterface(DummyActuatorInterface):
 
     def control(self, *args: typing.Any, **kwargs: typing.Any) -> dict[typing.Any, typing.Any]:
         return {"flag": kwargs["flag"]}
+
+
+class DummyControllerInterface(ControllerInterface):
+    label = "dummycontroller"
+    config_form = DummyDeviceInterfaceForm
+    template_name = "dummy/test.html"
+
+    def control(self, *args: typing.Any, **kwargs: typing.Any) -> dict[typing.Any, typing.Any]:
+        return {"args": args, "kwargs": kwargs}
+
+
+class DummyControllerErrorInterface(DummyControllerInterface):
+    label = "dummycontroller-error"
+    template_name = "dummy/test.html"
+
+    def control(self, *args: typing.Any, **kwargs: typing.Any) -> dict[typing.Any, typing.Any]:
+        raise InterfaceRuntimeException("Controller error")

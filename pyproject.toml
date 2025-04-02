@@ -43,6 +43,7 @@ dev-dependencies = [
     "freezegun>=1.5.1",
     "pytest-selenium>=4.1.0",
     "webdriver-manager>=4.0.2",
+    "pygraphviz>=1.11",
 ]
 
 [tool.commitizen]

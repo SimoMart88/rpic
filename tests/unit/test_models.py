@@ -5,7 +5,7 @@ import typing
 from rpi_controller.exceptions import SensorException, ActuatorException
 
 if typing.TYPE_CHECKING:
-    from rpi_controller.models import Device, Sensor, Actuator
+    from rpi_controller.models import Device, Sensor, Actuator, Controller
     from _pytest.fixtures import TopRequest
 
 
@@ -120,6 +120,7 @@ def test_actuator_update_status(dummy_actuator: "Actuator") -> None:
     assert dummy_actuator.last_status_update_log  == "Actuator status updated successfully"
     assert dummy_actuator.last_update_status == dummy_actuator.UpdateStatus.SUCCESS
 
+
 @pytest.mark.django_db()
 def test_actuator_use_error(dummy_actuator_error: "Actuator") -> None:
     original_status = dummy_actuator_error.status
@@ -140,3 +141,43 @@ def test_actuator_use_error(dummy_actuator_error: "Actuator") -> None:
     assert dummy_actuator_error.last_status_update_time
     assert dummy_actuator_error.last_status_update_log == expected_error
     assert dummy_actuator_error.last_update_status == dummy_actuator_error.UpdateStatus.FAILURE
+
+
+@pytest.mark.django_db()
+def test_controller_update_status(dummy_controller: "Controller") -> None:
+    assert not dummy_controller.status  # Sanity check
+    assert not dummy_controller.last_status_update_time  # Sanity check
+    assert not dummy_controller.last_status_update_log  # Sanity check
+    assert dummy_controller.last_update_status == dummy_controller.UpdateStatus.NEW  # Sanity check
+
+    output = dummy_controller.update_status("my_args", my_kwargs="my_kwargs")
+    dummy_controller.refresh_from_db()
+
+    expected_output = {"args": ["my_args"], "kwargs": {"my_kwargs": "my_kwargs"}}
+    assert output == expected_output
+    assert dummy_controller.status == expected_output
+    assert dummy_controller.last_status_update_time
+    assert dummy_controller.last_status_update_log  == "Controller status updated successfully"
+    assert dummy_controller.last_update_status == dummy_controller.UpdateStatus.SUCCESS
+
+
+@pytest.mark.django_db()
+def test_controller_use_error(dummy_controller_error: "Controller") -> None:
+    original_status = dummy_controller_error.status
+
+    assert not dummy_controller_error.last_status_update_time  # Sanity check
+    assert dummy_controller_error.last_update_status == dummy_controller_error.UpdateStatus.NEW  # Sanity check
+
+    expected_error = "(Interface Error): Controller error"
+
+    with pytest.raises(ActuatorException) as ex:
+        output = dummy_controller_error.update_status("my_args", my_kwargs="my_kwargs")
+        assert output == original_status
+        assert str(ex) == expected_error
+
+    dummy_controller_error.refresh_from_db()
+
+    assert dummy_controller_error.status == original_status
+    assert dummy_controller_error.last_status_update_time
+    assert dummy_controller_error.last_status_update_log == expected_error
+    assert dummy_controller_error.last_update_status == dummy_controller_error.UpdateStatus.FAILURE

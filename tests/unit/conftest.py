@@ -6,8 +6,20 @@ from strategy_field.utils import fqn
 
 if typing.TYPE_CHECKING:
     from django.contrib.auth.models import User
-    from rpi_controller.models import Sensor, Actuator
+    from rpi_controller.models import Sensor, Actuator, Controller
     from django_webtest import DjangoTestApp
+
+
+@pytest.fixture
+def django_app_admin(django_app: "DjangoTestApp", admin_user: "User") -> "DjangoTestApp":
+    django_app.set_user(admin_user)
+    return django_app
+
+
+@pytest.fixture
+def django_api() -> APIClient:
+    return APIClient()
+
 
 
 @pytest.fixture
@@ -50,11 +62,12 @@ def dummy_actuator_error() -> "Actuator":
 
 
 @pytest.fixture
-def django_app_admin(django_app: "DjangoTestApp", admin_user: "User") -> "DjangoTestApp":
-    django_app.set_user(admin_user)
-    return django_app
+def dummy_controller_error() -> "Controller":
+    from test_utils.factories import ControllerFactory
+    from test_utils.interfaces import DummyControllerErrorInterface
 
-
-@pytest.fixture
-def django_api() -> APIClient:
-    return APIClient()
+    controller = ControllerFactory.create(
+        status={"dummy_key": "dummy_value"},
+        interface=fqn(DummyControllerErrorInterface),
+    )
+    return controller

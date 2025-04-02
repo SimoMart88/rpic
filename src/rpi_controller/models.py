@@ -11,6 +11,7 @@ import logging
 
 from rpi_controller.interfaces.sensors.registry import sensor_registry
 from rpi_controller.interfaces.actuators.registry import actuator_registry
+from rpi_controller.interfaces.controllers.registry import controller_registry
 from rpi_controller.interfaces.exceptions import InterfaceUpdateNotRequiredException, InterfaceException
 from rpi_controller.exceptions import SensorException, ActuatorException
 
@@ -97,7 +98,7 @@ class Actuator(Device):
 
     def update_status(self, *args: typing.Any, **kwargs: typing.Any) -> dict[typing.Any, typing.Any]:
         try:
-            logger.info("[Actuator '%s'] Control actuator with input: '%s' + '%s'", self.slug, args, kwargs)
+            logger.info("[Actuator '%s'] Control with input: '%s' + '%s'", self.slug, args, kwargs)
             self.status = self.interface.control(*args, **kwargs)
             logger.info("[Actuator '%s'] Control result: %s", self.slug, self.status)
 
@@ -112,3 +113,41 @@ class Actuator(Device):
             raise ActuatorException(error_message)
 
         return self._get_status_db_value()
+
+
+class Controller(Device):
+    interface = StrategyField(registry=controller_registry)
+    sensors = models.ManyToManyField(Sensor, through='ControlledSensorDetails', related_name="controllers")
+    actuators = models.ManyToManyField(Actuator, through='ControlledActuatorDetails', related_name="controllers")
+
+    def update_status(self, *args: typing.Any, **kwargs: typing.Any) -> dict[typing.Any, typing.Any]:
+        try:
+            logger.info("[Controller '%s'] Control with input: '%s' + '%s'", self.slug, args, kwargs)
+            self.status = self.interface.control(*args, **kwargs)
+            logger.info("[Controller '%s'] Control result: %s", self.slug, self.status)
+
+            self._set_success()
+        except InterfaceUpdateNotRequiredException:
+            logger.info("[Controller '%s'] Status update not required")
+        except InterfaceException as ex:
+            error_message = f"(Interface Error): {ex}"
+            self._set_failure(error_message)
+            raise ActuatorException(error_message)
+        except Exception as ex:
+            error_message = f"(Unexpected Error): {ex}"
+            self._set_failure(error_message)
+            raise ActuatorException(error_message)
+
+        return self._get_status_db_value()
+
+
+class ControlledSensorDetails(models.Model):
+    sensor = models.ForeignKey(Sensor, on_delete=models.CASCADE)
+    controller = models.ForeignKey(Controller, on_delete=models.CASCADE)
+    config = models.JSONField(default=dict)
+
+
+class ControlledActuatorDetails(models.Model):
+    actuator = models.ForeignKey(Actuator, on_delete=models.CASCADE)
+    controller = models.ForeignKey(Controller, on_delete=models.CASCADE)
+    config = models.JSONField(default=dict)

@@ -19,13 +19,18 @@ A controller for GPIO sensors and devices on RaspberryPI
 ## Documentation
 * Implement HLA
 
-## Security
-* Protect UI and API with authentication and authorization mechanism
-
 ## Features
 * Use a qualified relationship to link Controller with Sensors and Actuators to include labels
   * Validate this relationship against interface on form save
+* Implement scheduler for recurrent operations (Celery)
 * Implement a telemetry system to track device status changes in time
+* Implement support for LoRa based devices
+
+## Refactoring
+# Move common logic from concrete models (Sensor/Actuator/Controller) to the abstract model (Device)
+
+## Security
+* Protect UI and API with authentication and authorization mechanism
 
 ## Infrastructure
 * Expose the application and the static content through Nginx

@@ -35,3 +35,19 @@ This will automatically:
 - Update the changelog
 
 See Commitizen documentation for more details (https://commitizen-tools.github.io/commitizen/)
+
+# ClassDiagram
+Install OS level dependency with the following command:
+```shell
+sudo apt install graphviz graphviz-dev
+```
+
+Make sure django_extensions library is properly included into the active application list:
+```.dotenv
+LOCAL_APPS='django_extensions'
+```
+
+Run the following command to generate the diagram and save into the docs folder:
+```shell
+./manage.py graph_models rpi_controller --rankdir "BT" -o docs/ClassDiagram.png
+```
