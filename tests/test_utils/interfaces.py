@@ -58,6 +58,13 @@ class DummyActuatorInterface(ActuatorInterface):
         return {"args": args, "kwargs": kwargs}
 
 
+class DummyUpdateNotRequiredActuatorInterface(DummyActuatorInterface):
+    label = "dummyactuator-update-not-required"
+
+    def control(self, *args: typing.Any, **kwargs: typing.Any) -> dict[typing.Any, typing.Any]:
+        raise InterfaceUpdateNotRequiredException
+
+
 class DummyActuatorErrorInterface(DummyActuatorInterface):
     label = "dummyactuator-error"
     template_name = "dummy/test_flag.html"
@@ -81,6 +88,13 @@ class DummyControllerInterface(ControllerInterface):
 
     def control(self, *args: typing.Any, **kwargs: typing.Any) -> dict[typing.Any, typing.Any]:
         return {"args": args, "kwargs": kwargs}
+
+
+class DummyUpdateNotRequiredControllerInterface(DummyControllerInterface):
+    label = "dummycontroller-update-not-required"
+
+    def control(self, *args: typing.Any, **kwargs: typing.Any) -> dict[typing.Any, typing.Any]:
+        raise InterfaceUpdateNotRequiredException
 
 
 class DummyControllerErrorInterface(DummyControllerInterface):

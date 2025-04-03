@@ -28,13 +28,12 @@ def dummy_sensor_update_not_required() -> "Sensor":
     from rpi_controller.models import Sensor
     from test_utils.interfaces import DummyUpdateNotRequiredSensorInterface
 
-    sensor = SensorFactory.create(
+    return SensorFactory.create(
         status={"dummy_key": "dummy_value_no_update"},
         interface=fqn(DummyUpdateNotRequiredSensorInterface),
         last_status_update_log="Previous log",
         last_update_status=Sensor.UpdateStatus.SUCCESS
     )
-    return sensor
 
 
 @pytest.fixture
@@ -42,11 +41,24 @@ def dummy_sensor_error() -> "Sensor":
     from test_utils.factories import SensorFactory
     from test_utils.interfaces import DummyErrorSensorInterface
 
-    sensor = SensorFactory.create(
+    return SensorFactory.create(
         status={"dummy_key": "dummy_value"},
         interface=fqn(DummyErrorSensorInterface),
     )
-    return sensor
+
+
+@pytest.fixture
+def dummy_actuator_update_not_required() -> "Actuator":
+    from test_utils.factories import ActuatorFactory
+    from rpi_controller.models import Actuator
+    from test_utils.interfaces import DummyUpdateNotRequiredActuatorInterface
+
+    return ActuatorFactory.create(
+        status={"dummy_key": "dummy_value_no_update"},
+        interface=fqn(DummyUpdateNotRequiredActuatorInterface),
+        last_status_update_log="Previous log",
+        last_update_status=Actuator.UpdateStatus.SUCCESS
+    )
 
 
 @pytest.fixture
@@ -54,11 +66,24 @@ def dummy_actuator_error() -> "Actuator":
     from test_utils.factories import ActuatorFactory
     from test_utils.interfaces import DummyActuatorErrorInterface
 
-    actuator = ActuatorFactory.create(
+    return ActuatorFactory.create(
         status={"dummy_key": "dummy_value"},
         interface=fqn(DummyActuatorErrorInterface),
     )
-    return actuator
+
+
+@pytest.fixture
+def dummy_controller_update_not_required() -> "Controller":
+    from test_utils.factories import ControllerFactory
+    from rpi_controller.models import Controller
+    from test_utils.interfaces import DummyUpdateNotRequiredControllerInterface
+
+    return ControllerFactory.create(
+        status={"dummy_key": "dummy_value_no_update"},
+        interface=fqn(DummyUpdateNotRequiredControllerInterface),
+        last_status_update_log="Previous log",
+        last_update_status=Controller.UpdateStatus.SUCCESS
+    )
 
 
 @pytest.fixture
@@ -66,8 +91,7 @@ def dummy_controller_error() -> "Controller":
     from test_utils.factories import ControllerFactory
     from test_utils.interfaces import DummyControllerErrorInterface
 
-    controller = ControllerFactory.create(
+    return ControllerFactory.create(
         status={"dummy_key": "dummy_value"},
         interface=fqn(DummyControllerErrorInterface),
     )
-    return controller

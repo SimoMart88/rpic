@@ -9,17 +9,20 @@ from strategy_field.fields import StrategyField
 import typing
 import logging
 
+from rpi_controller.interfaces import Interface
 from rpi_controller.interfaces.sensors.registry import sensor_registry
 from rpi_controller.interfaces.actuators.registry import actuator_registry
 from rpi_controller.interfaces.controllers.registry import controller_registry
 from rpi_controller.interfaces.exceptions import InterfaceUpdateNotRequiredException, InterfaceException
-from rpi_controller.exceptions import SensorException, ActuatorException
+from rpi_controller.exceptions import DeviceException, SensorException, ActuatorException, ControllerException
 
 
 logger = logging.getLogger(__name__)
 
 
 class Device(models.Model):
+    exception_class: typing.Type[DeviceException] = DeviceException
+
     class UpdateStatus(models.TextChoices):
         NEW = ("NW", 'NEW')
         SUCCESS = ("SC", 'SUCCESS')
@@ -33,6 +36,7 @@ class Device(models.Model):
     last_update_status = models.CharField(max_length=2, choices=UpdateStatus.choices, default=UpdateStatus.NEW)
     last_status_update_time = models.DateTimeField(null=True, blank=True)
     last_status_update_log = models.TextField(null=True, blank=True)
+    interface: typing.Optional[Interface] = None
 
     def read_status(self) -> dict[typing.Any, typing.Any]:
         raise NotImplementedError("Status read not supported")
@@ -62,6 +66,29 @@ class Device(models.Model):
         self.last_update_status = self.UpdateStatus.FAILURE
         self.save()
 
+    def _control_interface(
+            self, interface_func_name: str, *args: typing.Any, **kwargs: typing.Any
+    ) -> dict[typing.Any, typing.Any]:
+        class_name = self.__class__.__name__
+        try:
+            logger.info("[%s '%s'] Control with input: '%s' + '%s'", class_name, self.slug, args, kwargs)
+            self.status = getattr(self.interface, interface_func_name)(*args, **kwargs)
+            logger.info("[%s '%s'] Control result: %s", class_name, self.slug, self.status)
+
+            self._set_success()
+        except InterfaceUpdateNotRequiredException:
+            logger.info("[%s '%s'] Status update not required", class_name)
+        except InterfaceException as ex:
+            error_message = f"(Interface Error): {ex}"
+            self._set_failure(error_message)
+            raise self.exception_class(error_message)
+        except Exception as ex:
+            error_message = f"(Unexpected Error): {ex}"
+            self._set_failure(error_message)
+            raise self.exception_class(error_message)
+
+        return self._get_status_db_value()
+
     def __str__(self) -> str:
         return self.name
 
@@ -70,75 +97,32 @@ class Device(models.Model):
 
 
 class Sensor(Device):
+    exception_class = SensorException
+
     interface = StrategyField(registry=sensor_registry)
 
     def read_status(self) -> dict[typing.Any, typing.Any]:
-        try:
-            logger.info("[Sensor '%s'] Read input with config: %s", self.slug, self.config)
-            self.status = self.interface.read_input()
-            logger.info("[Sensor '%s'] Read input result: %s", self.slug, self.status)
-
-            self._set_success()
-        except InterfaceUpdateNotRequiredException:
-            logger.info("[Sensor '%s'] Status update not required")
-        except InterfaceException as ex:
-            error_message = f"(Interface Error): {ex}"
-            self._set_failure(error_message)
-            raise SensorException(error_message)
-        except Exception as ex:
-            error_message = f"(Unexpected Error): {ex}"
-            self._set_failure(error_message)
-            raise SensorException(error_message)
-
-        return self._get_status_db_value()
+        return self._control_interface("read_input")
 
 
 class Actuator(Device):
+    exception_class = ActuatorException
+
     interface = StrategyField(registry=actuator_registry)
 
     def update_status(self, *args: typing.Any, **kwargs: typing.Any) -> dict[typing.Any, typing.Any]:
-        try:
-            logger.info("[Actuator '%s'] Control with input: '%s' + '%s'", self.slug, args, kwargs)
-            self.status = self.interface.control(*args, **kwargs)
-            logger.info("[Actuator '%s'] Control result: %s", self.slug, self.status)
-
-            self._set_success()
-        except InterfaceException as ex:
-            error_message = f"(Interface Error): {ex}"
-            self._set_failure(error_message)
-            raise ActuatorException(error_message)
-        except Exception as ex:
-            error_message = f"(Unexpected Error): {ex}"
-            self._set_failure(error_message)
-            raise ActuatorException(error_message)
-
-        return self._get_status_db_value()
+        return self._control_interface("control", *args, **kwargs)
 
 
 class Controller(Device):
+    exception_class = ControllerException
+
     interface = StrategyField(registry=controller_registry)
     sensors = models.ManyToManyField(Sensor, through='ControlledSensorDetails', related_name="controllers")
     actuators = models.ManyToManyField(Actuator, through='ControlledActuatorDetails', related_name="controllers")
 
     def update_status(self, *args: typing.Any, **kwargs: typing.Any) -> dict[typing.Any, typing.Any]:
-        try:
-            logger.info("[Controller '%s'] Control with input: '%s' + '%s'", self.slug, args, kwargs)
-            self.status = self.interface.control(*args, **kwargs)
-            logger.info("[Controller '%s'] Control result: %s", self.slug, self.status)
-
-            self._set_success()
-        except InterfaceUpdateNotRequiredException:
-            logger.info("[Controller '%s'] Status update not required")
-        except InterfaceException as ex:
-            error_message = f"(Interface Error): {ex}"
-            self._set_failure(error_message)
-            raise ActuatorException(error_message)
-        except Exception as ex:
-            error_message = f"(Unexpected Error): {ex}"
-            self._set_failure(error_message)
-            raise ActuatorException(error_message)
-
-        return self._get_status_db_value()
+        return self._control_interface("control", *args, **kwargs)
 
 
 class ControlledSensorDetails(models.Model):
