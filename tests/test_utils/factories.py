@@ -56,21 +56,19 @@ class ControllerFactory(factory.django.DjangoModelFactory):
 
 
 class ControlledSensorDetailsFactory(factory.django.DjangoModelFactory):
-    sensors = factory.SubFactory(SensorFactory)
+    sensor = factory.SubFactory(SensorFactory)
     controller = factory.SubFactory(ControllerFactory)
 
     class Meta:
         model = 'rpi_controller.ControlledSensorDetails'
-        django_get_or_create = ('sensor', 'controller')
 
 
 class ControlledActuatorDetailsFactory(factory.django.DjangoModelFactory):
-    actuators = factory.SubFactory(ActuatorFactory)
+    actuator = factory.SubFactory(ActuatorFactory)
     controller = factory.SubFactory(ControllerFactory)
 
     class Meta:
-        model = 'rpi_controller.ControlledSensorDetails'
-        django_get_or_create = ('actuator', 'controller')
+        model = 'rpi_controller.ControlledActuatorDetails'
 
 
 class ControllerWithSensorAndActuatorFactory(ControllerFactory):

@@ -16,6 +16,7 @@ if typing.TYPE_CHECKING:
 @pytest.mark.parametrize("device_fixture_name", [
     pytest.param("dummy_sensor", id="sensor"),
     pytest.param("dummy_actuator", id="actuator"),
+    pytest.param("dummy_controller", id="controller"),
 ])
 def test_device_change(django_app_admin: "DjangoTestApp", device_fixture_name: str, request: "TopRequest") -> None:
     dummy_device: "Device" = request.getfixturevalue(device_fixture_name)
@@ -31,6 +32,7 @@ def test_device_change(django_app_admin: "DjangoTestApp", device_fixture_name: s
 @pytest.mark.parametrize("device_fixture_name", [
     pytest.param("dummy_sensor", id="sensor"),
     pytest.param("dummy_actuator", id="actuator"),
+    pytest.param("dummy_controller", id="controller"),
 ])
 def test_device_configure(django_app_admin: "DjangoTestApp", device_fixture_name: str, request: "TopRequest") -> None:
     dummy_device: "Device" = request.getfixturevalue(device_fixture_name)
@@ -62,6 +64,7 @@ def test_device_configure(django_app_admin: "DjangoTestApp", device_fixture_name
 @pytest.mark.parametrize("device_fixture_name,test_input,test_output", [
     pytest.param("dummy_sensor", "[]", "dummy_value", id="sensor"),
     pytest.param("dummy_actuator", "[\"input_value\"]", "input_value", id="actuator"),
+    pytest.param("dummy_controller", "[\"input_value\"]", "input_value", id="controller"),
 ])
 def test_device_test(django_app_admin: "DjangoTestApp", device_fixture_name: str,
                      test_input: str, test_output: str, templates_for_testing: "SettingsWrapper",
@@ -90,6 +93,7 @@ def test_device_test(django_app_admin: "DjangoTestApp", device_fixture_name: str
 @pytest.mark.parametrize("device_fixture_name", [
     pytest.param("dummy_sensor", id="sensor"),
     pytest.param("dummy_actuator", id="actuator"),
+    pytest.param("dummy_controller", id="controller"),
 ])
 def test_device_test_input_error(django_app_admin: "DjangoTestApp", device_fixture_name: str,
                                  templates_for_testing: "SettingsWrapper", request: "TopRequest") -> None:
@@ -113,6 +117,7 @@ def test_device_test_input_error(django_app_admin: "DjangoTestApp", device_fixtu
 @pytest.mark.parametrize("device_fixture_name", [
     pytest.param("dummy_sensor_error", id="sensor"),
     pytest.param("dummy_actuator_error", id="actuator"),
+    pytest.param("dummy_controller_error", id="controller"),
 ])
 def test_device_test_error(django_app_admin: "DjangoTestApp", device_fixture_name: str,
                                  templates_for_testing: "SettingsWrapper", request: "TopRequest") -> None:

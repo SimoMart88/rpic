@@ -7,9 +7,10 @@ from rpi_controller.interfaces.exceptions import InterfaceUpdateNotRequiredExcep
 from rpi_controller.interfaces.sensors.base import SensorInterface
 from rpi_controller.interfaces.actuators.base import ActuatorInterface
 from rpi_controller.interfaces.controllers.base import ControllerInterface
+from rpi_controller.interfaces.forms import ConfigForm
 
 
-class DummyDeviceInterfaceForm(forms.Form):
+class DummyDeviceInterfaceForm(ConfigForm):
     dummy_input = forms.CharField(max_length=3)
 
 
