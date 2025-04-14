@@ -2,13 +2,13 @@
 - Install UV (https://docs.astral.sh/uv)
 - Install Python `uv python install 3.9`
 - Create a virtual environment `uv venv --python 3.9`
-- Run `uv sync` on the root folder of the project
+- Run `uv sync --all-groups` on the root folder of the project
 - Install pre-commit `pre-commit install`
 
 ## EnvRC configuration file (.envrc)
 ```.dotenv
 dotenv
-uv sync
+uv sync --all-groups
 source .venv/bin/activate
 ```
 
