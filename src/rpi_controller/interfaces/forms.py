@@ -15,5 +15,5 @@ class ConfigForm(forms.Form):
         self.instance = instance
 
     def save(self) -> None:
-        self.instance.config = self.cleaned_data
-        self.instance.save()
+        self.instance.config = self.cleaned_data  # type: ignore[assignment]
+        self.instance.save()  # type: ignore[call-arg]

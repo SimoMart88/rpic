@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 if typing.TYPE_CHECKING:
-    from rpi_controller.models import Controller
+    from rpi_controller.models import Device
 
 
 class SensorTemperatureStepScaleFanControllerForm(ConfigForm):
@@ -29,7 +29,7 @@ class SensorTemperatureStepScaleFanControllerForm(ConfigForm):
     primary_fan_actuator = forms.ModelChoiceField(queryset=Actuator.objects.all())
     secondary_fan_actuator = forms.ModelChoiceField(queryset=Actuator.objects.all())
 
-    def __init__(self, *args: typing.Any, instance: "Controller", **kwargs: typing.Any) -> None:
+    def __init__(self, *args: typing.Any, instance: typing.Type["Device"], **kwargs: typing.Any) -> None:
         if instance.sensors.count() == 2 and instance.actuators.count() == 2:
             kwargs["initial"] = {
                 'primary_temperature_sensor': instance.sensors.get(controlledsensordetails__config__type="primary").pk,
