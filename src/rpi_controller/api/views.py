@@ -2,7 +2,7 @@ import typing
 from rest_framework import viewsets, serializers, decorators, status
 from rest_framework.response import Response
 
-from rpi_controller.models import Sensor, Actuator
+from rpi_controller.models import Sensor, Actuator, Controller
 
 
 if typing.TYPE_CHECKING:
@@ -39,9 +39,14 @@ class ActuatorSerializer(DeviceSerializer):
         model = Actuator
 
 
-class SensorViewSet(viewsets.ModelViewSet):
-    queryset = Sensor.objects.all()
-    serializer_class = SensorSerializer
+class ControllerSerializer(DeviceSerializer):
+
+    class Meta(DeviceSerializer.Meta):
+        model = Controller
+
+
+
+class StatusReaderGenericViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'head']
     lookup_field = 'slug'
 
@@ -59,10 +64,7 @@ class SensorViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=response_status)
 
 
-
-class ActuatorViewSet(viewsets.ModelViewSet):
-    queryset = Actuator.objects.all()
-    serializer_class = ActuatorSerializer
+class StatusUpdaterGenericViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'head']
     lookup_field = 'slug'
 
@@ -78,3 +80,18 @@ class ActuatorViewSet(viewsets.ModelViewSet):
 
         serializer = self.get_serializer(actuator)
         return Response(serializer.data, status=response_status)
+
+
+class SensorViewSet(StatusReaderGenericViewSet):
+    queryset = Sensor.objects.all()
+    serializer_class = SensorSerializer
+
+
+class ActuatorViewSet(StatusUpdaterGenericViewSet):
+    queryset = Actuator.objects.all()
+    serializer_class = ActuatorSerializer
+
+
+class ControllerViewSet(StatusUpdaterGenericViewSet):
+    queryset = Controller.objects.all()
+    serializer_class = ControllerSerializer
