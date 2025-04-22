@@ -1,0 +1,24 @@
+<div>
+    <div class="dummy">
+        <h1>Dummy Value:</h1>
+        <p id="{{ device.slug }}-status-dummy_key">{{ device.status.dummy_key }}</p>
+    </div>
+    <div class="flag">
+        <h5>Flag:</h5>
+        <p id="{{ device.slug }}-status-flag">{{ device.status.flag }}</p>
+    </div>
+    <div class="control">
+        <h5>Force check:</h5>
+        <button id="{{ device.slug }}-control" type="button" class="btn btn-outline-primary">
+            <i class="bi bi-gear"></i>
+        </button>
+    </div>
+    <script>
+        let control_field_c_{{ device.id }} = $("#{{ device.slug }}-control");
+        control_field_c_{{ device.id }}.click(function() {
+            FieldChangers["button_click"](
+                "{{ device.slug }}", control_field_c_{{ device.id }}, {},
+                '{% url 'api-controller-update-status' device.slug %}');
+        });
+    </script>
+</div>

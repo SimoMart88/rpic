@@ -3,7 +3,7 @@ from django.urls import reverse
 
 from django.views.generic.base import TemplateView
 
-from rpi_controller.models import Sensor, Actuator
+from rpi_controller.models import Sensor, Actuator, Controller
 
 
 class HomePageView(TemplateView):
@@ -16,4 +16,5 @@ class HomePageView(TemplateView):
         ]
         context["sensors"] = Sensor.objects.filter(visible=True)
         context["actuators"] = Actuator.objects.filter(visible=True)
+        context["controllers"] = Controller.objects.filter(visible=True)
         return context

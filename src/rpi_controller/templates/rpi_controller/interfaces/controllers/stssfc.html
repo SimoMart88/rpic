@@ -1,0 +1,40 @@
+<div>
+    <div class="fans">
+        <h5>Fans:</h5>
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    {% for label in device.status.keys %}
+                        <th scope="col">{{ label | title }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    {% for label, active in device.status.items %}
+                        <td id="{{ device.slug }}-status-{{ label }}" data-updater="string_to_colored_icon_fan">{{ active }}</td>
+                    {% endfor %}
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="control">
+        <h5>Force check:</h5>
+        <button id="{{ device.slug }}-control" type="button" class="btn btn-outline-primary">
+            <i class="bi bi-gear"></i>
+        </button>
+    </div>
+    <script>
+        function string_to_colored_icon_fan(field, value) {
+            FieldUpdaters["string_to_colored_icon"](field, value, "bi-fan");
+        }
+        FieldUpdaters["string_to_colored_icon_fan"] = string_to_colored_icon_fan;
+
+        let control_field_c_{{ device.id }} = $("#{{ device.slug }}-control");
+        control_field_c_{{ device.id }}.click(function() {
+            FieldChangers["button_click"](
+                "{{ device.slug }}", control_field_c_{{ device.id }}, {},
+                '{% url 'api-controller-update-status' device.slug %}');
+        });
+    </script>
+</div>

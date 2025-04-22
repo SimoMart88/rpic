@@ -48,24 +48,24 @@ class DeviceAdmin(ExtraButtonsMixin, admin.ModelAdmin["Device"]):
     list_filter = ["visible", "interface"]
     readonly_fields = ["config", "status", "last_update_status", "last_status_update_time", "last_status_update_log"]
 
-    def get_object_or_404(self, request: "HttpRequest", pk: str) -> typing.Type["Device"]:
-        obj: typing.Type["Device"] = self.get_object(request, pk)  # type: ignore[assignment]
+    def get_object_or_404(self, request: "HttpRequest", pk: str) -> "Device":
+        obj: typing.Optional["Device"] = self.get_object(request, pk)
 
         if not obj:
             raise Http404
 
         return obj
 
-    def run_test(self, obj: typing.Type["Device"], *args: typing.Any, **kwargs: typing.Any) -> None:
+    def run_test(self, obj: "Device", *args: typing.Any, **kwargs: typing.Any) -> None:
         raise NotImplementedError
 
     @admin.display(description="Interface")
-    def interface_label(self, obj: typing.Type["Device"]) -> str:
+    def interface_label(self, obj: "Device") -> str:
         return str(obj.interface.label)
 
     @button(html_attrs={'style': BLACK_ON_GREEN})
     def configure(self, request: "HttpRequest", pk: str) -> "HttpResponse":
-        obj: typing.Type["Device"] = self.get_object_or_404(request, pk)
+        obj: "Device" = self.get_object_or_404(request, pk)
         context: dict[str, typing.Any] = self.get_common_context(request, pk, title="Interface configuration")
         form_class: typing.Type[ConfigForm] = obj.interface.config_form
 
@@ -88,7 +88,7 @@ class DeviceAdmin(ExtraButtonsMixin, admin.ModelAdmin["Device"]):
 
     @button(html_attrs={'style': BLACK_ON_YELLOW})
     def test(self, request: "HttpRequest", pk: str) -> "HttpResponse":
-        obj: typing.Type["Device"] = self.get_object_or_404(request, pk)
+        obj: "Device" = self.get_object_or_404(request, pk)
         context: dict[str, typing.Any] = self.get_common_context(request, pk, title="Interface test")
         form_class: typing.Type[Form] = TestForm
         context["device"]: typing.Type["Device"] = obj
@@ -112,19 +112,19 @@ class DeviceAdmin(ExtraButtonsMixin, admin.ModelAdmin["Device"]):
 
 
 class SensorAdmin(DeviceAdmin):
-    def run_test(self, obj: typing.Type["Device"], *args: typing.Any, **kwargs: typing.Any) -> None:
+    def run_test(self, obj: "Device", *args: typing.Any, **kwargs: typing.Any) -> None:
         obj.read_status()  # type: ignore[call-arg]
 
 
 class ActuatorAdmin(DeviceAdmin):
-    def run_test(self, obj: typing.Type["Device"], *args: typing.Any, **kwargs: typing.Any) -> None:
+    def run_test(self, obj: "Device", *args: typing.Any, **kwargs: typing.Any) -> None:
         obj.update_status(*args, **kwargs)
 
 
 class ControllerAdmin(DeviceAdmin):
     readonly_fields = DeviceAdmin.readonly_fields + ["sensors", "actuators"]
 
-    def run_test(self, obj: typing.Type["Device"], *args: typing.Any, **kwargs: typing.Any) -> None:
+    def run_test(self, obj: "Device", *args: typing.Any, **kwargs: typing.Any) -> None:
         obj.update_status(*args, **kwargs)
 
 

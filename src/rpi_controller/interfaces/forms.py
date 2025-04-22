@@ -9,11 +9,11 @@ if typing.TYPE_CHECKING:
 
 class ConfigForm(forms.Form):
 
-    def __init__(self, *args: typing.Any, instance: typing.Type["Device"], **kwargs: typing.Any):
+    def __init__(self, *args: typing.Any, instance: "Device", **kwargs: typing.Any):
         super().__init__(*args, **kwargs)
 
         self.instance = instance
 
     def save(self) -> None:
         self.instance.config = self.cleaned_data  # type: ignore[assignment]
-        self.instance.save()  # type: ignore[call-arg]
+        self.instance.save()

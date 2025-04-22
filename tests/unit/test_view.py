@@ -21,6 +21,7 @@ def test_home(django_app: "DjangoTestApp") -> None:
 @pytest.mark.parametrize("device_fixture_name", [
     pytest.param("dummy_sensor", id="sensor"),
     pytest.param("dummy_actuator", id="actuator"),
+    pytest.param("dummy_controller", id="controller"),
 ])
 def test_home_device(django_app: "DjangoTestApp", device_fixture_name: str, templates_for_testing: "SettingsWrapper",
                      request: "TopRequest") -> None:

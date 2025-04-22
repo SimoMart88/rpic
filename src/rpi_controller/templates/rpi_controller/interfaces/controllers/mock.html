@@ -1,0 +1,31 @@
+<div>
+    <div class="fans">
+        <h5>Flag:</h5>
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th scope="col">Flag</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td id="{{ device.slug }}-status-flag" data-updater="string_to_colored_icon">{{ device.status.flag }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="control">
+        <h5>Force check:</h5>
+        <button id="{{ device.slug }}-control" type="button" class="btn btn-outline-primary">
+            <i class="bi bi-gear"></i>
+        </button>
+    </div>
+    <script>
+        let control_field_c_{{ device.id }} = $("#{{ device.slug }}-control");
+        control_field_c_{{ device.id }}.click(function() {
+            FieldChangers["button_click"](
+                "{{ device.slug }}", control_field_c_{{ device.id }}, {},
+                '{% url 'api-controller-update-status' device.slug %}');
+        });
+    </script>
+</div>

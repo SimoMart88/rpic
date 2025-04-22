@@ -25,8 +25,10 @@ class Config(AppConfig):
     def _register_controllers(self) -> None:
         from rpi_controller.interfaces.controllers.registry import controller_registry
         from rpi_controller.interfaces.controllers.mixed import SensorTemperatureStepScaleFanControllerInterface
+        from rpi_controller.interfaces.controllers.mock import MockControllerInterface
 
         controller_registry.register(SensorTemperatureStepScaleFanControllerInterface)
+        controller_registry.register(MockControllerInterface)
 
 
     def ready(self) -> None:

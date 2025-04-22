@@ -100,7 +100,15 @@ class DummyUpdateNotRequiredControllerInterface(DummyControllerInterface):
 
 class DummyControllerErrorInterface(DummyControllerInterface):
     label = "dummycontroller-error"
-    template_name = "dummy/test.html"
+    template_name = "dummy/test_button.html"
 
     def control(self, *args: typing.Any, **kwargs: typing.Any) -> dict[typing.Any, typing.Any]:
         raise InterfaceRuntimeException("Controller error")
+
+
+class UpdatedDummyControllerInterface(DummyControllerInterface):
+    label = "dummycontroller-mock"
+    template_name = "dummy/test_button.html"
+
+    def control(self, *args: typing.Any, **kwargs: typing.Any) -> dict[typing.Any, typing.Any]:
+        return {"flag": not self.context.status.get("flag", False)}

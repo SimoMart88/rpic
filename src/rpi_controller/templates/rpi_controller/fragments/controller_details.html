@@ -1,0 +1,9 @@
+{% extends 'rpi_controller/fragments/device_details.html' %}
+
+{% block device_script %}
+<script>
+    let func_args_c_{{ device.id }} = ['{{ device.slug }}', '{% url 'api-controller-detail' device.slug %}']
+    register_auto_update(func_args_c_{{ device.id }});
+    register_refresh_button('#{{ device.slug }}-refresh', func_args_c_{{ device.id }});
+</script>
+{% endblock %}
