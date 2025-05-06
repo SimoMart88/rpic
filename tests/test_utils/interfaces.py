@@ -1,5 +1,4 @@
 import typing
-from unittest.mock import Mock
 
 from django import forms
 
@@ -8,6 +7,10 @@ from rpi_controller.interfaces.sensors.base import SensorInterface
 from rpi_controller.interfaces.actuators.base import ActuatorInterface
 from rpi_controller.interfaces.controllers.base import ControllerInterface
 from rpi_controller.interfaces.forms import ConfigForm
+
+
+if typing.TYPE_CHECKING:
+    from unittest.mock import Mock
 
 
 class DummyDeviceInterfaceForm(ConfigForm):
@@ -25,12 +28,7 @@ class DummySensorInterface(SensorInterface):
 
 class UpdatedDummySensorInterface(DummySensorInterface):
     label = "dummysensor-mock"
-    read_input_mock = Mock(
-        side_effect=[
-            {"dummy_key": "updated_dummy_value"},
-            {"dummy_key": "updated_dummy_value_another_time"}
-        ]
-    )
+    read_input_mock: typing.Optional[Mock] = None  # Must be defined by class clients
 
     def read_input(self) -> dict[str, typing.Any]:
         return self.read_input_mock()

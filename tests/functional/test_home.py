@@ -1,5 +1,6 @@
 import pytest
 import typing
+from unittest.mock import Mock
 from strategy_field.utils import fqn
 from freezegun import freeze_time
 from datetime import datetime
@@ -37,6 +38,12 @@ def __configure_device_for_error_on_ui(dummy_device: "Device", device_interface:
 @pytest.fixture
 def dummy_sensor_ui(dummy_sensor: "Sensor") -> "Sensor":
     from test_utils.interfaces import UpdatedDummySensorInterface
+    UpdatedDummySensorInterface.read_input_mock = Mock(
+        side_effect=[
+            {"dummy_key": "updated_dummy_value"},
+            {"dummy_key": "updated_dummy_value_another_time"}
+        ]
+    )
     return typing.cast("Sensor", __configure_device_on_ui(dummy_sensor, UpdatedDummySensorInterface))
 
 
@@ -375,3 +382,7 @@ def test_home_page_controller_control_status_error(selenium: "WebDriver", live_s
 
     dummy_controller_ui_error.refresh_from_db()
     assert not dummy_controller_ui_error.status["flag"]
+
+
+# Using --randomly-seed=1270583170 --> tests/functional/test_home.py:113
+#
