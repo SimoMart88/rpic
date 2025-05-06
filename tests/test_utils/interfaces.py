@@ -28,7 +28,7 @@ class DummySensorInterface(SensorInterface):
 
 class UpdatedDummySensorInterface(DummySensorInterface):
     label = "dummysensor-mock"
-    read_input_mock: typing.Optional[Mock] = None  # Must be defined by class clients
+    read_input_mock: typing.Optional["Mock"] = None  # Must be defined by class clients
 
     def read_input(self) -> dict[str, typing.Any]:
         return self.read_input_mock()
