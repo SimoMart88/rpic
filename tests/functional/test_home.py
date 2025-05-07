@@ -325,7 +325,9 @@ def test_home_page_controller_control_status(selenium: "WebDriver", live_server:
 
     dummy_controller_card = selenium.find_element(By.ID, dummy_controller_ui.slug)
     status_flag = dummy_controller_card.find_element(By.ID, f"{ dummy_controller_ui.slug }-status-flag")
-    assert status_flag.text == "false"
+    assert WebDriverWait(selenium, 5).until(
+        lambda d: status_flag.text == "false"
+    )
 
     control_button = dummy_controller_card.find_element(By.ID, f"{dummy_controller_ui.slug}-control")
     control_button.click()
@@ -360,7 +362,9 @@ def test_home_page_controller_control_status_error(selenium: "WebDriver", live_s
 
     dummy_controller_card = selenium.find_element(By.ID, dummy_controller_ui_error.slug)
     status_flag = dummy_controller_card.find_element(By.ID, f"{ dummy_controller_ui_error.slug }-status-flag")
-    assert status_flag.text == "false"
+    assert WebDriverWait(selenium, 5).until(
+        lambda d: status_flag.text == "false"
+    )
 
     control_button = dummy_controller_card.find_element(By.ID, f"{dummy_controller_ui_error.slug}-control")
     control_button.click()
