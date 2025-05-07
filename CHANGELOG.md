@@ -1,3 +1,16 @@
+## 0.5.0 (2025-05-07)
+
+### Feat
+
+- **Controller**: implement UI support
+- **Controller**: implement API support for status update
+- **SensorTemperatureStepScaleFanControllerInterface**: implement SensorTemperatureStepScaleFanControllerInterface logic
+- **Controller**: implement support for Controller model
+
+### Refactor
+
+- **Device**: move interface controll logic to a common method
+
 ## 0.4.2 (2025-03-28)
 
 ### Fix
