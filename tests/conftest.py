@@ -5,7 +5,7 @@ from pathlib import Path
 
 if typing.TYPE_CHECKING:
     from django.contrib.auth.models import User
-    from rpi_controller.models import Sensor, Actuator
+    from rpi_controller.models import Sensor, Actuator, Controller
     from pytest_django.fixtures import SettingsWrapper
     from pytest import Parser, Config
 
@@ -57,6 +57,12 @@ def templates_for_testing(settings: "SettingsWrapper") -> "SettingsWrapper":
 
 
 @pytest.fixture
+def admin_user() -> "User":
+    from test_utils.factories import SuperUserFactory
+    return SuperUserFactory.create()
+
+
+@pytest.fixture
 def dummy_sensor() -> "Sensor":
     from test_utils.factories import SensorFactory
     return SensorFactory.create()
@@ -69,6 +75,6 @@ def dummy_actuator() -> "Actuator":
 
 
 @pytest.fixture
-def admin_user() -> "User":
-    from test_utils.factories import SuperUserFactory
-    return SuperUserFactory.create()
+def dummy_controller() -> "Controller":
+    from test_utils.factories import ControllerFactory
+    return ControllerFactory.create()

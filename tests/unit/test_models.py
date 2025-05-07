@@ -2,10 +2,10 @@ from __future__ import annotations
 import pytest
 import typing
 
-from rpi_controller.exceptions import SensorException, ActuatorException
+from rpi_controller.exceptions import SensorException, ActuatorException, ControllerException
 
 if typing.TYPE_CHECKING:
-    from rpi_controller.models import Device, Sensor, Actuator
+    from rpi_controller.models import Device, Sensor, Actuator, Controller
     from _pytest.fixtures import TopRequest
 
 
@@ -13,6 +13,7 @@ if typing.TYPE_CHECKING:
 @pytest.mark.parametrize("device_fixture_name", [
     pytest.param("dummy_sensor", id="sensor"),
     pytest.param("dummy_actuator", id="actuator"),
+    pytest.param("dummy_controller", id="controller"),
 ])
 def test_device_str(device_fixture_name: "Device", request: "TopRequest") -> None:
     dummy_device: "Device" = request.getfixturevalue(device_fixture_name)
@@ -23,6 +24,7 @@ def test_device_str(device_fixture_name: "Device", request: "TopRequest") -> Non
 @pytest.mark.parametrize("device_fixture_name", [
     pytest.param("dummy_sensor", id="sensor"),
     pytest.param("dummy_actuator", id="actuator"),
+    pytest.param("dummy_controller", id="controller"),
 ])
 def test_device_save_slugify(device_fixture_name: "Device", request: "TopRequest") -> None:
     dummy_device: "Device" = request.getfixturevalue(device_fixture_name)
@@ -35,60 +37,149 @@ def test_device_save_slugify(device_fixture_name: "Device", request: "TopRequest
 
 
 @pytest.mark.django_db()
-def test_sensor_read_status(dummy_sensor: "Sensor") -> None:
+@pytest.mark.parametrize("device_fixture_name", [
+    pytest.param("dummy_sensor", id="sensor"),
+])
+def test_device_read_status(device_fixture_name: "Device", request: "TopRequest") -> None:
+    dummy_device: "Device" = request.getfixturevalue(device_fixture_name)
+
     expected_output = {"dummy_key": "dummy_value"}
 
-    assert not dummy_sensor.status  # Sanity check
-    assert not dummy_sensor.last_status_update_time  # Sanity check
-    assert not dummy_sensor.last_status_update_log  # Sanity check
-    assert dummy_sensor.last_update_status == dummy_sensor.UpdateStatus.NEW  # Sanity check
+    assert not dummy_device.status  # Sanity check
+    assert not dummy_device.last_status_update_time  # Sanity check
+    assert not dummy_device.last_status_update_log  # Sanity check
+    assert dummy_device.last_update_status == dummy_device.UpdateStatus.NEW  # Sanity check
 
-    output = dummy_sensor.read_status()
-    dummy_sensor.refresh_from_db()
+    output = dummy_device.read_status()
+    dummy_device.refresh_from_db()
 
     assert output == expected_output
-    assert dummy_sensor.status == expected_output
-    assert dummy_sensor.last_status_update_time
-    assert dummy_sensor.last_status_update_log  == "Sensor status updated successfully"
-    assert dummy_sensor.last_update_status == dummy_sensor.UpdateStatus.SUCCESS
+    assert dummy_device.status == expected_output
+    assert dummy_device.last_status_update_time
+    assert dummy_device.last_status_update_log  == f"{dummy_device.__class__.__name__} status updated successfully"
+    assert dummy_device.last_update_status == dummy_device.UpdateStatus.SUCCESS
 
 
 @pytest.mark.django_db()
-def test_sensor_read_status_update_not_required(dummy_sensor_update_not_required: "Sensor") -> None:
-    original_status = dummy_sensor_update_not_required.status
+@pytest.mark.parametrize("device_fixture_name", [
+    pytest.param("dummy_sensor_update_not_required", id="sensor"),
+])
+def test_device_read_status_update_not_required(device_fixture_name: "Device", request: "TopRequest") -> None:
+    dummy_device: "Device" = request.getfixturevalue(device_fixture_name)
 
-    assert not dummy_sensor_update_not_required.last_status_update_time  # Sanity check
+    original_status = dummy_device.status
 
-    output = dummy_sensor_update_not_required.read_status()
-    dummy_sensor_update_not_required.refresh_from_db()
+    assert not dummy_device.last_status_update_time  # Sanity check
+
+    output = dummy_device.read_status()
+    dummy_device.refresh_from_db()
 
     assert output == original_status
-    assert dummy_sensor_update_not_required.status == original_status
-    assert not dummy_sensor_update_not_required.last_status_update_time
-    assert dummy_sensor_update_not_required.last_status_update_log == "Previous log"
-    assert dummy_sensor_update_not_required.last_update_status == dummy_sensor_update_not_required.UpdateStatus.SUCCESS
+    assert dummy_device.status == original_status
+    assert not dummy_device.last_status_update_time
+    assert dummy_device.last_status_update_log == "Previous log"
+    assert dummy_device.last_update_status == dummy_device.UpdateStatus.SUCCESS
 
 
 @pytest.mark.django_db()
-def test_sensor_read_status_error(dummy_sensor_error: "Sensor") -> None:
-    original_status = dummy_sensor_error.status
+@pytest.mark.parametrize("device_fixture_name,exception_class", [
+    pytest.param("dummy_sensor_error", SensorException, id="sensor"),
+])
+def test_device_read_status_error(device_fixture_name: "Device", exception_class: typing.Type[Exception], request: "TopRequest") -> None:
+    dummy_device: "Device" = request.getfixturevalue(device_fixture_name)
 
-    assert not dummy_sensor_error.last_status_update_time  # Sanity check
-    assert dummy_sensor_error.last_update_status == dummy_sensor_error.UpdateStatus.NEW  # Sanity check
+    original_status = dummy_device.status
+
+    assert not dummy_device.last_status_update_time  # Sanity check
+    assert dummy_device.last_update_status == dummy_device.UpdateStatus.NEW  # Sanity check
 
     expected_error_message = "(Interface Error): Sensor error"
 
-    with pytest.raises(SensorException) as ex:
-        output = dummy_sensor_error.read_status()
+    with pytest.raises(exception_class) as ex:
+        output = dummy_device.read_status()
         assert output == original_status
         assert str(ex) == expected_error_message
 
-    dummy_sensor_error.refresh_from_db()
+    dummy_device.refresh_from_db()
 
-    assert dummy_sensor_error.status == original_status
-    assert dummy_sensor_error.last_status_update_time
-    assert dummy_sensor_error.last_status_update_log == expected_error_message
-    assert dummy_sensor_error.last_update_status == dummy_sensor_error.UpdateStatus.FAILURE
+    assert dummy_device.status == original_status
+    assert dummy_device.last_status_update_time
+    assert dummy_device.last_status_update_log == expected_error_message
+    assert dummy_device.last_update_status == dummy_device.UpdateStatus.FAILURE
+
+
+@pytest.mark.django_db()
+@pytest.mark.parametrize("device_fixture_name", [
+    pytest.param("dummy_actuator", id="actuator"),
+    pytest.param("dummy_controller", id="controller"),
+])
+def test_device_update_status(device_fixture_name: "Device", request: "TopRequest") -> None:
+    dummy_device: "Device" = request.getfixturevalue(device_fixture_name)
+
+    assert not dummy_device.status  # Sanity check
+    assert not dummy_device.last_status_update_time  # Sanity check
+    assert not dummy_device.last_status_update_log  # Sanity check
+    assert dummy_device.last_update_status == dummy_device.UpdateStatus.NEW  # Sanity check
+
+    output = dummy_device.update_status("my_args", my_kwargs="my_kwargs")
+    dummy_device.refresh_from_db()
+
+    expected_output = {"args": ["my_args"], "kwargs": {"my_kwargs": "my_kwargs"}}
+    assert output == expected_output
+    assert dummy_device.status == expected_output
+    assert dummy_device.last_status_update_time
+    assert dummy_device.last_status_update_log  == f"{dummy_device.__class__.__name__} status updated successfully"
+    assert dummy_device.last_update_status == dummy_device.UpdateStatus.SUCCESS
+
+
+@pytest.mark.django_db()
+@pytest.mark.parametrize("device_fixture_name", [
+    pytest.param("dummy_actuator_update_not_required", id="actuator"),
+    pytest.param("dummy_controller_update_not_required", id="controller"),
+])
+def test_device_update_status_update_not_required(device_fixture_name: "Device", request: "TopRequest") -> None:
+    dummy_device: "Device" = request.getfixturevalue(device_fixture_name)
+
+    original_status = dummy_device.status
+
+    assert not dummy_device.last_status_update_time  # Sanity check
+
+    output = dummy_device.update_status("my_args", my_kwargs="my_kwargs")
+    dummy_device.refresh_from_db()
+
+    assert output == original_status
+    assert dummy_device.status == original_status
+    assert not dummy_device.last_status_update_time
+    assert dummy_device.last_status_update_log == "Previous log"
+    assert dummy_device.last_update_status == dummy_device.UpdateStatus.SUCCESS
+
+
+@pytest.mark.django_db()
+@pytest.mark.parametrize("device_fixture_name,exception_class", [
+    pytest.param("dummy_actuator_error", ActuatorException, id="actuator"),
+    pytest.param("dummy_controller_error", ControllerException, id="controller"),
+])
+def test_device_update_status_error(device_fixture_name: "Device", exception_class: typing.Type[Exception], request: "TopRequest") -> None:
+    dummy_device: "Device" = request.getfixturevalue(device_fixture_name)
+
+    original_status = dummy_device.status
+
+    assert not dummy_device.last_status_update_time  # Sanity check
+    assert dummy_device.last_update_status == dummy_device.UpdateStatus.NEW  # Sanity check
+
+    expected_error = f"(Interface Error): {dummy_device.__class__.__name__} error"
+
+    with pytest.raises(exception_class) as ex:
+        output = dummy_device.update_status("my_args", my_kwargs="my_kwargs")
+        assert output == original_status
+        assert str(ex) == expected_error
+
+    dummy_device.refresh_from_db()
+
+    assert dummy_device.status == original_status
+    assert dummy_device.last_status_update_time
+    assert dummy_device.last_status_update_log == expected_error
+    assert dummy_device.last_update_status == dummy_device.UpdateStatus.FAILURE
 
 
 @pytest.mark.django_db()
@@ -104,39 +195,6 @@ def test_actuator_read_status(dummy_actuator: "Actuator") -> None:
 
 
 @pytest.mark.django_db()
-def test_actuator_update_status(dummy_actuator: "Actuator") -> None:
-    assert not dummy_actuator.status  # Sanity check
-    assert not dummy_actuator.last_status_update_time  # Sanity check
-    assert not dummy_actuator.last_status_update_log  # Sanity check
-    assert dummy_actuator.last_update_status == dummy_actuator.UpdateStatus.NEW  # Sanity check
-
-    output = dummy_actuator.update_status("my_args", my_kwargs="my_kwargs")
-    dummy_actuator.refresh_from_db()
-
-    expected_output = {"args": ["my_args"], "kwargs": {"my_kwargs": "my_kwargs"}}
-    assert output == expected_output
-    assert dummy_actuator.status == expected_output
-    assert dummy_actuator.last_status_update_time
-    assert dummy_actuator.last_status_update_log  == "Actuator status updated successfully"
-    assert dummy_actuator.last_update_status == dummy_actuator.UpdateStatus.SUCCESS
-
-@pytest.mark.django_db()
-def test_actuator_use_error(dummy_actuator_error: "Actuator") -> None:
-    original_status = dummy_actuator_error.status
-
-    assert not dummy_actuator_error.last_status_update_time  # Sanity check
-    assert dummy_actuator_error.last_update_status == dummy_actuator_error.UpdateStatus.NEW  # Sanity check
-
-    expected_error = "(Interface Error): Actuator error"
-
-    with pytest.raises(ActuatorException) as ex:
-        output = dummy_actuator_error.update_status("my_args", my_kwargs="my_kwargs")
-        assert output == original_status
-        assert str(ex) == expected_error
-
-    dummy_actuator_error.refresh_from_db()
-
-    assert dummy_actuator_error.status == original_status
-    assert dummy_actuator_error.last_status_update_time
-    assert dummy_actuator_error.last_status_update_log == expected_error
-    assert dummy_actuator_error.last_update_status == dummy_actuator_error.UpdateStatus.FAILURE
+def test_controller_read_status(dummy_controller: "Controller") -> None:
+    with pytest.raises(NotImplementedError):
+        dummy_controller.read_status()

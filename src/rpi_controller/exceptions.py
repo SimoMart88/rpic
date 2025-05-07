@@ -8,3 +8,7 @@ class SensorException(DeviceException):
 
 class ActuatorException(DeviceException):
     pass
+
+
+class ControllerException(DeviceException):
+    pass

@@ -6,7 +6,7 @@ from strategy_field.registry import Registry
 
 
 if typing.TYPE_CHECKING:
-    from django.forms import Form
+    from rpi_controller.interfaces.forms import ConfigForm
 
 
 
@@ -18,7 +18,7 @@ class InterfaceRegistry(Registry):
 
 class Interface(ABC):
     label: str
-    config_form: type[Form]
+    config_form: type[ConfigForm]
     template_name: str
 
     def __init__(self, context: typing.Any) -> None:

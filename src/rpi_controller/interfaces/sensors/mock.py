@@ -1,10 +1,11 @@
 import typing
 from django import forms
+
+from rpi_controller.interfaces.forms import ConfigForm
 from rpi_controller.interfaces.sensors.base import SensorInterface
-from rpi_controller.interfaces.sensors.registry import sensor_registry
 
 
-class MockSensorInterfaceForm(forms.Form):
+class MockSensorInterfaceForm(ConfigForm):
     user_input_value = forms.CharField(max_length=15)
 
 
@@ -19,6 +20,3 @@ class MockSensorInterface(SensorInterface):
             "counter": self.context.status.get("counter", 0) + 1,
             "user_input_key": self.context.config.get('user_input_value', 'not configured')
         }
-
-
-sensor_registry.register(MockSensorInterface)

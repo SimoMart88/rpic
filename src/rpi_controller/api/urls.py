@@ -7,6 +7,7 @@ from rpi_controller.api import views
 router = SimpleRouter()
 router.register(r'sensor', views.SensorViewSet, basename='api-sensor')
 router.register(r'actuator', views.ActuatorViewSet, basename='api-actuator')
+router.register(r'controller', views.ControllerViewSet, basename='api-controller')
 
 
 urlpatterns = [

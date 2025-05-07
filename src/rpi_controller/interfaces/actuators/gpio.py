@@ -1,8 +1,9 @@
 import typing
 import logging
 from django import forms
+
+from rpi_controller.interfaces.forms import ConfigForm
 from rpi_controller.interfaces.actuators.base import ActuatorInterface
-from rpi_controller.interfaces.actuators.registry import actuator_registry
 from rpi_controller.interfaces.exceptions import (InterfaceRuntimeException,
                                                   InterfaceUserInputException)
 from rpi_controller.interfaces.utils.gpio import get_gpio_pin_from_config
@@ -15,7 +16,7 @@ if typing.TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class RelayInterfaceForm(forms.Form):
+class RelayInterfaceForm(ConfigForm):
     gpio_pin = forms.CharField(label="GPIO ping reference", max_length=3)
 
 
@@ -57,6 +58,3 @@ class RelayActuatorInterface(ActuatorInterface):
             raise InterfaceRuntimeException('Relay unexpected error') from e
 
         return {"active": active}
-
-
-actuator_registry.register(RelayActuatorInterface)

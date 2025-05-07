@@ -29,20 +29,28 @@ build-backend = "hatchling.build"
 [tool.uv]
 package = true
 dev-dependencies = [
-    "commitizen>=4.0.0",
     "factory-boy>=3.3.1",
-    "mypy>=1.13.0",
-    "pre-commit>=4.0.1",
     "pytest-cov>=6.0.0",
     "pytest-django>=4.9.0",
     "pytest>=8.3.4",
-    "ruff>=0.8.0",
     "types-setuptools>=75.6.0.20241126",
     "django-extensions>=3.2.3",
     "django-webtest>=1.9.12",
     "freezegun>=1.5.1",
     "pytest-selenium>=4.1.0",
     "webdriver-manager>=4.0.2",
+    "pytest-randomly>=3.16.0",
+]
+
+[dependency-groups]
+checks = [
+    "ruff>=0.8.0",
+    "commitizen>=4.0.0",
+    "mypy>=1.13.0",
+    "pre-commit>=4.0.1",
+]
+docs = [
+    "pygraphviz>=1.11",
 ]
 
 [tool.commitizen]

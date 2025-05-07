@@ -2,13 +2,13 @@
 - Install UV (https://docs.astral.sh/uv)
 - Install Python `uv python install 3.9`
 - Create a virtual environment `uv venv --python 3.9`
-- Run `uv sync` on the root folder of the project
+- Run `uv sync --all-groups` on the root folder of the project
 - Install pre-commit `pre-commit install`
 
 ## EnvRC configuration file (.envrc)
 ```.dotenv
 dotenv
-uv sync
+uv sync --all-groups
 source .venv/bin/activate
 ```
 
@@ -35,3 +35,19 @@ This will automatically:
 - Update the changelog
 
 See Commitizen documentation for more details (https://commitizen-tools.github.io/commitizen/)
+
+# ClassDiagram
+Install OS level dependency with the following command:
+```shell
+sudo apt install graphviz graphviz-dev
+```
+
+Make sure django_extensions library is properly included into the active application list:
+```.dotenv
+LOCAL_APPS='django_extensions'
+```
+
+Run the following command to generate the diagram and save into the docs folder:
+```shell
+./manage.py graph_models rpi_controller --rankdir "BT" -o docs/ClassDiagram.png
+```

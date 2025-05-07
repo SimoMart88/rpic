@@ -7,7 +7,8 @@ from django.contrib.admin.helpers import AdminForm
 from django.http.response import HttpResponseRedirect, Http404
 from django.template.response import TemplateResponse
 
-from rpi_controller.models import Sensor, Actuator
+from rpi_controller.interfaces.forms import ConfigForm
+from rpi_controller.models import Sensor, Actuator, Controller
 
 from admin_extra_buttons.decorators import button
 
@@ -48,7 +49,7 @@ class DeviceAdmin(ExtraButtonsMixin, admin.ModelAdmin["Device"]):
     readonly_fields = ["config", "status", "last_update_status", "last_status_update_time", "last_status_update_log"]
 
     def get_object_or_404(self, request: "HttpRequest", pk: str) -> "Device":
-        obj = self.get_object(request, pk)
+        obj: typing.Optional["Device"] = self.get_object(request, pk)
 
         if not obj:
             raise Http404
@@ -66,17 +67,19 @@ class DeviceAdmin(ExtraButtonsMixin, admin.ModelAdmin["Device"]):
     def configure(self, request: "HttpRequest", pk: str) -> "HttpResponse":
         obj: "Device" = self.get_object_or_404(request, pk)
         context: dict[str, typing.Any] = self.get_common_context(request, pk, title="Interface configuration")
-        form_class: typing.Type[Form] = obj.interface.config_form
+        form_class: typing.Type[ConfigForm] = obj.interface.config_form
 
         if request.method == "POST":
-            config_form = form_class(request.POST)
+            config_form = form_class(request.POST, instance=obj)
             if config_form.is_valid():
-                obj.config = config_form.cleaned_data
-                obj.save()
+                config_form.save()
                 self.message_user(request, "Configured interface {}".format(obj.name))
                 return HttpResponseRedirect("..")
         else:
-            config_form = form_class(initial={k: v for k, v in obj.config.items() if k in form_class.declared_fields})
+            config_form = form_class(
+                initial={k: v for k, v in obj.config.items() if k in form_class.declared_fields},
+                instance=obj
+            )
 
         context["admin_form"] = AdminForm(
             config_form, [("", {"fields": form_class.declared_fields})], {}   # type: ignore[arg-type, dict-item]
@@ -88,7 +91,7 @@ class DeviceAdmin(ExtraButtonsMixin, admin.ModelAdmin["Device"]):
         obj: "Device" = self.get_object_or_404(request, pk)
         context: dict[str, typing.Any] = self.get_common_context(request, pk, title="Interface test")
         form_class: typing.Type[Form] = TestForm
-        context["device"]: "Device" = obj
+        context["device"]: typing.Type["Device"] = obj
 
         if request.method == "POST":
             config_form = form_class(request.POST)
@@ -110,7 +113,7 @@ class DeviceAdmin(ExtraButtonsMixin, admin.ModelAdmin["Device"]):
 
 class SensorAdmin(DeviceAdmin):
     def run_test(self, obj: "Device", *args: typing.Any, **kwargs: typing.Any) -> None:
-        obj.read_status()
+        obj.read_status()  # type: ignore[call-arg]
 
 
 class ActuatorAdmin(DeviceAdmin):
@@ -118,5 +121,13 @@ class ActuatorAdmin(DeviceAdmin):
         obj.update_status(*args, **kwargs)
 
 
+class ControllerAdmin(DeviceAdmin):
+    readonly_fields = DeviceAdmin.readonly_fields + ["sensors", "actuators"]
+
+    def run_test(self, obj: "Device", *args: typing.Any, **kwargs: typing.Any) -> None:
+        obj.update_status(*args, **kwargs)
+
+
 admin.site.register(Sensor, SensorAdmin)
 admin.site.register(Actuator, ActuatorAdmin)
+admin.site.register(Controller, ControllerAdmin)

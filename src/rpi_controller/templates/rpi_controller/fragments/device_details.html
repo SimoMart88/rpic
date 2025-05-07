@@ -1,7 +1,7 @@
 {% load tz %}
 
 {% for device in devices %}
-    <div id="{{ device.slug }}" class="card" style="display: inline-block">
+    <div id="{{ device.slug }}" class="card d-flex">
         {% block device_card %}
         <div class="card-header">
             {% block device_card_header %}

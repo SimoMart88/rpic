@@ -124,6 +124,17 @@ function update_checkbox(field, value) {
     field.prop("checked", value);
 }
 
+
+function string_to_colored_icon(field, value, icon_ref="bi-patch-check", success_color="text-success", failure_color="text-danger") {
+    let icon;
+    if (!!value) {
+        icon = `<i class="bi ${icon_ref} ${success_color}"></i>`
+    } else {
+        icon = `<i class="bi ${icon_ref} ${failure_color}"></i>`
+    }
+    field.html(icon);
+}
+
 function change_checkbox(device_ref, field, post_data, api_url) {
     function success(response) {
         render_device_status(device_ref, response);
@@ -138,10 +149,27 @@ function change_checkbox(device_ref, field, post_data, api_url) {
     change_device_status(api_url, post_data, success, error);
 }
 
+
+function button_click(device_ref, field, post_data, api_url) {
+    function success(response) {
+        render_device_status(device_ref, response);
+    }
+
+    function error(response) {
+        console.log(`API CALL ERROR => ${JSON.stringify(response)}`);
+        render_device_status(device_ref, response["responseJSON"]);
+    }
+
+    change_device_status(api_url, post_data, success, error);
+}
+
+
 let FieldUpdaters = {
     "update_checkbox": update_checkbox,
+    "string_to_colored_icon": string_to_colored_icon
 };
 
 let FieldChangers = {
     "change_checkbox": change_checkbox,
+    "button_click": button_click
 };
