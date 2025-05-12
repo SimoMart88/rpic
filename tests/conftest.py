@@ -46,6 +46,11 @@ def pytest_configure(config: "Config") -> None:
 @pytest.fixture(autouse=True)
 def common_tests_settings(settings: "SettingsWrapper") -> None:
     settings.TIME_ZONE = "Etc/UTC"
+    settings.CELERY_RESULT_BACKEND = "memory:///"
+
+    # FIXME: should not be used as per documentation (https://docs.celeryq.dev/en/stable/userguide/testing.html#tasks-and-unit-tests)
+    #  but I'm not able to make the official solution works as expected
+    # settings.CELERY_TASK_ALWAYS_EAGER = True
 
 
 @pytest.fixture()
