@@ -1,7 +1,7 @@
 import pytest
 import typing
 
-from rpi_controller.tasks import sensor_read_status, actuator_update_status
+from rpi_controller.tasks import sensor_read_status, actuator_update_status, controller_update_status
 
 
 if typing.TYPE_CHECKING:
@@ -13,6 +13,7 @@ if typing.TYPE_CHECKING:
 @pytest.mark.parametrize("device_fixture_name,task_to_run", [
     pytest.param("dummy_sensor", sensor_read_status, id="sensor"),
     pytest.param("dummy_actuator", actuator_update_status, id="actuator"),
+    pytest.param("dummy_controller", controller_update_status, id="controller"),
 ])
 def test_task(device_fixture_name: str, task_to_run: typing.Callable[[str], None], request: "TopRequest") -> None:
     dummy_device: "Device" = request.getfixturevalue(device_fixture_name)
