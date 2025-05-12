@@ -42,7 +42,7 @@ jobs:
         ports:
           - 15432:5432
       redis:
-        image: redia:6
+        image: redis:6
         ports:
           - 16379:6379
     env:
