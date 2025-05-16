@@ -1,0 +1,49 @@
+{% extends "admin/device/change_list.html" %}
+{% load admin_urls %}
+
+{% block object-tools-items %}
+    <li>
+        <a href="{% url opts|admin_urlname:'add_periodic_task' original.pk %}" class="addlink">Add</a>
+    </li>
+{% endblock %}
+
+{% block search %}{% endblock %}
+
+{% block pagination %}{% endblock %}
+
+{% block result_list %}
+    <div class="results">
+        <table id="result_list">
+            <thead>
+            <tr>
+                <th scope="col"{{ header.class_attrib }}>
+                    <div class="text"><span>Name</span></div>
+                    <div class="clear"></div>
+                </th>
+                <th scope="col"{{ header.class_attrib }}>
+                    <div class="text"><span>Enabled</span></div>
+                    <div class="clear"></div>
+                </th>
+                <th scope="col"{{ header.class_attrib }}>
+                    <div class="text"><span>Edit</span></div>
+                    <div class="clear"></div>
+                </th>
+                <th scope="col"{{ header.class_attrib }}>
+                    <div class="text"><span>Delete</span></div>
+                    <div class="clear"></div>
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for periodic_task in device.periodic_tasks.all %}
+                <tr>
+                    <td>{{ periodic_task.name }}</td>
+                    <td>{{ periodic_task.enabled }}</td>
+                    <td><a href="{% url opts|admin_urlname:'change_periodic_task' original.pk %}?periodic_task_id={{ periodic_task.pk }}" class="changelink">Change</a></td>
+                    <td><a href="{% url opts|admin_urlname:'delete_periodic_task' original.pk %}?periodic_task_id={{ periodic_task.pk }}" class="deletelink">Delete</a></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

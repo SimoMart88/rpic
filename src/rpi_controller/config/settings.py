@@ -57,10 +57,6 @@ DEFAULT_APPS = [
     'django.contrib.staticfiles',
 ]
 
-USER_APPS = [
-    'rpi_controller'
-]
-
 THIRDPARTY_APPS = [
     "admin_extra_buttons",
     "django_bootstrap5",
@@ -69,12 +65,16 @@ THIRDPARTY_APPS = [
     "django_celery_beat",
 ]
 
+USER_APPS = [
+    'rpi_controller'
+]
+
 LOCAL_APPS = env.list("LOCAL_APPS")
 
 INSTALLED_APPS = [
     *DEFAULT_APPS,
-    *USER_APPS,
     *THIRDPARTY_APPS,
+    *USER_APPS,
     *LOCAL_APPS
 ]
 
