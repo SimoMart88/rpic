@@ -57,7 +57,8 @@ class TestForm(forms.Form):
 class SimplifiedPeriodicTaskForm(forms.Form):
     task_name = forms.CharField(max_length=255)
     enabled = forms.BooleanField(initial=True, required=False)
-    crontab_expression = forms.CharField(initial="*/5 * * * *", max_length=255)
+    crontab_expression = forms.CharField(initial="*/5 * * * *", max_length=255,
+                                         help_text="Configure schedule with Crontab syntax.")
     update_kwargs = forms.JSONField(required=False, initial={}, validators=[is_kwargs])
 
 

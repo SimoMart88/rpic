@@ -386,7 +386,3 @@ def test_home_page_controller_control_status_error(selenium: "WebDriver", live_s
 
     dummy_controller_ui_error.refresh_from_db()
     assert not dummy_controller_ui_error.status["flag"]
-
-
-# Using --randomly-seed=1270583170 --> tests/functional/test_home.py:113
-#

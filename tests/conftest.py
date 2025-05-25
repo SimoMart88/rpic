@@ -2,6 +2,8 @@ import typing
 import pytest
 from pathlib import Path
 
+from django_celery_beat.models import PeriodicTask, CrontabSchedule
+
 
 if typing.TYPE_CHECKING:
     from django.contrib.auth.models import User
@@ -48,10 +50,6 @@ def common_tests_settings(settings: "SettingsWrapper") -> None:
     settings.TIME_ZONE = "Etc/UTC"
     settings.CELERY_RESULT_BACKEND = "memory:///"
 
-    # FIXME: should not be used as per documentation (https://docs.celeryq.dev/en/stable/userguide/testing.html#tasks-and-unit-tests)
-    #  but I'm not able to make the official solution works as expected
-    # settings.CELERY_TASK_ALWAYS_EAGER = True
-
 
 @pytest.fixture()
 def templates_for_testing(settings: "SettingsWrapper") -> "SettingsWrapper":
@@ -83,3 +81,19 @@ def dummy_actuator() -> "Actuator":
 def dummy_controller() -> "Controller":
     from test_utils.factories import ControllerFactory
     return ControllerFactory.create()
+
+
+@pytest.fixture
+def dummy_periodic_task() -> PeriodicTask:
+    crontab, _ = CrontabSchedule.objects.get_or_create(
+        minute="*/5", hour="*", day_of_week="*",
+        month_of_year="*", day_of_month="*",
+        timezone="Etc/UTC",
+    )
+    periodic_task = PeriodicTask.objects.create(
+        name="Trigger every 5 minutes",
+        enabled=True,
+        task="dummy_task",
+        crontab=crontab
+    )
+    return periodic_task

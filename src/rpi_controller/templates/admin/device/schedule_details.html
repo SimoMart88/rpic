@@ -1,9 +1,34 @@
 {% extends "admin/device/input_form.html" %}
 
-{# Extension point for crontab field UI improvement #}
+{% block extrahead %}{{ block.super }}
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/cronstrue@latest/dist/cronstrue.min.js" async></script>
+{% endblock %}
 
-{#{% block extrahead %}{{ block.super }}#}
-{#<script src="{% url 'admin:jsi18n' %}"></script>#}
-{#{% endblock %}#}
+{% block action-content-extra %}
+    <script>
+        let crontab_expression_field = $("#id_crontab_expression");
+        let crontab_expression_helptext_field = $("#id_crontab_expression_helptext");
 
-{#{% prepopulated_fields_js %}#}
+        function update_crontab_expression_helptext() {
+            let crontab_expression_helptext;
+
+            try {
+                crontab_expression_helptext = cronstrue.toString(crontab_expression_field.val());
+            } catch (error) {
+                crontab_expression_helptext = error;
+            }
+
+            crontab_expression_helptext_field.text(crontab_expression_helptext);
+        }
+
+        crontab_expression_field.on("keyup", function() {
+            update_crontab_expression_helptext();
+        })
+
+        $(window).on('load', function() {
+            update_crontab_expression_helptext();
+        });
+
+    </script>
+{% endblock %}
