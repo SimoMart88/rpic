@@ -21,6 +21,8 @@ A controller for GPIO sensors and devices on RaspberryPI
 
 ## Features
 * Implement a monitoring system to track devices status changes in time
+* Integrate Sentry (https://sentry.io/)
+  * Better runtime error management
 * Move installer to a dedicated Python(click) script
   * Better parameter management
   * https://unix.stackexchange.com/questions/228277/grouping-systemd-services
