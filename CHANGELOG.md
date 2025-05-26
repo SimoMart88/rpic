@@ -1,3 +1,15 @@
+## 0.6.0 (2025-05-27)
+
+### Feat
+
+- **Install**: update install script to include Redis and Celery support
+- **Admin**: improve Crontab expression input in Admin UI using Cronstrue
+- **Admin**: implement simplified PeriodicTask configuration UI
+- **Tasks**: implement support for Controller update_status async execution
+- **Tasks**: implement support for Actuator update_status async execution
+- **Tasks**: implement support for Sensor read_status async execution
+- **Celery**: Implement Celery support
+
 ## 0.5.0 (2025-05-07)
 
 ### Feat
