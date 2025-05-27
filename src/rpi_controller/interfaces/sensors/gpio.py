@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class Dht22SensorInterfaceForm(ConfigForm):
-    gpio_pin = forms.CharField(label="GPIO ping reference", max_length=3)
+    gpio_pin = forms.CharField(label="GPIO pin reference", max_length=3)
     refresh_min_interval = forms.IntegerField(label="Sensor refresh minimum interval (in seconds)", min_value=5)
     retry_number = forms.IntegerField(label="Sensor retry number", min_value=5)
 

@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 class RelayInterfaceForm(ConfigForm):
-    gpio_pin = forms.CharField(label="GPIO ping reference", max_length=3)
+    gpio_pin = forms.CharField(label="GPIO pin reference", max_length=3)
 
 
 class RelayActuatorInterface(ActuatorInterface):
