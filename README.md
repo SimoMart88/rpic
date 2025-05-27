@@ -46,8 +46,6 @@ A controller for GPIO sensors and devices on RaspberryPI
   * Improve security
 
 # Known issues
-* SensorTemperatureStepScaleFanControllerForm does not load delta_temperature_step and cooldown_period fields value on configuration edit
-* SensorTemperatureStepScaleFanController core logic fails on temperature delta
 * pgpio solution for DHT sensor is very fragile
   * Evaluate a more robust solution
     * Make https://github.com/adafruit/Adafruit_Python_DHT/ compatible with Uv?
