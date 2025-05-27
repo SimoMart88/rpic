@@ -27,10 +27,10 @@ class MockControllerForm(ConfigForm):
 
     def __init__(self, *args: typing.Any, instance: "Device", **kwargs: typing.Any) -> None:
         if instance.sensors.count() == 1 and instance.actuators.count() == 1:
-            kwargs["initial"] = {
+            kwargs["initial"].update({
                 'input_sensor': instance.sensors.get(controlledsensordetails__config__type="input").pk,
                 'output_actuator': instance.actuators.get(controlledactuatordetails__config__type="output").pk,
-            }
+            })
         super().__init__(*args, instance=instance, **kwargs)
 
     def save(self) -> None:

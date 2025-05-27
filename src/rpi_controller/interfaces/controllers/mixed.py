@@ -31,12 +31,12 @@ class SensorTemperatureStepScaleFanControllerForm(ConfigForm):
 
     def __init__(self, *args: typing.Any, instance: "Controller", **kwargs: typing.Any) -> None:
         if instance.sensors.count() == 2 and instance.actuators.count() == 2:
-            kwargs["initial"] = {
+            kwargs["initial"].update({
                 'primary_temperature_sensor': instance.sensors.get(controlledsensordetails__config__type="primary").pk,
                 'secondary_temperature_sensor': instance.sensors.get(controlledsensordetails__config__type="secondary").pk,
                 'primary_fan_actuator': instance.actuators.get(controlledactuatordetails__config__type="primary").pk,
                 'secondary_fan_actuator': instance.actuators.get(controlledactuatordetails__config__type="primary").pk,
-            }
+            })
         super().__init__(*args, instance=instance, **kwargs)
 
     def save(self) -> None:
