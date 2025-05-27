@@ -1,3 +1,14 @@
+## 0.6.1 (2025-05-28)
+
+### Fix
+
+- **SensorTemperatureStepScaleFanControllerForm**: fix initial data override problem
+- **GPIO**: fixed typo error in form help text
+
+### Refactor
+
+- **SensorTemperatureStepScaleFanControllerInterface**: fixed wrong information log
+
 ## 0.6.0 (2025-05-27)
 
 ### Feat
