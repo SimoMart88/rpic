@@ -30,13 +30,13 @@ class SensorTemperatureStepScaleFanControllerForm(ConfigForm):
     secondary_fan_actuator = forms.ModelChoiceField(queryset=Actuator.objects.all())
 
     def __init__(self, *args: typing.Any, instance: "Controller", **kwargs: typing.Any) -> None:
-        if instance.sensors.count() == 2 and instance.actuators.count() == 2:
-            kwargs["initial"] = {
+        if kwargs.get("initial") and (instance.sensors.count() == 2 and instance.actuators.count() == 2):
+            kwargs["initial"].update({
                 'primary_temperature_sensor': instance.sensors.get(controlledsensordetails__config__type="primary").pk,
                 'secondary_temperature_sensor': instance.sensors.get(controlledsensordetails__config__type="secondary").pk,
                 'primary_fan_actuator': instance.actuators.get(controlledactuatordetails__config__type="primary").pk,
                 'secondary_fan_actuator': instance.actuators.get(controlledactuatordetails__config__type="primary").pk,
-            }
+            })
         super().__init__(*args, instance=instance, **kwargs)
 
     def save(self) -> None:
@@ -116,12 +116,12 @@ class SensorTemperatureStepScaleFanControllerInterface(ControllerInterface):
                 sensor_delta_temperature = secondary_temperature - delta_temperature
                 if sensor_delta_temperature > primary_temperature:
                     logger.info("[Controller '%s'] Activating %s fan (%s > %s)",
-                                self.context.slug, fan_label, delta_temperature, primary_temperature)
+                                self.context.slug, fan_label, sensor_delta_temperature, primary_temperature)
                     fan_actuator.update_status(active=True)
                     status[fan_label] = True
                 else:
                     logger.info("[Controller '%s'] Deactivating %s fan (%s > %s)",
-                                self.context.slug, fan_label, delta_temperature, primary_temperature)
+                                self.context.slug, fan_label, sensor_delta_temperature, primary_temperature)
                     fan_actuator.update_status(active=False)
                     status[fan_label] = False
 
