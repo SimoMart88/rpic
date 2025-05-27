@@ -46,6 +46,7 @@ A controller for GPIO sensors and devices on RaspberryPI
   * Improve security
 
 # Known issues
+* Bad UX/UI on small screen (smartphones), cards are placed in a single row
 * pgpio solution for DHT sensor is very fragile
   * Evaluate a more robust solution
     * Make https://github.com/adafruit/Adafruit_Python_DHT/ compatible with Uv?
