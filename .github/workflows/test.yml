@@ -41,9 +41,15 @@ jobs:
           POSTGRES_USERNAME: postgres
         ports:
           - 15432:5432
+      redis:
+        image: redis:6
+        ports:
+          - 16379:6379
     env:
-      DATABASE_URL: "postgres://postgres:postgres@localhost:15432/rpic"
       DJANGO_SETTINGS_MODULE: 'rpi_controller.config.settings'
+      DATABASE_URL: "postgres://postgres:postgres@localhost:15432/rpic"
+      CELERY_BROKER_URL: "redis://redis:16379/1"
+
     steps:
       - name: 'Check out repository code'
         uses: actions/checkout@v4

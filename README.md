@@ -20,16 +20,21 @@ A controller for GPIO sensors and devices on RaspberryPI
 * Implement HLA
 
 ## Features
-* Use a qualified relationship to link Controller with Sensors and Actuators to include labels
-  * Validate this relationship against interface on form save
-* Implement scheduler for recurrent operations (Celery)
-* Implement a telemetry system to track device status changes in time
+* Implement a monitoring system to track devices status changes in time
+* Integrate Sentry (https://sentry.io/)
+  * Better runtime error management
+* Move installer to a dedicated Python(click) script
+  * Better parameter management
+  * https://unix.stackexchange.com/questions/228277/grouping-systemd-services
 * Implement support for LoRa based devices
+* Implement caching system for API calls
+  * Improve performance reducing DB access
 
 ## Refactoring
-# Move common logic from concrete models (Sensor/Actuator/Controller) to the abstract model (Device)
 
 ## Security
+* Apply Bandit (https://bandit.readthedocs.io/en/latest/) security scan
+* Apply permission control on Admin buttons and views
 * Protect UI and API with authentication and authorization mechanism
 
 ## Infrastructure
@@ -39,3 +44,10 @@ A controller for GPIO sensors and devices on RaspberryPI
 ## Installer
 * Run installation and application with a dedicated user
   * Improve security
+
+# Known issues
+* "GPIO ping reference" needs to be renamed to "GPIO pin reference"
+* SensorTemperatureStepScaleFanControllerForm does not load delta_temperature_step and cooldown_period fields value on configuration edit
+* pgpio solution for DHT sensor is very fragile
+  * Evaluate a more robust solution
+    * Make https://github.com/adafruit/Adafruit_Python_DHT/ compatible with Uv?

@@ -57,23 +57,24 @@ DEFAULT_APPS = [
     'django.contrib.staticfiles',
 ]
 
-USER_APPS = [
-    'rpi_controller'
-]
-
 THIRDPARTY_APPS = [
     "admin_extra_buttons",
     "django_bootstrap5",
     "rest_framework",
     "compressor",
+    "django_celery_beat",
+]
+
+USER_APPS = [
+    'rpi_controller'
 ]
 
 LOCAL_APPS = env.list("LOCAL_APPS")
 
 INSTALLED_APPS = [
     *DEFAULT_APPS,
-    *USER_APPS,
     *THIRDPARTY_APPS,
+    *USER_APPS,
     *LOCAL_APPS
 ]
 
@@ -169,7 +170,13 @@ COMPRESS_ENABLED = env('COMPRESS_ENABLED')
 COMPRESS_OFFLINE = True
 COMPRESS_OUTPUT_DIR = "compressed"
 
+# Celery
+# https://docs.celeryq.dev/en/stable/django/index.html
+CELERY_BROKER_URL = env('CELERY_BROKER_URL')
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers.DatabaseScheduler'
+CELERY_TASK_TRACK_STARTED = True
 
+# Logging
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

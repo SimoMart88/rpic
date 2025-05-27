@@ -37,6 +37,7 @@ class Device(models.Model):
     last_status_update_time = models.DateTimeField(null=True, blank=True)
     last_status_update_log = models.TextField(null=True, blank=True)
     interface: typing.Optional[Interface] = None
+    periodic_tasks = models.ManyToManyField("django_celery_beat.PeriodicTask", blank=True)
 
     def read_status(self) -> dict[typing.Any, typing.Any]:
         raise NotImplementedError("Status read not supported")
