@@ -177,13 +177,13 @@ def test_device_schedule_list(django_app_admin: "DjangoTestApp", device_fixture_
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("device_fixture_name", [
-    pytest.param("dummy_sensor", id="sensor"),
-    pytest.param("dummy_actuator", id="actuator"),
-    pytest.param("dummy_controller", id="controller"),
+@pytest.mark.parametrize("device_fixture_name,periodic_task_class_name", [
+    pytest.param("dummy_sensor", "rpi_controller.tasks.sensor_read_status", id="sensor"),
+    pytest.param("dummy_actuator", "rpi_controller.tasks.actuator_update_status_task", id="actuator"),
+    pytest.param("dummy_controller", "rpi_controller.tasks.controller_update_status", id="controller"),
 ])
 def test_device_schedule_add(django_app_admin: "DjangoTestApp", device_fixture_name: str,
-                             request: "TopRequest") -> None:
+                             periodic_task_class_name: str, request: "TopRequest") -> None:
     dummy_device: "Device" = request.getfixturevalue(device_fixture_name)
     opts: "Options"["Device"] = dummy_device.__class__._meta
 
@@ -213,6 +213,7 @@ def test_device_schedule_add(django_app_admin: "DjangoTestApp", device_fixture_n
 
     assert dummy_device.periodic_tasks.count() == 1
     periodic_task = dummy_device.periodic_tasks.get(name=periodic_task_name)
+    assert periodic_task.task == periodic_task_class_name
 
     response = response.follow()
     assert response.status_code == 200

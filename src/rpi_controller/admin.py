@@ -269,7 +269,7 @@ class ActuatorAdmin(DeviceAdmin):
 
 class ControllerAdmin(DeviceAdmin):
     readonly_fields = DeviceAdmin.readonly_fields + ["sensors", "actuators"]
-    periodic_task_name = "rpi_controller.tasks.controller_control"
+    periodic_task_name = "rpi_controller.tasks.controller_update_status"
 
     def run_test(self, device: "Device", *args: typing.Any, **kwargs: typing.Any) -> None:
         device.update_status(*args, **kwargs)
