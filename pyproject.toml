@@ -1,6 +1,6 @@
 [project]
 name = "rpi-controller"
-version = "0.6.1"
+version = "0.6.2"
 description = "A controller for GPIO sensors and devices on RaspberryPI"
 readme = "README.md"
 requires-python = ">=3.9"

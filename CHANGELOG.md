@@ -1,3 +1,9 @@
+## 0.6.2 (2025-05-28)
+
+### Fix
+
+- **Admin**: set correct periodic_task_name in ControllerAdmin
+
 ## 0.6.1 (2025-05-28)
 
 ### Fix
