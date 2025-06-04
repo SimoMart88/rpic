@@ -31,6 +31,7 @@ A controller for GPIO sensors and devices on RaspberryPI
   * Improve performance reducing DB access
 
 ## Refactoring
+* Include Sensor delta temperature in SensorTemperatureStepScaleFanControllerInterface output
 
 ## Security
 * Apply Bandit (https://bandit.readthedocs.io/en/latest/) security scan
