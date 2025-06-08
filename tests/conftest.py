@@ -48,7 +48,6 @@ def pytest_configure(config: "Config") -> None:
 @pytest.fixture(autouse=True)
 def common_tests_settings(settings: "SettingsWrapper") -> None:
     settings.TIME_ZONE = "Etc/UTC"
-    settings.CELERY_RESULT_BACKEND = "memory:///"
 
 
 @pytest.fixture()

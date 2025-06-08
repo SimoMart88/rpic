@@ -159,10 +159,12 @@ STATICFILES_FINDERS = [
     "compressor.finders.CompressorFinder",
 ]
 
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 
 # Django Compressor
 # https://django-compressor.readthedocs.io/en/stable/settings.html
@@ -170,11 +172,20 @@ COMPRESS_ENABLED = env('COMPRESS_ENABLED')
 COMPRESS_OFFLINE = True
 COMPRESS_OUTPUT_DIR = "compressed"
 
+
 # Celery
 # https://docs.celeryq.dev/en/stable/django/index.html
 CELERY_BROKER_URL = env('CELERY_BROKER_URL')
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers.DatabaseScheduler'
 CELERY_TASK_TRACK_STARTED = True
+
+
+# System monitors
+SYSTEM_MONITOR_CONFIG_FORMAT = dict(BACKEND=str, LOCATION=str, OPTIONS=dict)
+SYSTEM_MONITORS = {
+    'default': env.dict("SYSTEM_MONITOR", SYSTEM_MONITOR_CONFIG_FORMAT)
+}
+
 
 # Logging
 LOGGING = {
