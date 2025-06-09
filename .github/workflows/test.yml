@@ -49,6 +49,7 @@ jobs:
       DJANGO_SETTINGS_MODULE: 'rpi_controller.config.settings'
       DATABASE_URL: "postgres://postgres:postgres@localhost:15432/rpic"
       CELERY_BROKER_URL: "redis://redis:16379/1"
+      SYSTEM_MONITOR: 'BACKEND=dummy_backend;LOCATION=dummy_location'
 
     steps:
       - name: 'Check out repository code'
