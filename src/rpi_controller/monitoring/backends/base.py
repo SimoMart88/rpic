@@ -29,6 +29,9 @@ class BaseSystemMonitor:
         self._options = params.get("OPTIONS", {})
 
     def setup(self) -> None:
+        """Run operations required to make a SystemMonitor works properly (create folders, created tables, etc...)
+        Execution of this code MUST be idempotent.
+        """
         raise NotImplementedError(
             "subclasses of BaseTimeseriesStorageWrapper may require a setup() "
             "method"

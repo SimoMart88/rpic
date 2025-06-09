@@ -43,6 +43,7 @@ A controller for GPIO sensors and devices on RaspberryPI
   * For small environment uWSGI could be enough, for medium to large environment Nginx would be better
 
 ## Installer
+* Implement check command extension to include required env variables
 * Run installation and application with a dedicated user
   * Improve security
 
