@@ -15,7 +15,7 @@ from rpi_controller.interfaces.actuators.registry import actuator_registry
 from rpi_controller.interfaces.controllers.registry import controller_registry
 from rpi_controller.interfaces.exceptions import InterfaceUpdateNotRequiredException, InterfaceException
 from rpi_controller.exceptions import DeviceException, SensorException, ActuatorException, ControllerException
-
+from rpi_controller.signals import post_device_control
 
 logger = logging.getLogger(__name__)
 
@@ -87,6 +87,8 @@ class Device(models.Model):
             error_message = f"(Unexpected Error): {ex}"
             self._set_failure(error_message)
             raise self.exception_class(error_message)
+        finally:
+            post_device_control.send(sender=self.__class__, instance=self)
 
         return self._get_status_db_value()
 
