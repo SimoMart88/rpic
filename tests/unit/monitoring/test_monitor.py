@@ -1,6 +1,4 @@
 import typing
-from importlib import reload
-import pytest
 from datetime import datetime, timedelta
 
 from freezegun import freeze_time
@@ -11,27 +9,15 @@ from test_utils.monitoring import DummySystemMonitor
 
 
 if typing.TYPE_CHECKING:
-    from pytest_django.fixtures import SettingsWrapper
+    import types
 
 
-@pytest.fixture
-def system_monitor_settings(settings: "SettingsWrapper") -> "SettingsWrapper":
-    settings.SYSTEM_MONITORS = {
-        "default": {
-            "BACKEND": "test_utils.monitoring.DummySystemMonitor",
-            "LOCATION": "dummy"
-        }
-    }
-    reload(monitoring)
-    return settings
-
-
-def test_monitors(system_monitor_settings: "SettingsWrapper") -> None:
+def test_monitors(system_monitor_mock: "types.ModuleType") -> None:
     assert list(map(type, monitoring.monitors.all())) == [DummySystemMonitor]
 
 
 @freeze_time("2000-01-01 00:00:00")
-def test_monitor(system_monitor_settings: "SettingsWrapper") -> None:
+def test_monitor(system_monitor_mock: "types.ModuleType") -> None:
     test_key = "my_key"
     test_fields = {"my_field": "my_value"}
     now = datetime.now()

@@ -31,7 +31,15 @@ class Config(AppConfig):
         controller_registry.register(MockControllerInterface)
 
 
+    def _register_monitoring_signals_handlers(self) -> None:
+        from rpi_controller.signals import post_device_control
+        from rpi_controller.monitoring.signals import system_monitor_update_handler
+
+        post_device_control.connect(system_monitor_update_handler)
+
+
     def ready(self) -> None:
         self._register_sensors()
         self._register_actuators()
         self._register_controllers()
+        self._register_monitoring_signals_handlers()
