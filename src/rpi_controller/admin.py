@@ -1,5 +1,6 @@
 import json
 import typing
+from datetime import timedelta
 
 from django.conf import settings
 from django.contrib import admin, messages
@@ -17,9 +18,12 @@ from django_celery_beat.models import (
     SolarSchedule,
     ClockedSchedule,
 )
+from django.utils import timezone
+from django.contrib.admin.widgets import AdminSplitDateTime
 
 from rpi_controller.interfaces.forms import ConfigForm
 from rpi_controller.models import Sensor, Actuator, Controller
+from rpi_controller.monitoring import monitor
 
 from admin_extra_buttons.decorators import button, view
 
@@ -33,6 +37,7 @@ if typing.TYPE_CHECKING:
 
 BLACK_ON_GREEN = 'background-color:#88FF88;color:black'
 BLACK_ON_YELLOW = 'background-color:#FFFF66;color:black'
+BLACK_ON_BLUE = 'background-color:#33FFE0;color:black'
 
 
 def is_args(value: typing.Any) -> bool:
@@ -64,6 +69,11 @@ class SimplifiedPeriodicTaskForm(forms.Form):
 
 class ConfirmationForm(forms.Form):
     confirm_operation = forms.BooleanField(initial=False, required=True)
+
+
+class MonitoringForm(forms.Form):
+    start_time = forms.SplitDateTimeField(initial=lambda: timezone.now() - timedelta(days=7), widget=AdminSplitDateTime)
+    end_time = forms.SplitDateTimeField(initial= lambda:timezone.now(), widget=AdminSplitDateTime)
 
 
 class DeviceAdmin(ExtraButtonsMixin, admin.ModelAdmin["Device"]):
@@ -251,6 +261,35 @@ class DeviceAdmin(ExtraButtonsMixin, admin.ModelAdmin["Device"]):
             config_form, [("", {"fields": form_class.base_fields})], {}   # type: ignore[arg-type, dict-item]
         )
         return TemplateResponse(request, "admin/device/test.html", context)
+
+    @button(html_attrs={'style': BLACK_ON_BLUE})
+    def monitor(self, request: "HttpRequest", pk: str) -> "HttpResponse":
+        device: "Device" = self.get_object_or_404(request, pk)
+        context: dict[str, typing.Any] = self.get_common_context(request, pk, title="Device Monitoring")
+        form_class: typing.Type[Form] = MonitoringForm
+        context["device"]: typing.Type["Device"] = device
+
+        if request.method == "POST":
+            config_form = form_class(request.POST)
+            if config_form.is_valid():
+                try:
+                    context["entry_list"] = monitor.query_entries(
+                        key=device.slug,
+                        start_time=config_form.cleaned_data["start_time"],
+                        end_time=config_form.cleaned_data["end_time"],
+                    )
+                except Exception as ex:
+                    self.message_user(request, "Queried System Monitor {} failure: {}".format(
+                        device.name, str(ex)), messages.ERROR)
+        else:
+            config_form = form_class(initial={k: v for k, v in device.config.items() if k in form_class.base_fields})
+
+        context["admin_form"] = AdminForm(
+            config_form, [("", {"fields": form_class.base_fields})], {}   # type: ignore[arg-type, dict-item]
+        )
+        context["media"] = self.media + context["admin_form"].media  # Required to make AdminSplitDateTime works
+        context["submit_label"] = "Filter"
+        return TemplateResponse(request, "admin/device/monitor_entries_list.html", context)
 
 
 class SensorAdmin(DeviceAdmin):

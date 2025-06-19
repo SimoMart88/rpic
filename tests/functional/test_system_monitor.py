@@ -1,7 +1,8 @@
 import typing
 import pytest
 from freezegun import freeze_time
-from datetime import datetime, timedelta
+from datetime import timedelta
+from django.utils.timezone import now
 
 
 from rpi_controller.monitoring.backends.base import SystemMonitorEntry
@@ -30,10 +31,9 @@ def test_system_monitor(
     monkeypatch.setattr("rpi_controller.monitoring.signals.monitor", system_monitor_mock.monitor)
 
     dummy_device: "Device" = request.getfixturevalue(device_fixture_name)
-    now = datetime.now()
 
     assert list(system_monitor_mock.monitor.query_entries(
-        key=dummy_device.slug, start_time=now - timedelta(minutes=1), end_time=now + timedelta(minutes=1)
+        key=dummy_device.slug, start_time=now() - timedelta(minutes=1), end_time=now() + timedelta(minutes=1)
     )) == []  # Sanity check
 
     getattr(dummy_device, operation)()
@@ -41,7 +41,7 @@ def test_system_monitor(
     dummy_device.refresh_from_db()
     expected_field_result = dummy_device.status | {"last_update_status": dummy_device.get_last_update_status_display()}
     assert list(system_monitor_mock.monitor.query_entries(
-        key=dummy_device.slug, start_time=now - timedelta(minutes=1), end_time=now + timedelta(minutes=1)
+        key=dummy_device.slug, start_time=now() - timedelta(minutes=1), end_time=now() + timedelta(minutes=1)
     )) == [
-        SystemMonitorEntry(key=dummy_device.slug, fields=expected_field_result, time=now)
+        SystemMonitorEntry(key=dummy_device.slug, fields=expected_field_result, time=now())
     ]

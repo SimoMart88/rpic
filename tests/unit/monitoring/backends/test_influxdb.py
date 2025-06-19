@@ -2,7 +2,7 @@ import typing
 import pytest
 from unittest.mock import Mock
 from freezegun import freeze_time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from freezegun.api import FakeDatetime
 
@@ -109,6 +109,14 @@ def test_query_entries(influxdb_monitor: InfluxDBv1SystemMonitor) -> None:
         }
     )
     assert list(query_output) == [
-        SystemMonitorEntry(key='key', time=FakeDatetime(2000, 1, 1, 0, 0), fields={'field_key': 'field_value'}),
-        SystemMonitorEntry(key='key', time=FakeDatetime(2000, 1, 1, 1, 0), fields={'field_key': 'field_value_1'})
+        SystemMonitorEntry(
+            key='key',
+            time=FakeDatetime(2000, 1, 1, 0, 0, tzinfo=timezone.utc),
+            fields={'field_key': 'field_value'}
+        ),
+        SystemMonitorEntry(
+            key='key',
+            time=FakeDatetime(2000, 1, 1, 1, 0, tzinfo=timezone.utc),
+            fields={'field_key': 'field_value_1'}
+        )
     ]

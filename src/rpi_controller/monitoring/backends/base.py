@@ -9,6 +9,16 @@ class SystemMonitorEntry:
     time: datetime
     fields: dict[str, typing.Any]
 
+    def __post_init__(self) -> None:
+        """
+        Validates that the 'time' field is a timezone-aware datetime object.
+        """
+        if self.time.tzinfo is None:
+            raise ValueError(
+                f"Time attribute for SystemMonitorEntry (key='{self.key}') must be a timezone-aware datetime. "
+                f"Received: {self.time}"
+            )
+
     def split_by(self, field_name: str = "fields") -> typing.Generator["SystemMonitorEntry", None, None]:
         for entry_key, entry_value in getattr(self, field_name).items():
             yield SystemMonitorEntry(

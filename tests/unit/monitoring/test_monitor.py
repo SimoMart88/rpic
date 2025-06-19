@@ -1,5 +1,6 @@
 import typing
-from datetime import datetime, timedelta
+from datetime import timedelta
+from django.utils.timezone import now
 
 from freezegun import freeze_time
 
@@ -20,14 +21,13 @@ def test_monitors(system_monitor_mock: "types.ModuleType") -> None:
 def test_monitor(system_monitor_mock: "types.ModuleType") -> None:
     test_key = "my_key"
     test_fields = {"my_field": "my_value"}
-    now = datetime.now()
 
     monitoring.monitor.setup()
     monitoring.monitor.write_entry(
         key=test_key, fields=test_fields
     )
     assert list(monitoring.monitor.query_entries(
-        key=test_key, start_time=now - timedelta(minutes=1), end_time=now + timedelta(minutes=1)
+        key=test_key, start_time=now() - timedelta(minutes=1), end_time=now() + timedelta(minutes=1)
     )) == [
-        SystemMonitorEntry(key=test_key, fields=test_fields, time=now)
+        SystemMonitorEntry(key=test_key, fields=test_fields, time=now())
     ]

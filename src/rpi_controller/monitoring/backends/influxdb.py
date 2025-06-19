@@ -3,6 +3,7 @@ from urllib.parse import urlparse
 from influxdb import InfluxDBClient
 from django.utils.functional import cached_property
 from datetime import datetime, timezone
+from django.utils.timezone import make_aware
 
 from .base import BaseSystemMonitor, SystemMonitorEntry
 
@@ -16,7 +17,7 @@ class InfluxDBv1SystemMonitor(BaseSystemMonitor):
         self._class = InfluxDBClient
         self._hostname, self._port, self._username, self._password, self._db_name = self._parse_location()
 
-    def _parse_location(self) -> tuple[str, int, str, str, str]:
+    def _parse_location(self) -> tuple[typing.Optional[str], typing.Optional[int], typing.Optional[str], typing.Optional[str], str]:
         parts = urlparse(self._location)
         return parts.hostname, parts.port, parts.username, parts.password, parts.path.lstrip("/")
 
@@ -52,5 +53,7 @@ class InfluxDBv1SystemMonitor(BaseSystemMonitor):
 
         for point in query_result.get_points():
             yield SystemMonitorEntry(
-                key=key, time=datetime.strptime(point.pop("time"), "%Y-%m-%dT%H:%M:%S.%fZ"), fields=point
+                key=key,
+                time=make_aware(datetime.strptime(point.pop("time"), "%Y-%m-%dT%H:%M:%S.%fZ"), timezone.utc),
+                fields=point
             )

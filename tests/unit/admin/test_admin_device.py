@@ -1,18 +1,22 @@
 import typing
-from unittest.mock import Mock
-
 import pytest
+from unittest.mock import Mock
+from datetime import timedelta
 from django.urls import reverse
 from django.contrib.admin.templatetags.admin_urls import admin_urlname
 from django.utils.safestring import SafeString
 from django_celery_beat.models import PeriodicTask
+from django.utils.timezone import now
+from django.utils.html import escape
 
 if typing.TYPE_CHECKING:
+    import types
     from django_webtest import DjangoTestApp
     from rpi_controller.models import Device
     from django.db.models.options import Options
     from pytest_django.fixtures import SettingsWrapper
     from _pytest.fixtures import TopRequest
+    from pytest import MonkeyPatch
 
 
 @pytest.mark.django_db
@@ -387,3 +391,41 @@ def test_device_schedule_delete_error(django_app_admin: "DjangoTestApp", device_
     assert response.status_code == 200
     assert f'Periodic task {dummy_periodic_task.name} deletion failure:' in response.text
     assert dummy_device.periodic_tasks.count() == 1
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("device_fixture_name", [
+    pytest.param("dummy_sensor", id="sensor"),
+    pytest.param("dummy_actuator", id="actuator"),
+    pytest.param("dummy_controller", id="controller"),
+])
+def test_device_monitor(django_app_admin: "DjangoTestApp", device_fixture_name: str,
+                        request: "TopRequest", system_monitor_mock: "types.ModuleType",
+                        monkeypatch: "MonkeyPatch") -> None:
+    monkeypatch.setattr("rpi_controller.admin.monitor", system_monitor_mock.monitor)
+    monitor_fields = {"monitor_key": "monitor_value"}
+
+    dummy_device: "Device" = request.getfixturevalue(device_fixture_name)
+    opts: "Options"["Device"] = dummy_device.__class__._meta
+
+    system_monitor_mock.monitor.write_entry(key=dummy_device.slug, fields=monitor_fields)
+
+    url_change: str = reverse(admin_urlname(opts, SafeString("monitor")), args=[dummy_device.pk])
+    response = django_app_admin.get(url_change)
+    assert response.status_code == 200
+    form = response.forms["config-form"]
+    assert "start_time_0" in form.fields
+    assert "start_time_1" in form.fields
+    assert "end_time_0" in form.fields
+    assert "end_time_1" in form.fields
+
+    form["end_time_0"] = (now() - timedelta(days=1)).date().isoformat()
+    response = form.submit()
+    assert response.status_code == 200
+    assert escape(str(monitor_fields)) not in response.text
+
+    form = response.forms["config-form"]
+    form["end_time_0"] = (now() + timedelta(days=1)).date().isoformat()
+    response = form.submit()
+    assert response.status_code == 200
+    assert escape(str(monitor_fields)) in response.text

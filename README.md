@@ -20,35 +20,45 @@ A controller for GPIO sensors and devices on RaspberryPI
 * Implement HLA
 
 ## Features
-* Implement a monitoring system to track devices status changes in time
+### Mandatory for v1
 * Integrate Sentry (https://sentry.io/)
   * Better runtime error management
-* Move installer to a dedicated Python(click) script
-  * Better parameter management
-  * https://unix.stackexchange.com/questions/228277/grouping-systemd-services
+
+### Future
+* Bad UX/UI on small screen (smartphones), cards are placed in a single row
+* Implement a caching system for API calls
+  * Improving performance by reducing DB access
+* Implement UI with graphs support for System Monitor
 * Implement support for LoRa based devices
-* Implement caching system for API calls
-  * Improve performance reducing DB access
 
 ## Refactoring
+### Mandatory for v1
 * Include Sensor delta temperature in SensorTemperatureStepScaleFanControllerInterface output
 
 ## Security
-* Apply Bandit (https://bandit.readthedocs.io/en/latest/) security scan
+### Mandatory for v1
 * Apply permission control on Admin buttons and views
-* Protect UI and API with authentication and authorization mechanism
+* Apply Bandit (https://bandit.readthedocs.io/en/latest/) security scan
+
+### Future
+* Protect UI and API with authentication and an authorization mechanism
 
 ## Infrastructure
+### Future
 * Expose the application and the static content through Nginx
-  * For small environment uWSGI could be enough, for medium to large environment Nginx would be better
+  * For a small environment uWSGI could be enough, for medium to large environment Nginx would be better
 
 ## Installer
-* Implement check command extension to include required env variables
+### Mandatory for v1
 * Run installation and application with a dedicated user
   * Improve security
+* Implement check command extension to include required env variables
+
+### Future
+* Move installer to a dedicated Python(click) script
+  * Better parameter management
 
 # Known issues
-* Bad UX/UI on small screen (smartphones), cards are placed in a single row
 * pgpio solution for DHT sensor is very fragile
   * Evaluate a more robust solution
     * Make https://github.com/adafruit/Adafruit_Python_DHT/ compatible with Uv?

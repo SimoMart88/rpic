@@ -1,7 +1,8 @@
 import typing
 import pytest
 from freezegun import freeze_time
-from datetime import datetime, timedelta
+from datetime import timedelta
+from django.utils.timezone import now
 
 
 from rpi_controller.monitoring.backends.base import SystemMonitorEntry
@@ -32,20 +33,19 @@ def test_system_monitor_update_handler(
 
     dummy_device: "Device" = request.getfixturevalue(device_fixture_name)
     result_status = {"dummy_key": "dummy_value"}
-    now = datetime.now()
 
     dummy_device.status = result_status
     dummy_device.last_update_status = dummy_device.UpdateStatus.SUCCESS
 
     assert list(system_monitor_mock.monitor.query_entries(
-        key=dummy_device.slug, start_time=now - timedelta(minutes=1), end_time=now + timedelta(minutes=1)
+        key=dummy_device.slug, start_time=now() - timedelta(minutes=1), end_time=now() + timedelta(minutes=1)
     )) == []  # Sanity check
 
     system_monitor_update_handler(sender=dummy_device.__class__, instance=dummy_device)
 
-    expected_field_result = result_status | {"last_update_status": dummy_device.get_last_update_status_display()}  # type: ignore[attr-defined]
+    expected_field_result = result_status | {"last_update_status": dummy_device.get_last_update_status_display()}
     assert list(system_monitor_mock.monitor.query_entries(
-        key=dummy_device.slug, start_time=now - timedelta(minutes=1), end_time=now + timedelta(minutes=1)
+        key=dummy_device.slug, start_time=now() - timedelta(minutes=1), end_time=now() + timedelta(minutes=1)
     )) == [
-        SystemMonitorEntry(key=dummy_device.slug, fields=expected_field_result, time=now)
+        SystemMonitorEntry(key=dummy_device.slug, fields=expected_field_result, time=now())
     ]

@@ -1,8 +1,11 @@
 import typing
-from datetime import datetime
+from django.utils.timezone import now
 
 from rpi_controller.monitoring.backends.base import BaseSystemMonitor, SystemMonitorEntry
 
+
+if typing.TYPE_CHECKING:
+    from datetime import datetime
 
 
 class DummySystemMonitor(BaseSystemMonitor):
@@ -16,10 +19,10 @@ class DummySystemMonitor(BaseSystemMonitor):
         pass
 
     def write_entry(self, key:str, fields: dict[str, typing.Any]) -> None:
-        self.__storage[key] = {"fields": fields, "time": datetime.now()}
+        self.__storage[key] = {"fields": fields, "time": now()}
 
     def query_entries(self, key:str, start_time:"datetime", end_time:"datetime") -> typing.Generator[SystemMonitorEntry, None, None]:
-        for storage_key,storage_value in self.__storage.items():
+        for storage_key, storage_value in self.__storage.items():
             if storage_key == key and start_time <= storage_value["time"] <= end_time:
                 yield SystemMonitorEntry(
                     key=key, time=storage_value["time"], fields=storage_value["fields"]
