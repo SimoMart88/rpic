@@ -15,12 +15,18 @@ A controller for GPIO sensors and devices on RaspberryPI
 - During the first installation, automatically generated passwords (Postgresql, Django Admin, etc...) will be prompted
   - If you miss it, we can find it in /opt/rpic/app/.env
 
+### Notes
+- For InfluxDB default credential will be used, change it if your RaspberryPi is exposed on internet
+
 # Future improvements
 ## Documentation
 * Implement HLA
 
 ## Features
 ### Mandatory for v1
+* Include Sensor delta temperature in SensorTemperatureStepScaleFanControllerInterface output
+* Implement support for NC/NO state in Relays
+  * Implement support for status reset when unknown (for example, on application startup)
 * Integrate Sentry (https://sentry.io/)
   * Better runtime error management
 
@@ -30,10 +36,6 @@ A controller for GPIO sensors and devices on RaspberryPI
   * Improving performance by reducing DB access
 * Implement UI with graphs support for System Monitor
 * Implement support for LoRa based devices
-
-## Refactoring
-### Mandatory for v1
-* Include Sensor delta temperature in SensorTemperatureStepScaleFanControllerInterface output
 
 ## Security
 ### Mandatory for v1
