@@ -1,3 +1,15 @@
+## 0.7.0 (2025-06-23)
+
+### Feat
+
+- **Install**: perform InfluxDB installation and application configuration on target system
+- **Admin**: implement monitor view support for Devices
+- **system_monitor_update_handler**: implement post Device update handler to track changes with SystemMonitor
+- **post_device_control**: implement post control operation signal for Device models
+- **system_monitor_setup**: implement Django command to run SystemMonitor setup
+- **SystemMonitorHandler**: implement BaseConnectionHandler and ConnectionProxy for SystemMonitor
+- **SystemMonitor**: implement base class and InfluxDB monitoring backends
+
 ## 0.6.2 (2025-05-28)
 
 ### Fix
