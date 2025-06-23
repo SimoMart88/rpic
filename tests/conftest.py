@@ -1,11 +1,13 @@
 import typing
 import pytest
 from pathlib import Path
+from importlib import reload
 
 from django_celery_beat.models import PeriodicTask, CrontabSchedule
 
 
 if typing.TYPE_CHECKING:
+    import types
     from django.contrib.auth.models import User
     from rpi_controller.models import Sensor, Actuator, Controller
     from pytest_django.fixtures import SettingsWrapper
@@ -48,7 +50,21 @@ def pytest_configure(config: "Config") -> None:
 @pytest.fixture(autouse=True)
 def common_tests_settings(settings: "SettingsWrapper") -> None:
     settings.TIME_ZONE = "Etc/UTC"
-    settings.CELERY_RESULT_BACKEND = "memory:///"
+
+
+@pytest.fixture(autouse=True)
+def system_monitor_mock(settings: "SettingsWrapper") -> "types.ModuleType":
+    from rpi_controller import monitoring
+
+    settings.SYSTEM_MONITORS = {
+        "default": {
+            "BACKEND": "test_utils.monitoring.DummySystemMonitor",
+            "LOCATION": "dummy"
+        }
+    }
+    reload(monitoring)
+
+    return monitoring
 
 
 @pytest.fixture()

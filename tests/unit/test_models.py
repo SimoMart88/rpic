@@ -1,12 +1,24 @@
 from __future__ import annotations
 import pytest
 import typing
+from unittest.mock import Mock
 
 from rpi_controller.exceptions import SensorException, ActuatorException, ControllerException
+from rpi_controller.signals import post_device_control
 
 if typing.TYPE_CHECKING:
     from rpi_controller.models import Device, Sensor, Actuator, Controller
     from _pytest.fixtures import TopRequest
+
+
+@pytest.fixture
+def mock_post_device_control_signal() -> typing.Generator[Mock, None, None]:
+    post_device_control_mock = Mock()
+    post_device_control.connect(post_device_control_mock)
+
+    yield post_device_control_mock
+
+    post_device_control.disconnect(post_device_control_mock)
 
 
 @pytest.mark.django_db()
@@ -15,7 +27,7 @@ if typing.TYPE_CHECKING:
     pytest.param("dummy_actuator", id="actuator"),
     pytest.param("dummy_controller", id="controller"),
 ])
-def test_device_str(device_fixture_name: "Device", request: "TopRequest") -> None:
+def test_device_str(device_fixture_name: str, request: "TopRequest") -> None:
     dummy_device: "Device" = request.getfixturevalue(device_fixture_name)
     assert str(dummy_device) == dummy_device.name
 
@@ -26,7 +38,7 @@ def test_device_str(device_fixture_name: "Device", request: "TopRequest") -> Non
     pytest.param("dummy_actuator", id="actuator"),
     pytest.param("dummy_controller", id="controller"),
 ])
-def test_device_save_slugify(device_fixture_name: "Device", request: "TopRequest") -> None:
+def test_device_save_slugify(device_fixture_name: str, request: "TopRequest") -> None:
     dummy_device: "Device" = request.getfixturevalue(device_fixture_name)
 
     dummy_device.name = "String to Slugify"
@@ -40,7 +52,8 @@ def test_device_save_slugify(device_fixture_name: "Device", request: "TopRequest
 @pytest.mark.parametrize("device_fixture_name", [
     pytest.param("dummy_sensor", id="sensor"),
 ])
-def test_device_read_status(device_fixture_name: "Device", request: "TopRequest") -> None:
+def test_device_read_status(device_fixture_name: str, request: "TopRequest",
+                            mock_post_device_control_signal: Mock) -> None:
     dummy_device: "Device" = request.getfixturevalue(device_fixture_name)
 
     expected_output = {"dummy_key": "dummy_value"}
@@ -58,13 +71,17 @@ def test_device_read_status(device_fixture_name: "Device", request: "TopRequest"
     assert dummy_device.last_status_update_time
     assert dummy_device.last_status_update_log  == f"{dummy_device.__class__.__name__} status updated successfully"
     assert dummy_device.last_update_status == dummy_device.UpdateStatus.SUCCESS
+    mock_post_device_control_signal.assert_called_once_with(
+        signal=post_device_control, sender=dummy_device.__class__, instance=dummy_device
+    )
 
 
 @pytest.mark.django_db()
 @pytest.mark.parametrize("device_fixture_name", [
     pytest.param("dummy_sensor_update_not_required", id="sensor"),
 ])
-def test_device_read_status_update_not_required(device_fixture_name: "Device", request: "TopRequest") -> None:
+def test_device_read_status_update_not_required(device_fixture_name: str, request: "TopRequest",
+                                                mock_post_device_control_signal: Mock) -> None:
     dummy_device: "Device" = request.getfixturevalue(device_fixture_name)
 
     original_status = dummy_device.status
@@ -79,13 +96,17 @@ def test_device_read_status_update_not_required(device_fixture_name: "Device", r
     assert not dummy_device.last_status_update_time
     assert dummy_device.last_status_update_log == "Previous log"
     assert dummy_device.last_update_status == dummy_device.UpdateStatus.SUCCESS
+    mock_post_device_control_signal.assert_called_once_with(
+        signal=post_device_control, sender=dummy_device.__class__, instance=dummy_device
+    )
 
 
 @pytest.mark.django_db()
 @pytest.mark.parametrize("device_fixture_name,exception_class", [
     pytest.param("dummy_sensor_error", SensorException, id="sensor"),
 ])
-def test_device_read_status_error(device_fixture_name: "Device", exception_class: typing.Type[Exception], request: "TopRequest") -> None:
+def test_device_read_status_error(device_fixture_name: str, exception_class: typing.Type[Exception],
+                                  request: "TopRequest", mock_post_device_control_signal: Mock) -> None:
     dummy_device: "Device" = request.getfixturevalue(device_fixture_name)
 
     original_status = dummy_device.status
@@ -106,6 +127,9 @@ def test_device_read_status_error(device_fixture_name: "Device", exception_class
     assert dummy_device.last_status_update_time
     assert dummy_device.last_status_update_log == expected_error_message
     assert dummy_device.last_update_status == dummy_device.UpdateStatus.FAILURE
+    mock_post_device_control_signal.assert_called_once_with(
+        signal=post_device_control, sender=dummy_device.__class__, instance=dummy_device
+    )
 
 
 @pytest.mark.django_db()
@@ -113,7 +137,8 @@ def test_device_read_status_error(device_fixture_name: "Device", exception_class
     pytest.param("dummy_actuator", id="actuator"),
     pytest.param("dummy_controller", id="controller"),
 ])
-def test_device_update_status(device_fixture_name: "Device", request: "TopRequest") -> None:
+def test_device_update_status(device_fixture_name: str, request: "TopRequest",
+                              mock_post_device_control_signal: Mock) -> None:
     dummy_device: "Device" = request.getfixturevalue(device_fixture_name)
 
     assert not dummy_device.status  # Sanity check
@@ -130,6 +155,9 @@ def test_device_update_status(device_fixture_name: "Device", request: "TopReques
     assert dummy_device.last_status_update_time
     assert dummy_device.last_status_update_log  == f"{dummy_device.__class__.__name__} status updated successfully"
     assert dummy_device.last_update_status == dummy_device.UpdateStatus.SUCCESS
+    mock_post_device_control_signal.assert_called_once_with(
+        signal=post_device_control, sender=dummy_device.__class__, instance=dummy_device
+    )
 
 
 @pytest.mark.django_db()
@@ -137,7 +165,8 @@ def test_device_update_status(device_fixture_name: "Device", request: "TopReques
     pytest.param("dummy_actuator_update_not_required", id="actuator"),
     pytest.param("dummy_controller_update_not_required", id="controller"),
 ])
-def test_device_update_status_update_not_required(device_fixture_name: "Device", request: "TopRequest") -> None:
+def test_device_update_status_update_not_required(device_fixture_name: str, request: "TopRequest",
+                                                  mock_post_device_control_signal: Mock) -> None:
     dummy_device: "Device" = request.getfixturevalue(device_fixture_name)
 
     original_status = dummy_device.status
@@ -152,6 +181,9 @@ def test_device_update_status_update_not_required(device_fixture_name: "Device",
     assert not dummy_device.last_status_update_time
     assert dummy_device.last_status_update_log == "Previous log"
     assert dummy_device.last_update_status == dummy_device.UpdateStatus.SUCCESS
+    mock_post_device_control_signal.assert_called_once_with(
+        signal=post_device_control, sender=dummy_device.__class__, instance=dummy_device
+    )
 
 
 @pytest.mark.django_db()
@@ -159,7 +191,8 @@ def test_device_update_status_update_not_required(device_fixture_name: "Device",
     pytest.param("dummy_actuator_error", ActuatorException, id="actuator"),
     pytest.param("dummy_controller_error", ControllerException, id="controller"),
 ])
-def test_device_update_status_error(device_fixture_name: "Device", exception_class: typing.Type[Exception], request: "TopRequest") -> None:
+def test_device_update_status_error(device_fixture_name: str, exception_class: typing.Type[Exception],
+                                    request: "TopRequest", mock_post_device_control_signal: Mock) -> None:
     dummy_device: "Device" = request.getfixturevalue(device_fixture_name)
 
     original_status = dummy_device.status
@@ -180,6 +213,9 @@ def test_device_update_status_error(device_fixture_name: "Device", exception_cla
     assert dummy_device.last_status_update_time
     assert dummy_device.last_status_update_log == expected_error
     assert dummy_device.last_update_status == dummy_device.UpdateStatus.FAILURE
+    mock_post_device_control_signal.assert_called_once_with(
+        signal=post_device_control, sender=dummy_device.__class__, instance=dummy_device
+    )
 
 
 @pytest.mark.django_db()

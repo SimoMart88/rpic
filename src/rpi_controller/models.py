@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 
 from django.db import models
 from django.utils import timezone
@@ -15,6 +16,7 @@ from rpi_controller.interfaces.actuators.registry import actuator_registry
 from rpi_controller.interfaces.controllers.registry import controller_registry
 from rpi_controller.interfaces.exceptions import InterfaceUpdateNotRequiredException, InterfaceException
 from rpi_controller.exceptions import DeviceException, SensorException, ActuatorException, ControllerException
+from rpi_controller.signals import post_device_control
 
 
 logger = logging.getLogger(__name__)
@@ -50,10 +52,8 @@ class Device(models.Model):
             self.slug = slugify(self.name)
         super().save(*args, **kwargs)
 
-    def _get_status_db_value(self) -> typing.Any:
-        """Return value as stored on the DB (with JSON encode/decode)"""
-        self.refresh_from_db(fields=["status"])
-        return self.status
+    def _as_json_value(self, value: typing.Any) -> typing.Any:
+        return json.loads(json.dumps(value))
 
     def _set_success(self) -> None:
         self.last_status_update_time = timezone.now()
@@ -73,7 +73,7 @@ class Device(models.Model):
         class_name = self.__class__.__name__
         try:
             logger.info("[%s '%s'] Control with input: '%s' + '%s'", class_name, self.slug, args, kwargs)
-            self.status = getattr(self.interface, interface_func_name)(*args, **kwargs)
+            self.status = self._as_json_value(getattr(self.interface, interface_func_name)(*args, **kwargs))
             logger.info("[%s '%s'] Control result: %s", class_name, self.slug, self.status)
 
             self._set_success()
@@ -87,8 +87,10 @@ class Device(models.Model):
             error_message = f"(Unexpected Error): {ex}"
             self._set_failure(error_message)
             raise self.exception_class(error_message)
+        finally:
+            post_device_control.send(sender=self.__class__, instance=self)
 
-        return self._get_status_db_value()
+        return self.status
 
     def __str__(self) -> str:
         return self.name

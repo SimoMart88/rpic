@@ -22,6 +22,7 @@ dependencies = [
     "rpi-gpio>=0.7.1",
     "celery[redis]>=5.5.2",
     "django-celery-beat>=2.8.0",
+    "influxdb>=5.3.2",
 ]
 
 [build-system]

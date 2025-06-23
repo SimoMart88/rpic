@@ -11,8 +11,9 @@ RPIC_APP_DEBUG=${RPIC_DEBUG:-"False"}
 RPIC_APP_TIME_ZONE=${RPIC_TIME_ZONE:-"UTC"}
 RPIC_APP_LOGGING_LEVEL=${RPIC_LOGGING_LEVEL:-"ERROR"}
 RPIC_APP_DB_URL=${RPIC_DB_URL}
-RPIC_APP_REDIS_URL=${RPIC_DB_URL}
 RPIC_APP_DB_NAME="rpic"
+RPIC_APP_REDIS_URL=${RPIC_DB_URL}
+RPIC_APP_INFLUXDB=${RPIC_INFLUXDB}
 SYSTEMD_FOLDER=${SYSTEMD_PATH:-"/etc/systemd/system/"}
 
 
@@ -20,7 +21,6 @@ SYSTEMD_FOLDER=${SYSTEMD_PATH:-"/etc/systemd/system/"}
 echo "[ Installing system-level dependencies... ]"
 apt update
 apt install -y python3 python3-dev pigpiod libgpiod2
-
 
 if [[ "${RPIC_APP_DB_URL}" == "" ]] ; then
   apt install -y postgresql
@@ -30,8 +30,12 @@ if [[ "${RPIC_APP_REDIS_URL}" == "" ]] ; then
   apt install -y redis-server
 fi
 
+if [[ "${RPIC_APP_INFLUXDB}" == "" ]] ; then
+  apt install -y influxdb influxdb-client
+fi
+
 # Start pigpiod service
-echo "[ Starting pigpiod service... ]"
+echo "[ (Re)Starting pigpiod service... ]"
 systemctl enable pigpiod.service || exit 1
 systemctl restart pigpiod.service || exit 1
 
@@ -78,6 +82,7 @@ if [ -f "${RPIC_OPT_BACKUP_FOLDER}/.env" ] ; then
   TIME_ZONE=$(grep TIME_ZONE "${RPIC_OPT_BACKUP_FOLDER}/.env")
   LOGGING_LEVEL=$(grep LOGGING_LEVEL "${RPIC_OPT_BACKUP_FOLDER}/.env")
   CELERY_BROKER_URL=$(grep CELERY_BROKER_URL "${RPIC_OPT_BACKUP_FOLDER}/.env")
+  SYSTEM_MONITOR=$(grep SYSTEM_MONITOR "${RPIC_OPT_BACKUP_FOLDER}/.env")
 fi
 
 echo "[ Generating required config for .env file... ]"
@@ -118,7 +123,16 @@ if [[ "${CELERY_BROKER_URL}" == "" ]] ; then
   if [[ "${RPIC_APP_REDIS_URL}" == "" ]] ; then
     CELERY_BROKER_URL="CELERY_BROKER_URL=\"redis://localhost:6379/0\""
   else
-    CELERY_BROKER_URL="CELERY_BROKER_URL=\"${RPIC_APP_DB_URL}\""
+    CELERY_BROKER_URL="CELERY_BROKER_URL=\"${RPIC_APP_REDIS_URL}\""
+  fi
+fi
+
+if [[ "${SYSTEM_MONITOR}" == "" ]] ; then
+  if [[ "${RPIC_APP_INFLUXDB}" == "" ]] ; then
+    echo " =======> InfluxDB is exposed using default credential, change it if your RaspberryPi is exposed on internet <==========="
+    SYSTEM_MONITOR="SYSTEM_MONITOR=\"BACKEND=rpi_controller.monitoring.backends.influxdb.InfluxDBv1SystemMonitor;LOCATION=influxdb://root:root@localhost:8086/rpic\""
+  else
+    SYSTEM_MONITOR="SYSTEM_MONITOR=\"${RPIC_APP_INFLUXDB}\""
   fi
 fi
 
@@ -138,6 +152,7 @@ echo "[ Updating .env file... ]"
   echo "${LOGGING_LEVEL}"
   echo "LOGGING_FILE=\"${RPIC_WORKSPACE_LOG_FOLDER}/rpi_controller.log\""
   echo "${CELERY_BROKER_URL}"
+  echo "${SYSTEM_MONITOR}"
   echo "C_FORCE_ROOT=\"true\""  # https://docs.celeryq.dev/en/stable/userguide/daemonizing.html#running-the-worker-with-superuser-privileges-root
 } > "${RPIC_APP_FOLDER}/.env" || exit 1
 

@@ -10,7 +10,7 @@
                 {% include "admin/includes/fieldset.html" %}
             {% endfor %}
             <div class="submit-row">
-                <input type="submit" value="Submit" />
+                <input type="submit" value="{% if submit_label %}{{ submit_label }}{% else %}Submit{% endif %}" />
             </div>
         </form>
     {% endblock %}
