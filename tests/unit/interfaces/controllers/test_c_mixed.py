@@ -59,6 +59,7 @@ def test_stssfc(working_controller: "Controller") -> None:
     controller_output = controller_interface.control()
     assert controller_output['primary'] is True
     assert controller_output['secondary'] is True
+    assert controller_output['delta_temperature'] == 10
 
     working_controller.refresh_from_db()
     for actuator in working_controller.actuators.all():
@@ -73,6 +74,7 @@ def test_stssfc_partial(working_controller: "Controller") -> None:
     controller_output = controller_interface.control()
     assert controller_output['primary'] is True
     assert controller_output['secondary'] is False
+    assert controller_output['delta_temperature'] == 10
 
     working_controller.refresh_from_db()
     primary_fan_actuator = working_controller.actuators.get(controlledactuatordetails__config__type="primary")
@@ -95,6 +97,7 @@ def test_stssfc_deactivate(working_controller: "Controller") -> None:
     controller_output = controller_interface.control()
     assert controller_output['primary'] is False
     assert controller_output['secondary'] is False
+    assert controller_output['delta_temperature'] == 10
 
     working_controller.refresh_from_db()
     primary_fan_actuator = working_controller.actuators.get(controlledactuatordetails__config__type="primary")

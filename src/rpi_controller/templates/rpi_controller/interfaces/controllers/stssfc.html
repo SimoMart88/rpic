@@ -18,6 +18,10 @@
             </tbody>
         </table>
     </div>
+    <div class="delta-temperature">
+        <h5>Delta Temperature:</h5>
+        <p id="{{ device.slug }}-status-delta_temperature">{{ device.status.delta_temperature }}</p>
+    </div>
     <div class="control">
         <h5>Force check:</h5>
         <button id="{{ device.slug }}-control" type="button" class="btn btn-outline-primary">
