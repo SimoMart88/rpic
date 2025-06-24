@@ -1371,7 +1371,7 @@ wheels = [
 [[package]]
 name = "rpi-adafruit-python-dht"
 version = "2.0.0"
-source = { registry = "../RPI_Adafruit_Python_DHT/dist" }
+source = { registry = "../../local-deps/RPI_Adafruit_Python_DHT" }
 sdist = { path = "RPI_Adafruit_Python_DHT-2.0.0.tar.gz" }
 
 [[package]]
