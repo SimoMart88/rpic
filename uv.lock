@@ -1371,8 +1371,7 @@ wheels = [
 [[package]]
 name = "rpi-adafruit-python-dht"
 version = "2.0.0"
-source = { registry = "../../local-deps/RPI_Adafruit_Python_DHT" }
-sdist = { path = "RPI_Adafruit_Python_DHT-2.0.0.tar.gz" }
+source = { git = "https://github.com/SimoMart88/RPI_Adafruit_Python_DHT#f9246f761f69102c4fc9f70f4cbfc07c3cd74e69" }
 
 [[package]]
 name = "rpi-controller"
@@ -1439,7 +1438,7 @@ requires-dist = [
     { name = "djangorestframework", specifier = ">=3.15.2" },
     { name = "influxdb", specifier = ">=5.3.2" },
     { name = "psycopg", specifier = ">=3.2.3" },
-    { name = "rpi-adafruit-python-dht", specifier = ">=2.0.0" },
+    { name = "rpi-adafruit-python-dht", git = "https://github.com/SimoMart88/RPI_Adafruit_Python_DHT" },
     { name = "rpi-gpio", specifier = ">=0.7.1" },
     { name = "setuptools", specifier = ">=75.6.0" },
     { name = "uwsgi", specifier = ">=2.0.28" },

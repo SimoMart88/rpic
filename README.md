@@ -24,8 +24,8 @@ A controller for GPIO sensors and devices on RaspberryPI
 
 ## Features
 ### Mandatory for v1
-* Implement support for read status on Actuators
 * Include Sensor delta temperature in SensorTemperatureStepScaleFanControllerInterface output
+* Implement support for read status on Actuators
 * Implement support for NC/NO state in Relays
 * Integrate Sentry (https://sentry.io/)
   * Better runtime error management

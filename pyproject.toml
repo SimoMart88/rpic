@@ -22,7 +22,7 @@ dependencies = [
     "celery[redis]>=5.5.2",
     "django-celery-beat>=2.8.0",
     "influxdb>=5.3.2",
-    "rpi-adafruit-python-dht>=2.0.0",
+    "rpi-adafruit-python-dht",
 ]
 
 [build-system]
@@ -44,6 +44,9 @@ dev-dependencies = [
     "webdriver-manager>=4.0.2",
     "pytest-randomly>=3.16.0",
 ]
+
+[tool.uv.sources]
+rpi-adafruit-python-dht = { git = "https://github.com/SimoMart88/RPI_Adafruit_Python_DHT" }
 
 [dependency-groups]
 checks = [
