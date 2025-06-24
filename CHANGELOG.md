@@ -1,3 +1,9 @@
+## 0.9.0 (2025-06-25)
+
+### Feat
+
+- **SensorTemperatureStepScaleFanControllerInterface**: include temperature delta in status
+
 ## 0.8.1 (2025-06-25)
 
 ### Fix
