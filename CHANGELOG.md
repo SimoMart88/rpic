@@ -1,3 +1,13 @@
+## 0.8.0 (2025-06-25)
+
+### Feat
+
+- **Dht22SensorInterface**: move from pigpio to RPI_Adafruit_Python_DHT
+
+### Fix
+
+- **install**: remove pigpiod dependency
+
 ## 0.7.0 (2025-06-23)
 
 ### Feat
