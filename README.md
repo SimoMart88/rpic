@@ -24,11 +24,12 @@ A controller for GPIO sensors and devices on RaspberryPI
 
 ## Features
 ### Mandatory for v1
-* Implement support for read status on Actuators
 * Include Sensor delta temperature in SensorTemperatureStepScaleFanControllerInterface output
+* Implement support for read status on Actuators
 * Implement support for NC/NO state in Relays
 * Integrate Sentry (https://sentry.io/)
   * Better runtime error management
+* Improve code coverage
 
 ### Future
 * Bad UX/UI on small screen (smartphones), cards are placed in a single row
@@ -61,7 +62,4 @@ A controller for GPIO sensors and devices on RaspberryPI
   * Better parameter management
 
 # Known issues
-* pgpio solution for DHT sensor is very fragile
-  * Evaluate a more robust solution
-    * Make https://github.com/adafruit/Adafruit_Python_DHT/ compatible with Uv?
 * GPIO cleanup is not performed after operations
