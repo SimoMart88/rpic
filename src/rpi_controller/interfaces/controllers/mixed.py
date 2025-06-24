@@ -105,7 +105,8 @@ class SensorTemperatureStepScaleFanControllerInterface(ControllerInterface):
             logger.info("[Controller '%s'] Primary fan actuator active: %s | Secondary fan actuator active: %s",
                         self.context.slug, primary_fan_active, secondary_fan_active)
 
-            status = {"primary": primary_fan_active, "secondary": secondary_fan_active}
+            status = {"primary": primary_fan_active, "secondary": secondary_fan_active,
+                      "delta_temperature": secondary_temperature - primary_temperature}
 
             target_status_update = {
                 "primary": (delta_temperature_step, primary_fan_actuator),
