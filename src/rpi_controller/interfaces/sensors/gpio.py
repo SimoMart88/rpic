@@ -1,11 +1,10 @@
 import typing
-import pigpio
+import Adafruit_DHT
 import logging
 from django.db import transaction
 from django import forms
 
 from rpi_controller.interfaces.forms import ConfigForm
-from rpi_controller.interfaces.sensors.utils import dht
 from rpi_controller.interfaces.sensors.base import SensorInterface
 from rpi_controller.interfaces.exceptions import InterfaceRuntimeException
 from rpi_controller.interfaces.utils import is_status_update_required
@@ -35,25 +34,17 @@ class Dht22SensorInterface(SensorInterface):
         with transaction.atomic():
             # Lock model object to avoid concurrent read on the same sensor
             context = type(self.context).objects.select_for_update().get(id=self.context.id)
+
             gpio_pin = get_gpio_pin_from_config(context.config)
+            retries = context.config.get("retry_number", 5)
 
-            logger.info("[Sensor '%s'] Trying connect to the pigpio service", context.slug)
-            pi = pigpio.pi()
-            if not pi.connected:
-                logger.error("[Sensor '%s'] Failed to connect to pigpio service", context.slug)
-                raise InterfaceRuntimeException('Could not connect to pigpio')
-
-            logger.info("[Sensor '%s'] Trying read data using pigpio service", context.slug)
             try:
-                sensor = dht.Sensor(pi, gpio_pin, model=dht.Sensor.Model.DHT22)  # type: ignore[no-untyped-call]
-                sensor_output = sensor.read(self.context.config.get("retry_number", sensor.default_retry_number))  # type: ignore[no-untyped-call]
-                logger.info("[Sensor '%s'] pigpio service raw output: %s", context.slug, sensor_output)
-                _, _, status, temperature, humidity = sensor_output
+                humidity, temperature = Adafruit_DHT.read_retry(Adafruit_DHT.DHT22, gpio_pin, retries=retries)
             except Exception as e:
                 logger.info("[Sensor '%s'] Unexpected error: %s", context.slug, e)
                 raise InterfaceRuntimeException('DHT22 sensor unexpected error') from e
 
-            if status == sensor.Status.DHT_GOOD:
-                return {'temperature': temperature, 'humidity': humidity}
+            if humidity is not None and temperature is not None:
+                return {'temperature': round(temperature, 1), 'humidity': round(humidity, 1)}
             else:
-                raise InterfaceRuntimeException(f'DHT22 sensor read failure ({sensor.Status(status).name})')
+                raise InterfaceRuntimeException('DHT22 sensor read failure, temperature/humidity not available')
