@@ -19,14 +19,16 @@ def test_relayactuator(monkeypatch: MonkeyPatch) -> None:
     from test_utils.factories import ActuatorFactory
 
     class MockedRelayActuatorInterface(RelayActuatorInterface):
+        _client_mock = mock.Mock()
         def _get_gpio_client(self) -> mock.Mock:
-            return mock.Mock()
+            return self._client_mock
 
     actuator = ActuatorFactory(config={'gpio_pin': 7})
 
     actuator_interface = MockedRelayActuatorInterface(actuator)
     actuator_output = actuator_interface.control(True)
     assert actuator_output['active'] is True
+    actuator_interface._client_mock.cleanup.assert_called_once()
 
 
 @pytest.mark.django_db()
@@ -67,13 +69,16 @@ def test_relayactuator_interface_error(monkeypatch: MonkeyPatch) -> None:
     from test_utils.factories import ActuatorFactory
 
     class MockedRelayActuatorInterface(RelayActuatorInterface):
-        def _get_gpio_client(self) -> mock.Mock:
-            return mock.Mock(
+        _client_mock = mock.Mock(
                 output=mock.Mock(side_effect=InterfaceRuntimeException("ERROR"))
             )
+        def _get_gpio_client(self) -> mock.Mock:
+            return self._client_mock
 
     actuator = ActuatorFactory(config={'gpio_pin': 7})
 
     with pytest.raises(InterfaceRuntimeException, match='Relay unexpected error'):
         actuator_interface = MockedRelayActuatorInterface(actuator)
         actuator_interface.control(True)
+
+        actuator_interface._client_mock.cleanup.assert_called_once()

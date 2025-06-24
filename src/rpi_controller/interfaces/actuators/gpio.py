@@ -42,9 +42,9 @@ class RelayActuatorInterface(ActuatorInterface):
 
         gpio_pin = get_gpio_pin_from_config(self.context.config)
 
+        GPIO = self._get_gpio_client()
         try:
             logger.info("[Actuator '%s'] Setting up GPIO interface", self.context.slug)
-            GPIO = self._get_gpio_client()
             GPIO.setup(gpio_pin, GPIO.OUT)
 
             if active:
@@ -56,5 +56,8 @@ class RelayActuatorInterface(ActuatorInterface):
         except Exception as e:
             logger.info("[Actuator '%s'] Unexpected error: %s", self.context.slug, e)
             raise InterfaceRuntimeException('Relay unexpected error') from e
+        finally:
+            logger.info("[Actuator '%s'] Cleaning up GPIO interface", self.context.slug)
+            GPIO.cleanup()
 
         return {"active": active}
