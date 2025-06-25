@@ -1,3 +1,10 @@
+## 0.9.1 (2025-06-25)
+
+### Fix
+
+- **SensorTemperatureStepScaleFanControllerInterface**: fix fans visualization on UI
+- **SensorTemperatureStepScaleFanControllerInterface**: round delta temperature
+
 ## 0.9.0 (2025-06-25)
 
 ### Feat
