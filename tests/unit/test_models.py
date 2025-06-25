@@ -7,7 +7,7 @@ from rpi_controller.exceptions import SensorException, ActuatorException, Contro
 from rpi_controller.signals import post_device_control
 
 if typing.TYPE_CHECKING:
-    from rpi_controller.models import Device, Sensor, Actuator, Controller
+    from rpi_controller.models import Device, Sensor, Controller
     from _pytest.fixtures import TopRequest
 
 
@@ -51,6 +51,7 @@ def test_device_save_slugify(device_fixture_name: str, request: "TopRequest") ->
 @pytest.mark.django_db()
 @pytest.mark.parametrize("device_fixture_name", [
     pytest.param("dummy_sensor", id="sensor"),
+    pytest.param("dummy_actuator", id="actuator"),
 ])
 def test_device_read_status(device_fixture_name: str, request: "TopRequest",
                             mock_post_device_control_signal: Mock) -> None:
@@ -104,6 +105,7 @@ def test_device_read_status_update_not_required(device_fixture_name: str, reques
 @pytest.mark.django_db()
 @pytest.mark.parametrize("device_fixture_name,exception_class", [
     pytest.param("dummy_sensor_error", SensorException, id="sensor"),
+    pytest.param("dummy_actuator_error", ActuatorException, id="actuator"),
 ])
 def test_device_read_status_error(device_fixture_name: str, exception_class: typing.Type[Exception],
                                   request: "TopRequest", mock_post_device_control_signal: Mock) -> None:
@@ -114,7 +116,7 @@ def test_device_read_status_error(device_fixture_name: str, exception_class: typ
     assert not dummy_device.last_status_update_time  # Sanity check
     assert dummy_device.last_update_status == dummy_device.UpdateStatus.NEW  # Sanity check
 
-    expected_error_message = "(Interface Error): Sensor error"
+    expected_error_message = f"(Interface Error): {dummy_device.__class__.__name__} error"
 
     with pytest.raises(exception_class) as ex:
         output = dummy_device.read_status()
@@ -222,12 +224,6 @@ def test_device_update_status_error(device_fixture_name: str, exception_class: t
 def test_sensor_update_status(dummy_sensor: "Sensor") -> None:
     with pytest.raises(NotImplementedError):
         dummy_sensor.update_status()
-
-
-@pytest.mark.django_db()
-def test_actuator_read_status(dummy_actuator: "Actuator") -> None:
-    with pytest.raises(NotImplementedError):
-        dummy_actuator.read_status()
 
 
 @pytest.mark.django_db()

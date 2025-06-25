@@ -113,6 +113,9 @@ class Actuator(Device):
 
     interface = StrategyField(registry=actuator_registry)
 
+    def read_status(self) -> dict[typing.Any, typing.Any]:
+        return self._control_interface("read_input")
+
     def update_status(self, *args: typing.Any, **kwargs: typing.Any) -> dict[typing.Any, typing.Any]:
         return self._control_interface("control", *args, **kwargs)
 

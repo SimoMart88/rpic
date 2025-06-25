@@ -71,6 +71,9 @@ class DummyActuatorErrorInterface(DummyActuatorInterface):
     label = "dummyactuator-error"
     template_name = "dummy/test_flag.html"
 
+    def read_input(self) -> dict[str, typing.Any]:
+        raise InterfaceRuntimeException("Actuator error")
+
     def control(self, *args: typing.Any, **kwargs: typing.Any) -> dict[typing.Any, typing.Any]:
         raise InterfaceRuntimeException("Actuator error")
 
