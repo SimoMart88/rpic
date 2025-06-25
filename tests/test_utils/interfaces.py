@@ -53,6 +53,9 @@ class DummyActuatorInterface(ActuatorInterface):
     config_form = DummyDeviceInterfaceForm
     template_name = "dummy/test.html"
 
+    def read_input(self) -> dict[str, typing.Any]:
+        return {"dummy_key": "dummy_value"}
+
     def control(self, *args: typing.Any, **kwargs: typing.Any) -> dict[typing.Any, typing.Any]:
         return {"args": args, "kwargs": kwargs}
 
