@@ -57,8 +57,8 @@ def working_controller(dummy_controller: "Controller") -> "Controller":
 def test_stssfc(working_controller: "Controller") -> None:
     controller_interface = SensorTemperatureStepScaleFanControllerInterface(working_controller)
     controller_output = controller_interface.control()
-    assert controller_output['primary'] is True
-    assert controller_output['secondary'] is True
+    assert controller_output['fan_primary'] is True
+    assert controller_output['fan_secondary'] is True
     assert controller_output['delta_temperature'] == 10
 
     working_controller.refresh_from_db()
@@ -72,8 +72,8 @@ def test_stssfc_partial(working_controller: "Controller") -> None:
 
     controller_interface = SensorTemperatureStepScaleFanControllerInterface(working_controller)
     controller_output = controller_interface.control()
-    assert controller_output['primary'] is True
-    assert controller_output['secondary'] is False
+    assert controller_output['fan_primary'] is True
+    assert controller_output['fan_secondary'] is False
     assert controller_output['delta_temperature'] == 10
 
     working_controller.refresh_from_db()
@@ -95,8 +95,8 @@ def test_stssfc_deactivate(working_controller: "Controller") -> None:
 
     controller_interface = SensorTemperatureStepScaleFanControllerInterface(working_controller)
     controller_output = controller_interface.control()
-    assert controller_output['primary'] is False
-    assert controller_output['secondary'] is False
+    assert controller_output['fan_primary'] is False
+    assert controller_output['fan_secondary'] is False
     assert controller_output['delta_temperature'] == 10
 
     working_controller.refresh_from_db()
