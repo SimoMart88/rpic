@@ -5,14 +5,18 @@
             <thead>
                 <tr>
                     {% for label in device.status.keys %}
-                        <th scope="col">{{ label | title }}</th>
+                        {% if label|slice:":4" == "fan_" %}
+                            <th scope="col">{{ label|slice:"4:"|title }}</th>
+                        {% endif %}
                     {% endfor %}
                 </tr>
             </thead>
             <tbody>
                 <tr>
                     {% for label, active in device.status.items %}
-                        <td id="{{ device.slug }}-status-{{ label }}" data-updater="string_to_colored_icon_fan">{{ active }}</td>
+                        {% if label|slice:":4" == "fan_" %}
+                            <td id="{{ device.slug }}-status-{{ label }}" data-updater="string_to_colored_icon_fan">{{ active }}</td>
+                        {% endif %}
                     {% endfor %}
                 </tr>
             </tbody>

@@ -34,6 +34,7 @@ A controller for GPIO sensors and devices on RaspberryPI
 ### Future
 * Implement a caching system for API calls
   * Improving performance by reducing DB access
+* Implement System Monitor data export in the Admin UI
 * Implement UI with graphs support for System Monitor
 * Implement support for LoRa based devices
 
