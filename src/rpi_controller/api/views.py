@@ -10,6 +10,36 @@ if typing.TYPE_CHECKING:
     from rest_framework.response import Response
 
 
+class StatusReaderGenericViewSetMixin:
+    @decorators.action(methods=['post'], detail=True, url_path='read-status')
+    def read_status(self, request: "Request", *args: typing.Any, **kwargs: typing.Any) -> "Response":
+        sensor = self.get_object()
+        response_status = status.HTTP_200_OK
+
+        try:
+            sensor.read_status()
+        except Exception:
+            response_status = status.HTTP_500_INTERNAL_SERVER_ERROR
+
+        serializer = self.get_serializer(sensor)
+        return Response(serializer.data, status=response_status)
+
+
+class StatusUpdaterGenericViewSetMixin:
+    @decorators.action(methods=['post'], detail=True, url_path='update-status')
+    def update_status(self, request: "Request", *args: typing.Any, **kwargs: typing.Any) -> "Response":
+        actuator = self.get_object()
+        response_status = status.HTTP_200_OK
+
+        try:
+            actuator.update_status(**request.data)
+        except Exception:
+            response_status = status.HTTP_500_INTERNAL_SERVER_ERROR
+
+        serializer = self.get_serializer(actuator)
+        return Response(serializer.data, status=response_status)
+
+
 class DeviceSerializer(serializers.HyperlinkedModelSerializer):
     interface = serializers.SerializerMethodField()
     last_update_status = serializers.SerializerMethodField()
@@ -45,53 +75,25 @@ class ControllerSerializer(DeviceSerializer):
         model = Controller
 
 
-
-class StatusReaderGenericViewSet(viewsets.ModelViewSet):
+class SensorViewSet(viewsets.ModelViewSet, StatusReaderGenericViewSetMixin):
     http_method_names = ['get', 'post', 'head']
     lookup_field = 'slug'
 
-    @decorators.action(methods=['post'], detail=True, url_path='read-status')
-    def read_status(self, request: "Request", *args: typing.Any, **kwargs: typing.Any) -> "Response":
-        sensor = self.get_object()
-        response_status = status.HTTP_200_OK
-
-        try:
-            sensor.read_status()
-        except Exception:
-            response_status = status.HTTP_500_INTERNAL_SERVER_ERROR
-
-        serializer = self.get_serializer(sensor)
-        return Response(serializer.data, status=response_status)
-
-
-class StatusUpdaterGenericViewSet(viewsets.ModelViewSet):
-    http_method_names = ['get', 'post', 'head']
-    lookup_field = 'slug'
-
-    @decorators.action(methods=['post'], detail=True, url_path='update-status')
-    def update_status(self, request: "Request", *args: typing.Any, **kwargs: typing.Any) -> "Response":
-        actuator = self.get_object()
-        response_status = status.HTTP_200_OK
-
-        try:
-            actuator.update_status(**request.data)
-        except Exception:
-            response_status = status.HTTP_500_INTERNAL_SERVER_ERROR
-
-        serializer = self.get_serializer(actuator)
-        return Response(serializer.data, status=response_status)
-
-
-class SensorViewSet(StatusReaderGenericViewSet):
     queryset = Sensor.objects.all()
     serializer_class = SensorSerializer
 
 
-class ActuatorViewSet(StatusUpdaterGenericViewSet):
+class ActuatorViewSet(viewsets.ModelViewSet, StatusReaderGenericViewSetMixin, StatusUpdaterGenericViewSetMixin):
+    http_method_names = ['get', 'post', 'head']
+    lookup_field = 'slug'
+
     queryset = Actuator.objects.all()
     serializer_class = ActuatorSerializer
 
 
-class ControllerViewSet(StatusUpdaterGenericViewSet):
+class ControllerViewSet(viewsets.ModelViewSet, StatusUpdaterGenericViewSetMixin):
+    http_method_names = ['get', 'post', 'head']
+    lookup_field = 'slug'
+
     queryset = Controller.objects.all()
     serializer_class = ControllerSerializer
