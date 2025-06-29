@@ -39,6 +39,7 @@ def test_device_api_get(django_api: "APIClient", device_fixture_name: str, view_
 @freeze_time("2000-01-01 00:00:00")
 @pytest.mark.parametrize("device_fixture_name,view_name", [
     pytest.param("dummy_sensor", "api-sensor-read-status", id="sensor"),
+    pytest.param("dummy_actuator", "api-actuator-read-status", id="actuator"),
 ])
 def test_sensor_api_read_status(django_api: "APIClient", device_fixture_name: str, view_name: str,
                                 request: "TopRequest") -> None:

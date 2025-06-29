@@ -53,6 +53,9 @@ class DummyActuatorInterface(ActuatorInterface):
     config_form = DummyDeviceInterfaceForm
     template_name = "dummy/test.html"
 
+    def read_input(self) -> dict[str, typing.Any]:
+        return {"dummy_key": "dummy_value"}
+
     def control(self, *args: typing.Any, **kwargs: typing.Any) -> dict[typing.Any, typing.Any]:
         return {"args": args, "kwargs": kwargs}
 
@@ -68,6 +71,9 @@ class DummyActuatorErrorInterface(DummyActuatorInterface):
     label = "dummyactuator-error"
     template_name = "dummy/test_flag.html"
 
+    def read_input(self) -> dict[str, typing.Any]:
+        raise InterfaceRuntimeException("Actuator error")
+
     def control(self, *args: typing.Any, **kwargs: typing.Any) -> dict[typing.Any, typing.Any]:
         raise InterfaceRuntimeException("Actuator error")
 
@@ -75,6 +81,10 @@ class DummyActuatorErrorInterface(DummyActuatorInterface):
 class UpdatedDummyActuatorInterface(DummyActuatorInterface):
     label = "dummyactuator-mock"
     template_name = "dummy/test_flag.html"
+    read_input_mock: typing.Optional["Mock"] = None  # Must be defined by class clients
+
+    def read_input(self) -> dict[str, typing.Any]:
+        return self.read_input_mock()
 
     def control(self, *args: typing.Any, **kwargs: typing.Any) -> dict[typing.Any, typing.Any]:
         return {"flag": kwargs["flag"]}

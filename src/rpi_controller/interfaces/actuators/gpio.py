@@ -31,6 +31,24 @@ class RelayActuatorInterface(ActuatorInterface):
         GPIO.setmode(GPIO.BCM)
         return GPIO
 
+    def read_input(self) -> dict[str, typing.Any]:
+        gpio_pin = get_gpio_pin_from_config(self.context.config)
+
+        try:
+            logger.info("[Actuator '%s'] Setting up GPIO interface", self.context.slug)
+            GPIO = self._get_gpio_client()
+            GPIO.setup(gpio_pin, GPIO.OUT)  # MUST be OUT, changing it to IN will cause relay status reset
+
+            logger.info("[Actuator '%s'] Reading relay status", self.context.slug)
+            status = GPIO.input(gpio_pin)
+            logger.info("[Actuator '%s'] Raw status: %s", self.context.slug, status)
+        except Exception as e:
+            logger.info("[Actuator '%s'] Unexpected error: %s", self.context.slug, e)
+            raise InterfaceRuntimeException('Relay unexpected error') from e
+
+        return {"active": status == GPIO.HIGH}
+
+
     def control(self, *args: typing.Any, **kwargs: typing.Any) -> dict[typing.Any, typing.Any]:
         try:
             active = kwargs["active"]
