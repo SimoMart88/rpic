@@ -1,3 +1,12 @@
+## 0.10.0 (2025-06-30)
+
+### Feat
+
+- **Home**: implement read_status support for Actuators
+- **ActuatorViewSet**: implement read_status support
+- **Actuator**: implement read_status support
+- **RelayActuatorInterface**: implement read_input support
+
 ## 0.9.1 (2025-06-25)
 
 ### Fix
