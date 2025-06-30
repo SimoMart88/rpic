@@ -81,6 +81,10 @@ class DummyActuatorErrorInterface(DummyActuatorInterface):
 class UpdatedDummyActuatorInterface(DummyActuatorInterface):
     label = "dummyactuator-mock"
     template_name = "dummy/test_flag.html"
+    read_input_mock: typing.Optional["Mock"] = None  # Must be defined by class clients
+
+    def read_input(self) -> dict[str, typing.Any]:
+        return self.read_input_mock()
 
     def control(self, *args: typing.Any, **kwargs: typing.Any) -> dict[typing.Any, typing.Any]:
         return {"flag": kwargs["flag"]}

@@ -2,7 +2,7 @@
 
 {% block device_script %}
 <script>
-    let func_args_a_{{ device.id }} = ['{{ device.slug }}', '{% url 'api-actuator-detail' device.slug %}']
+    let func_args_a_{{ device.id }} = ['{{ device.slug }}', '{% url 'api-actuator-read-status' device.slug %}', "POST"]
     register_auto_update(func_args_a_{{ device.id }});
     register_refresh_button('#{{ device.slug }}-refresh', func_args_a_{{ device.id }});
 </script>

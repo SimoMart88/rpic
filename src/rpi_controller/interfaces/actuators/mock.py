@@ -16,6 +16,12 @@ class MockActuatorInterface(ActuatorInterface):
     config_form = MockActuatorInterfaceForm
     template_name = "rpi_controller/interfaces/actuators/mock.html"
 
+    def read_input(self) -> dict[str, typing.Any]:
+        return {
+            "counter": self.context.status.get("counter", 0) + 1,
+            "config_value": self.context.config.get('config_value', 'not configured')
+        }
+
     def control(self, *args: typing.Any, **kwargs: typing.Any) -> dict[typing.Any, typing.Any]:
         try:
             flag = kwargs["flag"]
