@@ -24,7 +24,6 @@ A controller for GPIO sensors and devices on RaspberryPI
 
 ## Features
 ### Mandatory for v1
-* Implement support for NC/NO state in Relays
 * Integrate Sentry (https://sentry.io/)
   * Better runtime error management
 * Bad UX/UI on small screen (smartphones), cards are placed in a single row
