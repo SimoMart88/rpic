@@ -1,3 +1,9 @@
+## 0.11.0 (2025-07-01)
+
+### Feat
+
+- **RelayActuatorInterface**: implement support for contacts state (NO/NC)
+
 ## 0.10.0 (2025-06-30)
 
 ### Feat
