@@ -14,6 +14,8 @@ RPIC_APP_DB_URL=${RPIC_DB_URL}
 RPIC_APP_DB_NAME="rpic"
 RPIC_APP_REDIS_URL=${RPIC_DB_URL}
 RPIC_APP_INFLUXDB=${RPIC_INFLUXDB}
+RPIC_APP_ENV=${RPIC_ENV:-"PROD"}
+RPIC_APP_SENTRY_DSN=${RPIC_SENTRY_DSN}
 SYSTEMD_FOLDER=${SYSTEMD_PATH:-"/etc/systemd/system/"}
 
 
@@ -138,6 +140,8 @@ echo "[ Updating .env file... ]"
 {
   echo "DJANGO_SETTINGS_MODULE=\"rpi_controller.config.settings\""
   echo "DEBUG=\"${RPIC_APP_DEBUG}\""
+  echo "ENVIRONMENT=\"${RPIC_APP_ENV}\""
+  echo "SENTRY_DSN=\"${RPIC_APP_SENTRY_DSN}\""
   echo "${TIME_ZONE}"
   echo "${DJANGO_SECRET_KEY}"
   echo "ALLOWED_HOSTS=\"*\""
