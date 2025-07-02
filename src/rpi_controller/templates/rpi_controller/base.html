@@ -1,4 +1,4 @@
-{% extends 'django_bootstrap5/bootstrap5.html' %}
+{% extends 'rpi_controller/bootstrap5.html' %}
 
 {% load static %}
 {% load django_bootstrap5 %}
@@ -12,34 +12,45 @@
 {% endblock %}
 
 {% block bootstrap5_content %}
-    <div class="container">
-        {% block nav_bar %}
-            <nav class="navbar navbar-expand-md navbar-light bg-light shadow">
-                <div class="container-fluid">
-                    <a href="#" class="navbar-brand dropdown-toggle" data-bs-toggle="dropdown">
-                        <img src="{% static 'rpic/img/logo.jpg' %}" width="30" height="30" class="d-inline-block align-top rounded-circle" alt="">
-                        {% block bar_title %}RaspberryPI Controller{% endblock %}
-                    </a>
-                    <div class="navbar-collapse">
-                        <ul class="nav navbar-nav ms.auto">
-                            <li class="nav-item dropdown">
-                                <div class="dropdown-menu">
-                                    {% block nav_links %}
-                                        {% for button in nav_links %}
-                                            <a class="dropdown-item" href="{{ button.url }}">{{ button.name }}</a>
-                                        {% endfor %}
-                                    {% endblock nav_links %}
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
+
+    {% block nav_bar %}
+        <nav class="navbar fixed-top navbar-light bg-body-tertiary shadow">
+            <div class="container-fluid">
+                <a href="#" class="navbar-brand dropdown-toggle" data-bs-toggle="dropdown">
+                    <img src="{% static 'rpic/img/logo.jpg' %}" width="30" height="30" class="d-inline-block align-top rounded-circle" alt="">
+                    {% block bar_title %}RaspberryPI Controller{% endblock %}
+                </a>
+                <div class="navbar-collapse">
+                    <ul class="nav navbar-nav ms.auto">
+                        <li class="nav-item dropdown">
+                            <div class="dropdown-menu">
+                                {% block nav_links %}
+                                    {% for button in nav_links %}
+                                        <a class="dropdown-item" href="{{ button.url }}">{{ button.name }}</a>
+                                    {% endfor %}
+                                {% endblock nav_links %}
+                            </div>
+                        </li>
+                    </ul>
                 </div>
-            </nav>
-        {% endblock %}
+            </div>
+        </nav>
+    {% endblock %}
 
-        {% autoescape off %}{% bootstrap_messages %}{% endautoescape %}
+    {% autoescape off %}{% bootstrap_messages %}{% endautoescape %}
 
+    <div class="container mt-5 pt-4 mb-5 pb-4">
         {% block content %}{% endblock %}
     </div>
 
+{% endblock %}
+
+{% block bootstrap5_footer %}
+    <footer class="bg-body-tertiary text-center fixed-bottom">
+        <!-- Copyright -->
+        <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.05);">
+            Version {{ rpic.version }} - Copyright &copy; 2024-<script>document.write(new Date().getFullYear())</script> SimoMart88
+        </div>
+        <!-- Copyright -->
+    </footer>
 {% endblock %}

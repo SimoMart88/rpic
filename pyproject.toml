@@ -2,6 +2,9 @@
 name = "rpi-controller"
 version = "0.11.0"
 description = "A controller for GPIO sensors and devices on RaspberryPI"
+authors = [
+  {name = "SimoMart88"},
+]
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [

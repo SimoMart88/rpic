@@ -1,48 +1,50 @@
 {% load tz %}
 
 {% for device in devices %}
-    <div id="{{ device.slug }}" class="card d-flex">
-        {% block device_card %}
-        <div class="card-header">
-            {% block device_card_header %}
-            <h3 id="{{ device.slug }}-name" class="card-title">{{ device.name }}</h3>
-            {% endblock %}
-        </div>
-        <div class="card-body">
-            {% block device_card_body %}
-            {% include device.interface.template_name %}
-            {% endblock %}
-        </div>
-        <div class="card-footer">
-            {% block device_card_footer %}
-            <h6 class="card-subtitle mb-2 text-muted">
-                Last status update:
-            </h6>
-            <div class="container">
-                <div class="row">
-                    <div class="col">
-                        <p id="{{ device.slug }}-last_status_update_time" class="small">
-                            {{ device.last_status_update_time|localtime|date:"Y-m-d H:i:s" }}
-                        </p>
-                    </div>
-                    <div class="col">
-                        <span id="{{ device.slug }}-last_update_status" title="{{ device.last_status_update_log }}">
-                            {{ device.get_last_update_status_display }}
-                        </span>
-                    </div>
-                    <div class="col">
-                        <button id="{{ device.slug }}-refresh" type="button" class="btn btn-outline-primary">
-                            <i class="bi bi-arrow-clockwise"></i>
-                        </button>
-                    </div>
+    <div class="col">
+        <div id="{{ device.slug }}" class="card h-100">
+            {% block device_card %}
+                <div class="card-header">
+                    {% block device_card_header %}
+                        <h3 id="{{ device.slug }}-name" class="card-title">{{ device.name }}</h3>
+                    {% endblock %}
                 </div>
-            </div>
+                <div class="card-body">
+                    {% block device_card_body %}
+                        {% include device.interface.template_name %}
+                    {% endblock %}
+                </div>
+                <div class="card-footer">
+                    {% block device_card_footer %}
+                        <h6 class="card-subtitle mb-2 text-muted">
+                            Last status update:
+                        </h6>
+                        <div class="container">
+                            <div class="row">
+                                <div class="col">
+                                    <p id="{{ device.slug }}-last_status_update_time" class="small">
+                                        {{ device.last_status_update_time|localtime|date:"Y-m-d H:i:s" }}
+                                    </p>
+                                </div>
+                                <div class="col">
+                                    <span id="{{ device.slug }}-last_update_status" title="{{ device.last_status_update_log }}">
+                                        {{ device.get_last_update_status_display }}
+                                    </span>
+                                </div>
+                                <div class="col">
+                                    <button id="{{ device.slug }}-refresh" type="button" class="btn btn-outline-primary">
+                                        <i class="bi bi-arrow-clockwise"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    {% endblock %}
+                </div>
             {% endblock %}
         </div>
-        {% endblock %}
     </div>
     {% block device_script %}
-    <script>
-    </script>
+        <script>
+        </script>
     {% endblock %}
 {% endfor %}
