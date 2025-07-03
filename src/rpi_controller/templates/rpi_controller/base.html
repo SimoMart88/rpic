@@ -39,14 +39,14 @@
 
     {% autoescape off %}{% bootstrap_messages %}{% endautoescape %}
 
-    <div class="container mt-5 pt-4 mb-5 pb-4">
+    <div class="container mt-5 pt-4 mb-5 pb-5">
         {% block content %}{% endblock %}
     </div>
 
 {% endblock %}
 
 {% block bootstrap5_footer %}
-    <footer class="bg-body-tertiary text-center fixed-bottom">
+    <footer class="bg-body-tertiary text-center fixed-bottom" style="pointer-events: none;">
         <!-- Copyright -->
         <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.05);">
             Version {{ rpic.version }} - Copyright &copy; 2024-<script>document.write(new Date().getFullYear())</script> SimoMart88
