@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
-from rpi_controller.views import HomePageView
+from rpi_controller.web.views import HomePageView
 
 urlpatterns = [
     path('admin/', admin.site.urls),

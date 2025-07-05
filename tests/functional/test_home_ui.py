@@ -381,7 +381,8 @@ def test_home_page_controller_refresh_button(selenium: "WebDriver", live_server:
     assert last_update_status.text == dummy_controller_ui.get_last_update_status_display()
 
     refresh_button = selenium.find_element(By.ID, f"{dummy_controller_ui.slug}-refresh")
-    refresh_button.click()
+    selenium.execute_script("arguments[0].scrollIntoView();", refresh_button)  # type: ignore[no-untyped-call]
+    selenium.execute_script("arguments[0].click();", refresh_button)  # type: ignore[no-untyped-call]
 
     last_update_status = selenium.find_element(By.ID, f"{dummy_controller_ui.slug}-last_update_status")
     assert WebDriverWait(selenium, 5).until(

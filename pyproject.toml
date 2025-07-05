@@ -2,6 +2,9 @@
 name = "rpi-controller"
 version = "0.11.0"
 description = "A controller for GPIO sensors and devices on RaspberryPI"
+authors = [
+  {name = "SimoMart88"},
+]
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
@@ -23,6 +26,7 @@ dependencies = [
     "django-celery-beat>=2.8.0",
     "influxdb>=5.3.2",
     "rpi-adafruit-python-dht",
+    "sentry-sdk[django]>=2.32.0",
 ]
 
 [build-system]
@@ -66,3 +70,6 @@ version_scheme = "pep440"
 version_provider = "pep621"
 update_changelog_on_bump = true
 major_version_zero = true
+version_files = [
+    "src/rpi_controller/__init__.py:__version__",
+]

@@ -20,13 +20,16 @@ A controller for GPIO sensors and devices on RaspberryPI
 
 # Future improvements
 ## Documentation
+### Mandatory for v1
 * Implement HLA
+* Document how to customize the installation process
+
+### Future
+* Document how to contribute
+* Document how to extend the system
 
 ## Features
 ### Mandatory for v1
-* Integrate Sentry (https://sentry.io/)
-  * Better runtime error management
-* Bad UX/UI on small screen (smartphones), cards are placed in a single row
 * Improve code coverage
 
 ### Future

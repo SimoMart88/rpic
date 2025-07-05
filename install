@@ -14,6 +14,8 @@ RPIC_APP_DB_URL=${RPIC_DB_URL}
 RPIC_APP_DB_NAME="rpic"
 RPIC_APP_REDIS_URL=${RPIC_DB_URL}
 RPIC_APP_INFLUXDB=${RPIC_INFLUXDB}
+RPIC_APP_ENV=${RPIC_ENV:-"PROD"}
+RPIC_APP_SENTRY_DSN=${RPIC_SENTRY_DSN}
 SYSTEMD_FOLDER=${SYSTEMD_PATH:-"/etc/systemd/system/"}
 
 
@@ -77,8 +79,6 @@ if [ -f "${RPIC_OPT_BACKUP_FOLDER}/.env" ] ; then
   DJANGO_SECRET_KEY=$(grep SECRET_KEY "${RPIC_OPT_BACKUP_FOLDER}/.env")
   DATABASE_URL=$(grep DATABASE_URL "${RPIC_OPT_BACKUP_FOLDER}/.env")
   DJANGO_SUPERUSER_PASSWORD=$(grep DJANGO_SUPERUSER_PASSWORD "${RPIC_OPT_BACKUP_FOLDER}/.env")
-  TIME_ZONE=$(grep TIME_ZONE "${RPIC_OPT_BACKUP_FOLDER}/.env")
-  LOGGING_LEVEL=$(grep LOGGING_LEVEL "${RPIC_OPT_BACKUP_FOLDER}/.env")
   CELERY_BROKER_URL=$(grep CELERY_BROKER_URL "${RPIC_OPT_BACKUP_FOLDER}/.env")
   SYSTEM_MONITOR=$(grep SYSTEM_MONITOR "${RPIC_OPT_BACKUP_FOLDER}/.env")
 fi
@@ -109,14 +109,6 @@ if [[ "${DJANGO_SUPERUSER_PASSWORD}" == "" ]] ; then
     DJANGO_SUPERUSER_PASSWORD="DJANGO_SUPERUSER_PASSWORD=\"${DJANGO_ADMIN_PASSWORD}\""
 fi
 
-if [[ "${TIME_ZONE}" == "" ]] ; then
-  TIME_ZONE="TIME_ZONE=\"${RPIC_APP_TIME_ZONE}\""
-fi
-
-if [[ "${LOGGING_LEVEL}" == "" ]] ; then
-  LOGGING_LEVEL="LOGGING_LEVEL=\"${RPIC_APP_LOGGING_LEVEL}\""
-fi
-
 if [[ "${CELERY_BROKER_URL}" == "" ]] ; then
   if [[ "${RPIC_APP_REDIS_URL}" == "" ]] ; then
     CELERY_BROKER_URL="CELERY_BROKER_URL=\"redis://localhost:6379/0\""
@@ -135,10 +127,14 @@ if [[ "${SYSTEM_MONITOR}" == "" ]] ; then
 fi
 
 echo "[ Updating .env file... ]"
+  LOGGING_LEVEL=$(grep LOGGING_LEVEL "${RPIC_OPT_BACKUP_FOLDER}/.env")
 {
   echo "DJANGO_SETTINGS_MODULE=\"rpi_controller.config.settings\""
   echo "DEBUG=\"${RPIC_APP_DEBUG}\""
-  echo "${TIME_ZONE}"
+  echo "ENVIRONMENT=\"${RPIC_APP_ENV}\""
+  echo "TIME_ZONE=\"${RPIC_APP_TIME_ZONE}\""
+  echo "LOGGING_LEVEL=\"${RPIC_APP_LOGGING_LEVEL}\""
+  echo "SENTRY_DSN=\"${RPIC_APP_SENTRY_DSN}\""
   echo "${DJANGO_SECRET_KEY}"
   echo "ALLOWED_HOSTS=\"*\""
   echo "${DATABASE_URL}"
@@ -147,7 +143,6 @@ echo "[ Updating .env file... ]"
   echo "${DJANGO_SUPERUSER_PASSWORD}"
   echo "STATIC_URL=\"/static/\""
   echo "STATIC_ROOT=\"${RPIC_WORKSPACE_FOLDER}/static\""
-  echo "${LOGGING_LEVEL}"
   echo "LOGGING_FILE=\"${RPIC_WORKSPACE_LOG_FOLDER}/rpi_controller.log\""
   echo "${CELERY_BROKER_URL}"
   echo "${SYSTEM_MONITOR}"

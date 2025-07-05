@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 import environ
+import sentry_sdk
 
 from pathlib import Path
 
@@ -21,6 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # django-environ configuration
 env = environ.Env(
+    ENVIRONMENT=(str, 'LOCAL'),
     SECRET_KEY=(str, 'local'),
     DEBUG=(bool, False),
     ALLOWED_HOSTS=(list, []),
@@ -31,6 +33,7 @@ env = environ.Env(
     COMPRESS_ENABLED=(bool, False),
     LOGGING_LEVEL=(str, 'ERROR'),
     LOGGING_FILE=(str, '~data/rpi_controller.log'),
+    SENTRY_DSN=(str, ''),
 )
 
 
@@ -101,6 +104,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'rpi_controller.web.context_processors.app_info'
             ],
         },
     },
@@ -185,6 +189,26 @@ SYSTEM_MONITOR_CONFIG_FORMAT = dict(BACKEND=str, LOCATION=str, OPTIONS=dict)
 SYSTEM_MONITORS = {
     'default': env.dict("SYSTEM_MONITOR", SYSTEM_MONITOR_CONFIG_FORMAT)
 }
+
+
+# Sentry
+if SENTRY_DSN := env('SENTRY_DSN'):
+    import rpi_controller
+    from sentry_sdk.integrations.celery import CeleryIntegration
+    from sentry_sdk.integrations.django import DjangoIntegration
+
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        release=rpi_controller.__version__,
+        debug=env('DEBUG'),
+        environment=env('ENVIRONMENT'),
+        send_default_pii=True,
+        default_integrations=False,
+        integrations=[
+            DjangoIntegration(),
+            CeleryIntegration()
+        ],
+    )
 
 
 # Logging

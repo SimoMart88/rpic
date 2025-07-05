@@ -1394,6 +1394,7 @@ dependencies = [
     { name = "psycopg" },
     { name = "rpi-adafruit-python-dht" },
     { name = "rpi-gpio" },
+    { name = "sentry-sdk", extra = ["django"] },
     { name = "setuptools" },
     { name = "uwsgi" },
 ]
@@ -1440,6 +1441,7 @@ requires-dist = [
     { name = "psycopg", specifier = ">=3.2.3" },
     { name = "rpi-adafruit-python-dht", git = "https://github.com/SimoMart88/RPI_Adafruit_Python_DHT" },
     { name = "rpi-gpio", specifier = ">=0.7.1" },
+    { name = "sentry-sdk", extras = ["django"], specifier = ">=2.32.0" },
     { name = "setuptools", specifier = ">=75.6.0" },
     { name = "uwsgi", specifier = ">=2.0.28" },
 ]
@@ -1517,6 +1519,25 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/88/38/d62d4e8da649ad699b02eb1e95c3cfc20ff400744b9417b9093c5daebd4b/selenium-4.28.1.tar.gz", hash = "sha256:0072d08670d7ec32db901bd0107695a330cecac9f196e3afb3fa8163026e022a", size = 981633, upload-time = "2025-01-23T12:36:39.372Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a0/9f/34d0ec09b0dd6fb7b08b93eb4b7b80049e0b9db0ba7f81ad814c9be78b8f/selenium-4.28.1-py3-none-any.whl", hash = "sha256:4238847e45e24e4472cfcf3554427512c7aab9443396435b1623ef406fff1cc1", size = 9530373, upload-time = "2025-01-23T12:36:34.819Z" },
+]
+
+[[package]]
+name = "sentry-sdk"
+version = "2.32.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "certifi" },
+    { name = "urllib3", version = "1.26.20", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10' or platform_python_implementation == 'PyPy'" },
+    { name = "urllib3", version = "2.3.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10' and platform_python_implementation != 'PyPy'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/10/59/eb90c45cb836cf8bec973bba10230ddad1c55e2b2e9ffa9d7d7368948358/sentry_sdk-2.32.0.tar.gz", hash = "sha256:9016c75d9316b0f6921ac14c8cd4fb938f26002430ac5be9945ab280f78bec6b", size = 334932, upload-time = "2025-06-27T08:10:02.89Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/01/a1/fc4856bd02d2097324fb7ce05b3021fb850f864b83ca765f6e37e92ff8ca/sentry_sdk-2.32.0-py2.py3-none-any.whl", hash = "sha256:6cf51521b099562d7ce3606da928c473643abe99b00ce4cb5626ea735f4ec345", size = 356122, upload-time = "2025-06-27T08:10:01.424Z" },
+]
+
+[package.optional-dependencies]
+django = [
+    { name = "django" },
 ]
 
 [[package]]

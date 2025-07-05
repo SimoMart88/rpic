@@ -1,9 +1,8 @@
+import os
 import typing
 import pytest
 from pathlib import Path
 from importlib import reload
-
-from django_celery_beat.models import PeriodicTask, CrontabSchedule
 
 
 if typing.TYPE_CHECKING:
@@ -12,6 +11,7 @@ if typing.TYPE_CHECKING:
     from rpi_controller.models import Sensor, Actuator, Controller
     from pytest_django.fixtures import SettingsWrapper
     from pytest import Parser, Config
+    from django_celery_beat.models import PeriodicTask
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -45,6 +45,9 @@ def pytest_configure(config: "Config") -> None:
     if not config.option.driver_path:
         from webdriver_manager.chrome import ChromeDriverManager
         setattr(config.option, 'driver_path', ChromeDriverManager().install())
+
+    # Force disable Sentry by setting environment variable
+    os.environ["SENTRY_DSN"] = ""
 
 
 @pytest.fixture(autouse=True)
@@ -100,7 +103,8 @@ def dummy_controller() -> "Controller":
 
 
 @pytest.fixture
-def dummy_periodic_task() -> PeriodicTask:
+def dummy_periodic_task() -> "PeriodicTask":
+    from django_celery_beat.models import PeriodicTask, CrontabSchedule
     crontab, _ = CrontabSchedule.objects.get_or_create(
         minute="*/5", hour="*", day_of_week="*",
         month_of_year="*", day_of_month="*",

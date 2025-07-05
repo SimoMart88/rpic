@@ -28,7 +28,7 @@ jobs:
       - name: 'Run Ruff checks'
         run: uv run ruff check
       - name: 'Run MyPy Checks'
-        run: uv run mypy --config-file .mypy.ini
+        run: uv run mypy --config-file .mypy.ini --non-interactive
   unit-test:
     name: 'Unit Test'
     runs-on: ubuntu-latest
