@@ -1,3 +1,16 @@
+## 0.12.0 (2025-07-08)
+
+### Feat
+
+- **install**: include ENVIRONMENT and SENTRY_DNS config support
+- **Home**: include footer with version
+- **views**: move module into the web package
+- **Sentry**: implement support with Django and Celery integration enabled
+
+### Fix
+
+- **install**: implement proper default value management
+
 ## 0.11.0 (2025-07-01)
 
 ### Feat
