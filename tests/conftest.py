@@ -85,6 +85,12 @@ def admin_user() -> "User":
 
 
 @pytest.fixture
+def staff_user() -> "User":
+    from test_utils.factories import StaffUserFactory
+    return StaffUserFactory.create()
+
+
+@pytest.fixture
 def dummy_sensor() -> "Sensor":
     from test_utils.factories import SensorFactory
     return SensorFactory.create()

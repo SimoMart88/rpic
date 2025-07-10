@@ -38,6 +38,7 @@ A controller for GPIO sensors and devices on RaspberryPI
 * Implement System Monitor data export in the Admin UI
 * Implement UI with graphs support for System Monitor
 * Implement support for LoRa based devices
+* Implement support for PWA (https://github.com/silviolleite/django-pwa)
 
 ## Security
 ### Mandatory for v1
