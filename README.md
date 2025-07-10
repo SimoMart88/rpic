@@ -7,6 +7,9 @@ A controller for GPIO sensors and devices on RaspberryPI
 ## Compatibility
 - Tested on RaspberryPi 1b
   - OS: Raspberry Pi OS (Legacy) Lite (see https://www.raspberrypi.com/software/operating-systems/)
+  - Postgres: 13.18
+  - Redis: 5 (6.0.16)
+  - InfluxDB: 1.6.7
 
 ## Installation
 - Download release file into the target RaspberryPI
@@ -62,5 +65,6 @@ A controller for GPIO sensors and devices on RaspberryPI
 ### Future
 * Move installer to a dedicated Python(click) script
   * Better parameter management
+* Move installer to docker compose
 
 # Known issues
