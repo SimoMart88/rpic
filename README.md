@@ -68,3 +68,5 @@ A controller for GPIO sensors and devices on RaspberryPI
 * Move installer to docker compose
 
 # Known issues
+* rpi-adafruit-python-dht is not compatible with ARM64
+  * Implement compatibility support
