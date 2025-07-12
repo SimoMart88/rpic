@@ -22,6 +22,14 @@ class SuperUserFactory(UserFactory):
     is_staff = True
 
 
+class StaffUserFactory(UserFactory):
+    username = factory.Sequence(lambda n: "StaffUser%d" % n)
+    email = factory.Sequence(lambda n: "staffuser-%d@example.com" % n)
+    is_superuser = False
+    is_staff = True
+
+
+
 class SensorFactory(factory.django.DjangoModelFactory):
     slug = factory.Sequence(lambda n: 'sensor-%d' % n)
     name = factory.Sequence(lambda n: 'Sensor %d' % n)

@@ -7,6 +7,9 @@ A controller for GPIO sensors and devices on RaspberryPI
 ## Compatibility
 - Tested on RaspberryPi 1b
   - OS: Raspberry Pi OS (Legacy) Lite (see https://www.raspberrypi.com/software/operating-systems/)
+  - Postgres: 13.18
+  - Redis: 5 (6.0.16)
+  - InfluxDB: 1.6.7
 
 ## Installation
 - Download release file into the target RaspberryPI
@@ -38,6 +41,7 @@ A controller for GPIO sensors and devices on RaspberryPI
 * Implement System Monitor data export in the Admin UI
 * Implement UI with graphs support for System Monitor
 * Implement support for LoRa based devices
+* Implement support for PWA (https://github.com/silviolleite/django-pwa)
 
 ## Security
 ### Mandatory for v1
@@ -61,5 +65,8 @@ A controller for GPIO sensors and devices on RaspberryPI
 ### Future
 * Move installer to a dedicated Python(click) script
   * Better parameter management
+* Move installer to docker compose
 
 # Known issues
+* rpi-adafruit-python-dht is not compatible with ARM64
+  * Implement compatibility support

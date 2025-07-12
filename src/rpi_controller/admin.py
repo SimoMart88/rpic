@@ -1,6 +1,7 @@
 import json
 import typing
 from datetime import timedelta
+from functools import partial
 
 from django.conf import settings
 from django.contrib import admin, messages
@@ -76,6 +77,10 @@ class MonitoringForm(forms.Form):
     end_time = forms.SplitDateTimeField(initial= lambda:timezone.now(), widget=AdminSplitDateTime)
 
 
+def check_permission_for_device(permission: str, request: "HttpRequest", obj: "Device", **kwargs: typing.Any) -> typing.Union[typing.Any, bool]:
+    return request.user.has_perm(f"rpi_controller.{permission}_{obj._meta.model_name.lower()}")
+
+
 class DeviceAdmin(ExtraButtonsMixin, admin.ModelAdmin["Device"]):
     list_display = ["name", "slug", "visible", "interface_label"]
     list_filter = ["visible", "interface"]
@@ -83,6 +88,10 @@ class DeviceAdmin(ExtraButtonsMixin, admin.ModelAdmin["Device"]):
                        "last_update_status", "last_status_update_time", "last_status_update_log"]
     periodic_task_form_class = SimplifiedPeriodicTaskForm
     periodic_task_name: typing.Optional[str] = None
+
+    @admin.display(description="Interface")
+    def interface_label(self, device: "Device") -> str:
+        return str(device.interface.label)
 
     def get_object_or_404(self, request: "HttpRequest", pk: str) -> "Device":
         device: typing.Optional["Device"] = self.get_object(request, pk)
@@ -92,10 +101,7 @@ class DeviceAdmin(ExtraButtonsMixin, admin.ModelAdmin["Device"]):
 
         return device
 
-    def run_test(self, device: "Device", *args: typing.Any, **kwargs: typing.Any) -> None:
-        raise NotImplementedError
-
-    @view(permission="add")
+    @view(permission=partial(check_permission_for_device, "change"))
     def add_periodic_task(self, request: "HttpRequest", pk: str) -> "HttpResponse":
         device: "Device" = self.get_object_or_404(request, pk)
         context: dict[str, typing.Any] = self.get_common_context(request, pk, title="New periodic task configuration")
@@ -133,7 +139,7 @@ class DeviceAdmin(ExtraButtonsMixin, admin.ModelAdmin["Device"]):
         )
         return TemplateResponse(request, "admin/device/schedule_details.html", context)
 
-    @view(permission="change")
+    @view(permission=partial(check_permission_for_device, "change"))
     def change_periodic_task(self, request: "HttpRequest", pk: str) -> "HttpResponse":
         device: "Device" = self.get_object_or_404(request, pk)
         periodic_task: "PeriodicTask" = device.periodic_tasks.get(id=request.GET["periodic_task_id"])
@@ -177,7 +183,7 @@ class DeviceAdmin(ExtraButtonsMixin, admin.ModelAdmin["Device"]):
         )
         return TemplateResponse(request, "admin/device/schedule_details.html", context)
 
-    @view(permission="delete")
+    @view(permission=partial(check_permission_for_device, "change"))
     def delete_periodic_task(self, request: "HttpRequest", pk: str) -> "HttpResponse":
         device: "Device" = self.get_object_or_404(request, pk)
         periodic_task: "PeriodicTask" = device.periodic_tasks.get(id=request.GET["periodic_task_id"])
@@ -203,11 +209,7 @@ class DeviceAdmin(ExtraButtonsMixin, admin.ModelAdmin["Device"]):
         )
         return TemplateResponse(request, "admin/device/input_form.html", context)
 
-    @admin.display(description="Interface")
-    def interface_label(self, device: "Device") -> str:
-        return str(device.interface.label)
-
-    @button(html_attrs={'style': BLACK_ON_GREEN})
+    @button(html_attrs={'style': BLACK_ON_GREEN}, permission=partial(check_permission_for_device, "change"))
     def configure(self, request: "HttpRequest", pk: str) -> "HttpResponse":
         device: "Device" = self.get_object_or_404(request, pk)
         context: dict[str, typing.Any] = self.get_common_context(request, pk, title="Interface configuration")
@@ -230,7 +232,7 @@ class DeviceAdmin(ExtraButtonsMixin, admin.ModelAdmin["Device"]):
         )
         return TemplateResponse(request, "admin/device/configure.html", context)
 
-    @button(html_attrs={'style': BLACK_ON_GREEN})
+    @button(html_attrs={'style': BLACK_ON_GREEN}, permission=partial(check_permission_for_device, "change"))
     def schedule(self, request: "HttpRequest", pk: str) -> "HttpResponse":
         device: "Device" = self.get_object_or_404(request, pk)
         context: dict[str, typing.Any] = self.get_common_context(request, pk, title="Periodic task configuration")
@@ -238,7 +240,10 @@ class DeviceAdmin(ExtraButtonsMixin, admin.ModelAdmin["Device"]):
         context["device_class_name"] = device.__class__.__name__.lower()
         return TemplateResponse(request, "admin/device/schedule_list.html", context)
 
-    @button(html_attrs={'style': BLACK_ON_YELLOW})
+    def run_test(self, device: "Device", *args: typing.Any, **kwargs: typing.Any) -> None:
+        raise NotImplementedError
+
+    @button(html_attrs={'style': BLACK_ON_YELLOW}, permission=partial(check_permission_for_device, "view"))
     def test(self, request: "HttpRequest", pk: str) -> "HttpResponse":
         device: "Device" = self.get_object_or_404(request, pk)
         context: dict[str, typing.Any] = self.get_common_context(request, pk, title="Interface test")
@@ -262,7 +267,7 @@ class DeviceAdmin(ExtraButtonsMixin, admin.ModelAdmin["Device"]):
         )
         return TemplateResponse(request, "admin/device/test.html", context)
 
-    @button(html_attrs={'style': BLACK_ON_BLUE})
+    @button(html_attrs={'style': BLACK_ON_BLUE}, permission=partial(check_permission_for_device, "view"))
     def monitor(self, request: "HttpRequest", pk: str) -> "HttpResponse":
         device: "Device" = self.get_object_or_404(request, pk)
         context: dict[str, typing.Any] = self.get_common_context(request, pk, title="Device Monitoring")

@@ -8,6 +8,8 @@ from django.utils.safestring import SafeString
 from django_celery_beat.models import PeriodicTask
 from django.utils.timezone import now
 from django.utils.html import escape
+from django.contrib.auth.models import User, Permission
+
 
 if typing.TYPE_CHECKING:
     import types
@@ -17,6 +19,49 @@ if typing.TYPE_CHECKING:
     from pytest_django.fixtures import SettingsWrapper
     from _pytest.fixtures import TopRequest
     from pytest import MonkeyPatch
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("device_fixture_name", [
+    pytest.param("dummy_sensor", id="sensor"),
+    pytest.param("dummy_actuator", id="actuator"),
+    pytest.param("dummy_controller", id="controller"),
+])
+@pytest.mark.parametrize("url_name,url_extra,required_permission_type_name", [
+    pytest.param("add_periodic_task", "?periodic_task_id=%(task_id)s", "change", id="add_periodic_task"),
+    pytest.param("change_periodic_task", "?periodic_task_id=%(task_id)s", "change", id="change_periodic_task"),
+    pytest.param("delete_periodic_task", "?periodic_task_id=%(task_id)s", "change", id="delete_periodic_task"),
+    pytest.param("configure", "", "change", id="configure"),
+    pytest.param("schedule", "", "change", id="schedule"),
+    pytest.param("test", "", "view", id="test"),
+    pytest.param("monitor", "", "view", id="monitor"),
+])
+def test_admin_extra_view_permission(request: "TopRequest", django_app: "DjangoTestApp", staff_user: User,
+                                     device_fixture_name: str, dummy_periodic_task: "PeriodicTask",
+                                     url_name: str, url_extra: str, required_permission_type_name: str,
+                                     templates_for_testing: "SettingsWrapper") -> None:
+    dummy_device: "Device" = request.getfixturevalue(device_fixture_name)
+    dummy_device.periodic_tasks.add(dummy_periodic_task)
+
+    opts: "Options"["Device"] = dummy_device.__class__._meta
+    target_url = (
+        f'{reverse(admin_urlname(opts, SafeString(url_name)), args=[dummy_device.pk])}'
+        f'{url_extra % {"task_id": dummy_periodic_task.id}}'
+    )
+
+    django_app.set_user(staff_user)
+
+    response = django_app.get(target_url, expect_errors=True)
+    assert response.status_code == 403
+
+    permission = Permission.objects.get(
+        codename=f"{required_permission_type_name}_{dummy_device._meta.model_name.lower()}"
+    )
+    staff_user.user_permissions.add(permission)
+
+    response = django_app.get(target_url)
+    assert response.status_code == 200
+
 
 
 @pytest.mark.django_db
