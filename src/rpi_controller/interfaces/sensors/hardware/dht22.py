@@ -40,6 +40,8 @@ class DHT22AdafruitCircuitPython(IDHT22):
         while retry < retries:
             try:
                 temperature, humidity = sensor.temperature, sensor.humidity
+                sensor.exit()
+                break
             except RuntimeError as ex:
                 retry += 1
                 if retry < retries:
@@ -48,15 +50,12 @@ class DHT22AdafruitCircuitPython(IDHT22):
                     continue
                 else:
                     raise ex
-            else:
-                sensor.exit()
 
         return temperature, humidity
 
 
 def create_hardware_interface(gpio_pin: int) -> IDHT22:
-    try:
-        importlib.util.find_spec("Adafruit_DHT")
+    if importlib.util.find_spec("Adafruit_DHT"):
         return DHT22RPIAdafruit(gpio_pin)
-    except ValueError:
+    else:
         return DHT22AdafruitCircuitPython(gpio_pin)

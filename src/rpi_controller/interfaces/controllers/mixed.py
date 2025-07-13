@@ -131,5 +131,5 @@ class SensorTemperatureStepScaleFanControllerInterface(ControllerInterface):
             return status
 
         except Exception as e:
-            logger.info("[Controller '%s'] Unexpected error: %s", self.context.slug, e)
+            logger.error("[Controller '%s'] Unexpected error: %s", self.context.slug, e)
             raise InterfaceRuntimeException('Fan controller unexpected error') from e

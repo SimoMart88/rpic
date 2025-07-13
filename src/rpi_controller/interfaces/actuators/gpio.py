@@ -62,7 +62,7 @@ class RelayActuatorInterface(ActuatorInterface):
             status = GPIO.input(gpio_pin)
             logger.info("[Actuator '%s'] Raw status: %s", self.context.slug, status)
         except Exception as e:
-            logger.info("[Actuator '%s'] Unexpected error: %s", self.context.slug, e)
+            logger.error("[Actuator '%s'] Unexpected error: %s", self.context.slug, e)
             raise InterfaceRuntimeException('Relay unexpected error') from e
 
         return {"active": status == self.contacts_state_active_output_map[contacts_state]}
@@ -92,7 +92,7 @@ class RelayActuatorInterface(ActuatorInterface):
                 logger.info("[Actuator '%s'] Moving relay to OFF (LOW)", self.context.slug)
                 GPIO.output(gpio_pin, not self.contacts_state_active_output_map[contacts_state])
         except Exception as e:
-            logger.info("[Actuator '%s'] Unexpected error: %s", self.context.slug, e)
+            logger.error("[Actuator '%s'] Unexpected error: %s", self.context.slug, e)
             raise InterfaceRuntimeException('Relay unexpected error') from e
 
         return {"active": active}

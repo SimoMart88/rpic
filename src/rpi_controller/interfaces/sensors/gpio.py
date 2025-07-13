@@ -46,7 +46,7 @@ class Dht22SensorInterface(SensorInterface):
                 sensor: "IDHT22" = create_hardware_interface(gpio_pin)
                 temperature, humidity = sensor.read(retries=retries)
             except Exception as e:
-                logger.info("[Sensor '%s'] Unexpected error: %s", context.slug, e)
+                logger.error("[Sensor '%s'] Unexpected error: %s", context.slug, e)
                 raise InterfaceRuntimeException('DHT22 sensor unexpected error') from e
 
             if humidity is not None and temperature is not None:
