@@ -19,8 +19,12 @@ if typing.TYPE_CHECKING:
 @pytest.fixture()
 def mock_adafruit_dht(monkeypatch: MonkeyPatch) -> None:
     monkeypatch.setattr(
-        'rpi_controller.interfaces.sensors.gpio.Adafruit_DHT.read_retry',
-        mock.Mock(return_value=(50.2, 22.1)),
+        'rpi_controller.interfaces.sensors.gpio.create_hardware_interface',
+        mock.Mock(
+            return_value=mock.Mock(
+                read=mock.Mock(return_value=(22.1, 50.2))
+            )
+        )
     )
 
 
@@ -80,8 +84,12 @@ def test_dht22sensor_interface_error(monkeypatch: MonkeyPatch) -> None:
     from test_utils.factories import SensorFactory
 
     monkeypatch.setattr(
-        'rpi_controller.interfaces.sensors.gpio.Adafruit_DHT.read_retry',
-        mock.Mock(return_value=(None, None)),
+        'rpi_controller.interfaces.sensors.gpio.create_hardware_interface',
+        mock.Mock(
+            return_value=mock.Mock(
+                read=mock.Mock(return_value=(None, None))
+            )
+        )
     )
 
     sensor = SensorFactory(config={'gpio_pin': 7})

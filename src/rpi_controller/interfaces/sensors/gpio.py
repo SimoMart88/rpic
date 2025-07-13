@@ -1,5 +1,4 @@
 import typing
-import Adafruit_DHT
 import logging
 from django.db import transaction
 from django import forms
@@ -9,9 +8,14 @@ from rpi_controller.interfaces.sensors.base import SensorInterface
 from rpi_controller.interfaces.exceptions import InterfaceRuntimeException
 from rpi_controller.interfaces.utils import is_status_update_required
 from rpi_controller.interfaces.utils.gpio import get_gpio_pin_from_config
+from rpi_controller.interfaces.sensors.hardware.dht22 import create_hardware_interface
 
 
 logger = logging.getLogger(__name__)
+
+
+if typing.TYPE_CHECKING:
+    from rpi_controller.interfaces.sensors.hardware.dht22 import IDHT22
 
 
 class Dht22SensorInterfaceForm(ConfigForm):
@@ -39,7 +43,8 @@ class Dht22SensorInterface(SensorInterface):
             retries = context.config.get("retry_number", 5)
 
             try:
-                humidity, temperature = Adafruit_DHT.read_retry(Adafruit_DHT.DHT22, gpio_pin, retries=retries)
+                sensor: "IDHT22" = create_hardware_interface(gpio_pin)
+                temperature, humidity = sensor.read(retries=retries)
             except Exception as e:
                 logger.info("[Sensor '%s'] Unexpected error: %s", context.slug, e)
                 raise InterfaceRuntimeException('DHT22 sensor unexpected error') from e
