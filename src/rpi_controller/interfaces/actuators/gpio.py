@@ -40,7 +40,7 @@ class RelayActuatorInterface(ActuatorInterface):
 
         try:
             logger.info("[Actuator '%s'] Reading relay status", self.context.slug)
-            status = actuator.is_active()
+            status = actuator.is_active(self.context.status.get("active"))
             logger.info("[Actuator '%s'] Raw status: %s", self.context.slug, status)
             return {"active": bool(status)}
         except Exception as e:
