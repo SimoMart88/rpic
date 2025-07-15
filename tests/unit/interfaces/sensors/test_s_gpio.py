@@ -1,7 +1,7 @@
 from __future__ import annotations
 import pytest
 import typing
-from unittest import mock
+from unittest.mock import Mock
 from datetime import timedelta
 from django.utils import timezone
 
@@ -17,12 +17,12 @@ if typing.TYPE_CHECKING:
 
 
 @pytest.fixture()
-def mock_adafruit_dht(monkeypatch: MonkeyPatch) -> None:
+def mock_adafruit_dht(monkeypatch: "MonkeyPatch") -> None:
     monkeypatch.setattr(
         'rpi_controller.interfaces.sensors.gpio.create_hardware_interface',
-        mock.Mock(
-            return_value=mock.Mock(
-                read=mock.Mock(return_value=(22.1, 50.2))
+        Mock(
+            return_value=Mock(
+                read=Mock(return_value=(22.1, 50.2))
             )
         )
     )
@@ -85,9 +85,9 @@ def test_dht22sensor_interface_error(monkeypatch: MonkeyPatch) -> None:
 
     monkeypatch.setattr(
         'rpi_controller.interfaces.sensors.gpio.create_hardware_interface',
-        mock.Mock(
-            return_value=mock.Mock(
-                read=mock.Mock(return_value=(None, None))
+        Mock(
+            return_value=Mock(
+                read=Mock(return_value=(None, None))
             )
         )
     )
