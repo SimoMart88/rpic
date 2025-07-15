@@ -35,7 +35,7 @@ class SensorTemperatureStepScaleFanControllerForm(ConfigForm):
                 'primary_temperature_sensor': instance.sensors.get(controlledsensordetails__config__type="primary").pk,
                 'secondary_temperature_sensor': instance.sensors.get(controlledsensordetails__config__type="secondary").pk,
                 'primary_fan_actuator': instance.actuators.get(controlledactuatordetails__config__type="primary").pk,
-                'secondary_fan_actuator': instance.actuators.get(controlledactuatordetails__config__type="primary").pk,
+                'secondary_fan_actuator': instance.actuators.get(controlledactuatordetails__config__type="secondary").pk,
             })
         super().__init__(*args, instance=instance, **kwargs)
 
