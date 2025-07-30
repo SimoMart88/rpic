@@ -1,5 +1,7 @@
+import time
 import logging
 import importlib
+import typing
 from abc import ABC, abstractmethod
 
 
@@ -7,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class IDHT22(ABC):
-    def __init__(self, gpio_pin: int):
+    def __init__(self, gpio_pin: int) -> None:
         self._gpio_pin: int = gpio_pin
 
     @abstractmethod
@@ -17,41 +19,42 @@ class IDHT22(ABC):
 
 class DHT22RPIAdafruit(IDHT22):
 
-    def read(self, retries: int) -> tuple[float, float]:
+    def _get_client(self) -> typing.Any:  # pragma: no cover
         import Adafruit_DHT
+        return Adafruit_DHT
 
-        humidity, temperature = Adafruit_DHT.read_retry(Adafruit_DHT.DHT22, self._gpio_pin, retries=retries)
+    def read(self, retries: int) -> tuple[float, float]:
+        sensor_client = self._get_client()
+        humidity, temperature = sensor_client.read_retry(sensor_client.DHT22, self._gpio_pin, retries=retries)
         return temperature, humidity
 
 
 class DHT22AdafruitCircuitPython(IDHT22):
 
-    def read(self, retries: int) -> tuple[float, float]:
-        import time
+    def _get_client(self) -> typing.Any:  # pragma: no cover
         import board
         import adafruit_dht
+        return adafruit_dht.DHT22(getattr(board, f"D{self._gpio_pin}"))
 
-        board_gpio = getattr(board, f"D{self._gpio_pin}")
-        sensor = adafruit_dht.DHT22(board_gpio)
-        temperature = 0.0
-        humidity = 0.0
+    def read(self, retries: int, retry_delay: int = 2) -> tuple[float, float]:
+        sensor_client = self._get_client()
+        last_exception = None
 
-        retry = 0
-        while retry < retries:
-            try:
-                temperature, humidity = sensor.temperature, sensor.humidity
-                sensor.exit()
-                break
-            except RuntimeError as ex:
-                retry += 1
-                if retry < retries:
-                    logger.warning(f"DHT22 read failed: {ex.args[0]}. Retrying in 2 seconds...")
-                    time.sleep(2.0)
-                    continue
-                else:
-                    raise ex
+        try:
+            for attempt in range(retries + 1):
+                try:
+                    temperature = sensor_client.temperature
+                    humidity = sensor_client.humidity
+                    return temperature, humidity
+                except RuntimeError as ex:
+                    last_exception = ex
+                    if attempt < retries:
+                        logger.warning(f"DHT22 read failed: {str(ex)}. Retrying in {retry_delay} seconds...")
+                        time.sleep(retry_delay)
 
-        return temperature, humidity
+            raise last_exception
+        finally:
+            sensor_client.exit()
 
 
 def create_hardware_interface(gpio_pin: int) -> IDHT22:

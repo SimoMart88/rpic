@@ -87,7 +87,7 @@ jobs:
         uses: irongut/CodeCoverageSummary@v1.3.0
         with:
           filename: coverage.xml
-          thresholds: '60 85'
+          thresholds: '70 90'
           badge: true
           output: console
 
