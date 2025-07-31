@@ -29,7 +29,6 @@ class IRelay(ABC):
     def __init__(self, gpio_pin: int, contacts_state: RelayContactsState):
         self._gpio_pin: int = gpio_pin
         self._contacts_state = contacts_state
-        self._client = None
         self.setup()
 
     @property
@@ -69,7 +68,7 @@ class RelayRPiGPIO(IRelay):
         if expected_is_active is not None and device_is_active != expected_is_active:
             logger.warning("Device status (is_active = %s) differ from expected (is_active = %s)",
                            device_is_active, expected_is_active)
-        return self._client.input(self._gpio_pin) == self.active_state
+        return device_is_active
 
     def activate(self) -> None:
         self._client.output(self._gpio_pin, self.active_state)
@@ -93,8 +92,8 @@ class RelayLGPIO(IRelay):
         self._client = lgpio
 
     def is_active(self, expected_is_active: typing.Optional[bool] = None) -> typing.Optional[bool]:
-        # FIXME: lgpio does not support read_input without reset
-        #  so expected value is use to set it instead of reading it
+        # FIXME: lgpio does not support read_input without resetting the device status
+        #  so expected value (if any) is use to set it instead of reading it
         if expected_is_active is not None:
             if expected_is_active:
                 self.activate()

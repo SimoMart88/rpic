@@ -1,7 +1,6 @@
 import time
 import logging
 import importlib
-import typing
 from abc import ABC, abstractmethod
 
 
@@ -11,6 +10,11 @@ logger = logging.getLogger(__name__)
 class IDHT22(ABC):
     def __init__(self, gpio_pin: int) -> None:
         self._gpio_pin: int = gpio_pin
+        self.setup()
+
+    @abstractmethod
+    def setup(self) -> None:
+        ...
 
     @abstractmethod
     def read(self, retries: int) -> tuple[float, float]:
@@ -19,32 +23,30 @@ class IDHT22(ABC):
 
 class DHT22RPIAdafruit(IDHT22):
 
-    def _get_client(self) -> typing.Any:  # pragma: no cover
+    def setup(self) -> None:  # pragma: no cover
         import Adafruit_DHT
-        return Adafruit_DHT
+        self._client = Adafruit_DHT
 
     def read(self, retries: int) -> tuple[float, float]:
-        sensor_client = self._get_client()
-        humidity, temperature = sensor_client.read_retry(sensor_client.DHT22, self._gpio_pin, retries=retries)
+        humidity, temperature = self._client.read_retry(self._client.DHT22, self._gpio_pin, retries=retries)
         return temperature, humidity
 
 
 class DHT22AdafruitCircuitPython(IDHT22):
 
-    def _get_client(self) -> typing.Any:  # pragma: no cover
+    def setup(self) -> None:  # pragma: no cover
         import board
         import adafruit_dht
-        return adafruit_dht.DHT22(getattr(board, f"D{self._gpio_pin}"))
+        self._client = adafruit_dht.DHT22(getattr(board, f"D{self._gpio_pin}"))
 
     def read(self, retries: int, retry_delay: int = 2) -> tuple[float, float]:
-        sensor_client = self._get_client()
         last_exception = None
 
         try:
             for attempt in range(retries + 1):
                 try:
-                    temperature = sensor_client.temperature
-                    humidity = sensor_client.humidity
+                    temperature = self._client.temperature
+                    humidity = self._client.humidity
                     return temperature, humidity
                 except RuntimeError as ex:
                     last_exception = ex
@@ -54,7 +56,7 @@ class DHT22AdafruitCircuitPython(IDHT22):
 
             raise last_exception
         finally:
-            sensor_client.exit()
+            self._client.exit()
 
 
 def create_hardware_interface(gpio_pin: int) -> IDHT22:
