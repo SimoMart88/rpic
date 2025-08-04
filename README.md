@@ -48,7 +48,6 @@ A simple and extensible controller for GPIO sensors and devices on RaspberryPI
 
 ## Security
 ### Mandatory for v1
-* Apply permission control on Admin buttons and views
 * Apply Bandit (https://bandit.readthedocs.io/en/latest/) security scan
 
 ### Future
