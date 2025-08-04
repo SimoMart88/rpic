@@ -1,3 +1,19 @@
+## 0.13.0 (2025-08-05)
+
+### Feat
+
+- **lock_db_record**: implement decorator to lock at db record level when a operation is performed on GPIO
+- **Relay**: implement ARM64 compatibility support
+- **DHT22**: implement ARM64 compatibility support
+- **Admin**: configured permissions for extra buttons and views
+
+### Fix
+
+- **SensorTemperatureStepScaleFanControllerForm**: fix secondary_fan_actuator field initial value config
+- **Relay**: is_active now support expected value
+- **create_hardware_interface**: implement proper use of importlib.util.find_spec
+- **pyproject.toml**: fixed adafruit and lgpio architecture import based
+
 ## 0.12.0 (2025-07-08)
 
 ### Feat
