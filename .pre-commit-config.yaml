@@ -40,6 +40,18 @@ repos:
   repo: https://github.com/Yelp/detect-secrets
   rev: v1.5.0
 - hooks:
+  - args:
+      - -c
+      - pyproject.toml
+      - -b
+      - .bandit.baseline
+    id: bandit
+    stages:
+    - pre-commit
+    additional_dependencies: ["bandit[toml]"]
+  repo: https://github.com/PyCQA/bandit
+  rev: 1.8.6
+- hooks:
   - id: check-ast
   - id: check-executables-have-shebangs
   - id: check-shebang-scripts-are-executable
