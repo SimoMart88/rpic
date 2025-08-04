@@ -2,14 +2,20 @@
 
 [![Test](https://github.com/SimoMart88/rpi-controller/actions/workflows/test.yml/badge.svg)](https://github.com/SimoMart88/rpi-controller/actions/workflows/test.yml)
 
-A controller for GPIO sensors and devices on RaspberryPI
+A simple and extensible controller for GPIO sensors and devices on RaspberryPI
 
 ## Compatibility
-- Tested on RaspberryPi 1b
-  - OS: Raspberry Pi OS (Legacy) Lite (see https://www.raspberrypi.com/software/operating-systems/)
-  - Postgres: 13.18
-  - Redis: 5 (6.0.16)
-  - InfluxDB: 1.6.7
+- Tested on
+  - RaspberryPi 1b
+    - OS: Raspberry Pi OS (Legacy) Lite
+    - Postgres: 13.18
+    - Redis: 6.0.16
+    - InfluxDB: 1.6.7
+  - RaspberryPi 5
+    - OS: Raspberry Pi OS (64-bit) Lite
+    - Postgres: 17.5
+    - Redis: 8.0.3
+    - InfluxDB: 1.11
 
 ## Installation
 - Download release file into the target RaspberryPI
@@ -21,7 +27,7 @@ A controller for GPIO sensors and devices on RaspberryPI
 ### Notes
 - For InfluxDB default credential will be used, change it if your RaspberryPi is exposed on internet
 
-# Future improvements
+# Roadmap
 ## Documentation
 ### Mandatory for v1
 * Implement HLA
@@ -32,9 +38,6 @@ A controller for GPIO sensors and devices on RaspberryPI
 * Document how to extend the system
 
 ## Features
-### Mandatory for v1
-* Improve code coverage
-
 ### Future
 * Implement a caching system for API calls
   * Improving performance by reducing DB access
@@ -58,8 +61,7 @@ A controller for GPIO sensors and devices on RaspberryPI
 
 ## Installer
 ### Mandatory for v1
-* Run installation and application with a dedicated user
-  * Improve security
+* Run installation and application with a dedicated user to improve security
 * Implement check command extension to include required env variables
 
 ### Future
@@ -68,5 +70,4 @@ A controller for GPIO sensors and devices on RaspberryPI
 * Move installer to docker compose
 
 # Known issues
-* rpi-adafruit-python-dht is not compatible with ARM64
-  * Implement compatibility support
+* None for now

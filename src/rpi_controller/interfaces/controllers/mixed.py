@@ -35,7 +35,7 @@ class SensorTemperatureStepScaleFanControllerForm(ConfigForm):
                 'primary_temperature_sensor': instance.sensors.get(controlledsensordetails__config__type="primary").pk,
                 'secondary_temperature_sensor': instance.sensors.get(controlledsensordetails__config__type="secondary").pk,
                 'primary_fan_actuator': instance.actuators.get(controlledactuatordetails__config__type="primary").pk,
-                'secondary_fan_actuator': instance.actuators.get(controlledactuatordetails__config__type="primary").pk,
+                'secondary_fan_actuator': instance.actuators.get(controlledactuatordetails__config__type="secondary").pk,
             })
         super().__init__(*args, instance=instance, **kwargs)
 
@@ -131,5 +131,5 @@ class SensorTemperatureStepScaleFanControllerInterface(ControllerInterface):
             return status
 
         except Exception as e:
-            logger.info("[Controller '%s'] Unexpected error: %s", self.context.slug, e)
+            logger.error("[Controller '%s'] Unexpected error: %s", self.context.slug, e)
             raise InterfaceRuntimeException('Fan controller unexpected error') from e

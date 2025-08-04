@@ -78,7 +78,7 @@ class Device(models.Model):
 
             self._set_success()
         except InterfaceUpdateNotRequiredException:
-            logger.info("[%s '%s'] Status update not required", class_name)
+            logger.error("[%s '%s'] Status update not required", class_name)
         except InterfaceException as ex:
             error_message = f"(Interface Error): {ex}"
             self._set_failure(error_message)

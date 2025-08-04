@@ -22,7 +22,7 @@ SYSTEMD_FOLDER=${SYSTEMD_PATH:-"/etc/systemd/system/"}
 # Install system-level dependency
 echo "[ Installing system-level dependencies... ]"
 apt update
-apt install -y python3 python3-dev
+apt install -y python3 python3-dev libgpiod2
 
 if [[ "${RPIC_APP_DB_URL}" == "" ]] ; then
   apt install -y postgresql
@@ -37,7 +37,7 @@ if [[ "${RPIC_APP_INFLUXDB}" == "" ]] ; then
 fi
 
 echo "[ Cleaning-up old system-level dependencies... ]"
-apt remove -y pigpiod libgpiod2 influxdb-client
+apt remove -y pigpiod influxdb-client
 
 # Install uv if needed
 echo "[ Checking uv installation... ]"
