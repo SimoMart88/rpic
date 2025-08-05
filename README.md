@@ -60,6 +60,8 @@ A simple and extensible controller for GPIO sensors and devices on RaspberryPI
 
 ## Installer
 ### Mandatory for v1
+* Remove external system dependencies (postgres, redis, etc...) installation and configuration from the installer
+  * Update documentation
 * Run installation and application with a dedicated user to improve security
 * Implement check command extension to include required env variables
 

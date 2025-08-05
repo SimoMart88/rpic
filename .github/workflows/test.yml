@@ -61,7 +61,7 @@ jobs:
         with:
           enable-cache: true
           cache-dependency-glob: "uv.lock"
-      - name: 'Install the project'
+      - name: 'Install project dependencies'
         run: uv sync --dev
       - name: 'Configure application workspace'
         run: mkdir ./~data
@@ -74,6 +74,7 @@ jobs:
           path: coverage.xml
           retention-days: 1
   code-coverage:
+    # TODO: when public, move coverage to a remote service (like Codecov) then include badge in README
     name: 'Code Coverage'
     needs:
       - 'unit-test'
@@ -90,5 +91,18 @@ jobs:
           thresholds: '70 90'
           badge: true
           output: console
-
-  # TODO: when public, move coverage to a remote service (like Codecov) then include badge in README
+  bandit:
+    name: 'Bandit Security Scan'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Check out repository code'
+        uses: actions/checkout@v4
+      - name: 'Install uv'
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+      - name: 'Install project dependencies'
+        run: uv sync --group checks
+      - name: 'Perform Bandit Analysis'
+        run: uv run bandit -c pyproject.toml -b .bandit.baseline -r src/
