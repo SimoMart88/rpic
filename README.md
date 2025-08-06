@@ -30,10 +30,8 @@ A simple and extensible controller for GPIO sensors and devices on RaspberryPI
 # Roadmap
 ## Documentation
 ### Mandatory for v1
-* Implement HLA
-* Document how to customize the installation process
-
-### Future
+* Document HLA
+* Document how to use the application
 * Document how to contribute
 * Document how to extend the system
 
@@ -47,9 +45,6 @@ A simple and extensible controller for GPIO sensors and devices on RaspberryPI
 * Implement support for PWA (https://github.com/silviolleite/django-pwa)
 
 ## Security
-### Mandatory for v1
-* Apply Bandit (https://bandit.readthedocs.io/en/latest/) security scan
-
 ### Future
 * Protect UI and API with authentication and an authorization mechanism
 
@@ -61,7 +56,8 @@ A simple and extensible controller for GPIO sensors and devices on RaspberryPI
 ## Installer
 ### Mandatory for v1
 * Remove external system dependencies (postgres, redis, etc...) installation and configuration from the installer
-  * Update documentation
+  * Document how to install and configure the external system dependencies
+  * Document how to customize the installation process
 * Run installation and application with a dedicated user to improve security
 * Implement check command extension to include required env variables
 
