@@ -2,38 +2,78 @@
 
 [![Test](https://github.com/SimoMart88/rpi-controller/actions/workflows/test.yml/badge.svg)](https://github.com/SimoMart88/rpi-controller/actions/workflows/test.yml)
 
-A simple and extensible controller for GPIO sensors and devices on RaspberryPI
-
-## Compatibility
-- Tested on
-  - RaspberryPi 1b
-    - OS: Raspberry Pi OS (Legacy) Lite
-    - Postgres: 13.18
-    - Redis: 6.0.16
-    - InfluxDB: 1.6.7
-  - RaspberryPi 5
-    - OS: Raspberry Pi OS (64-bit) Lite
-    - Postgres: 17.5
-    - Redis: 8.0.3
-    - InfluxDB: 1.11
+A simple and extensible controller for GPIO sensors and actuators on RaspberryPI
 
 ## Installation
-- Download release file into the target RaspberryPI
-- Unzip the file into a temp folder
-- Run `sudo ./install` inside the temp folder
-- During the first installation, automatically generated passwords (Postgresql, Django Admin, etc...) will be prompted
-  - If you miss it, we can find it in /opt/rpic/app/.env
+* Download release file into the target RaspberryPI
+* Unzip the file into a temp folder
+* Export the following environment variable (see next section for installation and configuration options):
+  * RPIC_DB_URL (default to "postgres://postgres:postgres@localhost:5432/rpic")
+  * RPIC_REDIS_URL (default to "redis://localhost:6379/0")
+  * RPIC_INFLUXDB (default to "BACKEND=rpi_controller.monitoring.backends.influxdb.InfluxDBv1SystemMonitor;LOCATION=influxdb://root:root@localhost:8086/rpic")
+* The following environment variable are also available to customize the installation process:
+  * RPIC_OPT (default to "/opt/rpic")
+  * RPIC_WORKSPACE (default to "/var/rpic")
+  * RPIC_DEBUG (default to "False")
+  * RPIC_TIME_ZONE (default to "UTC)
+  * RPIC_LOGGING_LEVEL (default to "ERROR")
+  * RPIC_ENV (default to "PROD")
+  * RPIC_SENTRY_DSN
+* Run `sudo ./install` inside the temp folder
+* During the first installation, automatically generated passwords (Django Admin, etc...) will be prompted
+  * If you miss it, we can find it in ${RPIC_OPT}/app/.env
+  * If you don't like it, you can change from the Django Admin UI
 
-### Notes
-- For InfluxDB default credential will be used, change it if your RaspberryPi is exposed on internet
+### External dependencies
+The application requires the following external dependencies installed and configured:
+* [Database](https://docs.djangoproject.com/en/5.2/ref/databases/)
+  * Suggested: [PostgreSQL](https://www.postgresql.org/)
+    * Installation options:
+      * https://www.postgresql.org/download/
+      * https://hub.docker.com/_/postgres
+    * Required configurations:
+      * Database: https://www.postgresql.org/docs/current/tutorial*createdb.html
+* [Celery broker](https://docs.celeryq.dev/en/stable/getting-started/backends-and-brokers/index.html)
+  * Suggested:[Redis](https://redis.io/)
+    * Installation options:
+      * https://redis.io/downloads/
+      * https://hub.docker.com/_/redis
+* Time series database
+  * At the moment, the only Monitoring System backend available is for [InfluxDB v1](https://docs.influxdata.com/influxdb/v1/)
+    * Installation options:
+      * https://docs.influxdata.com/influxdb/v1/introduction/install/
+      * https://hub.docker.com/_/influxdb
+
+## Security Notes
+Application service MUST be executed as root user in order to make GPIO work properly.
+
+Configured services will run with a dedicated "rpic" group.
+Add your users to that group in order to manage the application executable and workspace files.
+
+## Compatibility
+The application has been tested on the following configurations:
+* RaspberryPi 1b
+  * OS: Raspberry Pi OS (Legacy) Lite
+  * PostgreSQL: 13.18
+  * Redis: 6.0.16
+  * InfluxDB: 1.6.7
+* RaspberryPi 5
+  * OS: Raspberry Pi OS (64*bit) Lite
+  * PostgreSQL: 17.5
+  * Redis: 8.0.3
+  * InfluxDB: 1.11
 
 # Roadmap
 ## Documentation
 ### Mandatory for v1
-* Document HLA
-* Document how to use the application
-* Document how to contribute
-* Document how to extend the system
+* HLA
+* Synthetic documentation on how to use the application
+* Synthetic documentation on how to contribute
+
+### Future
+* Detailed documentation on how to use the application
+* Detailed documentation on how to contribute
+* Detailed documentation on how to extend the system
 
 ## Features
 ### Future
@@ -42,7 +82,7 @@ A simple and extensible controller for GPIO sensors and devices on RaspberryPI
 * Implement System Monitor data export in the Admin UI
 * Implement UI with graphs support for System Monitor
 * Implement support for LoRa based devices
-* Implement support for PWA (https://github.com/silviolleite/django-pwa)
+* Implement support for [ProgressiveWebApp](https://github.com/silviolleite/django-pwa)
 
 ## Security
 ### Future
@@ -55,10 +95,6 @@ A simple and extensible controller for GPIO sensors and devices on RaspberryPI
 
 ## Installer
 ### Mandatory for v1
-* Remove external system dependencies (postgres, redis, etc...) installation and configuration from the installer
-  * Document how to install and configure the external system dependencies
-  * Document how to customize the installation process
-* Run installation and application with a dedicated user to improve security
 * Implement check command extension to include required env variables
 
 ### Future

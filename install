@@ -1,5 +1,11 @@
 #!/bin/bash
 
+if [[ $EUID -ne 0 ]]; then
+   echo "ERROR ==> This script must be run as root!"
+   exit 1
+fi
+
+# Workspace settings
 RPIC_OPT_FOLDER=${RPIC_OPT:-"/opt/rpic"}
 RPIC_DEPS_FOLDER=${RPIC_OPT_FOLDER}/deps
 RPIC_APP_FOLDER=${RPIC_OPT_FOLDER}/app
@@ -7,37 +13,26 @@ RPIC_OPT_BACKUP_FOLDER=${RPIC_OPT_FOLDER}/backup
 RPIC_WORKSPACE_FOLDER=${RPIC_WORKSPACE:-"/var/rpic"}
 RPIC_WORKSPACE_BACKUP_FOLDER=${RPIC_WORKSPACE_FOLDER}/backup
 RPIC_WORKSPACE_LOG_FOLDER=${RPIC_WORKSPACE_FOLDER}/logs
+RPIC_SYSTEMD_FOLDER=${SYSTEMD_PATH:-"/etc/systemd/system/"}
+RPIC_APP_GROUP=${RPIC_GROUP:-"rpic"}
+
+# Application settings
 RPIC_APP_DEBUG=${RPIC_DEBUG:-"False"}
 RPIC_APP_TIME_ZONE=${RPIC_TIME_ZONE:-"UTC"}
 RPIC_APP_LOGGING_LEVEL=${RPIC_LOGGING_LEVEL:-"ERROR"}
+RPIC_APP_ENV=${RPIC_ENV:-"PROD"}
+
+# Application external dependencies settings
 RPIC_APP_DB_URL=${RPIC_DB_URL}
-RPIC_APP_DB_NAME="rpic"
 RPIC_APP_REDIS_URL=${RPIC_REDIS_URL}
 RPIC_APP_INFLUXDB=${RPIC_INFLUXDB}
-RPIC_APP_ENV=${RPIC_ENV:-"PROD"}
 RPIC_APP_SENTRY_DSN=${RPIC_SENTRY_DSN}
-SYSTEMD_FOLDER=${SYSTEMD_PATH:-"/etc/systemd/system/"}
 
 
 # Install system-level dependency
 echo "[ Installing system-level dependencies... ]"
 apt update
 apt install -y python3 python3-dev libgpiod2
-
-if [[ "${RPIC_APP_DB_URL}" == "" ]] ; then
-  apt install -y postgresql
-fi
-
-if [[ "${RPIC_APP_REDIS_URL}" == "" ]] ; then
-  apt install -y redis-server
-fi
-
-if [[ "${RPIC_APP_INFLUXDB}" == "" ]] ; then
-  apt install -y influxdb
-fi
-
-echo "[ Cleaning-up old system-level dependencies... ]"
-apt remove -y pigpiod influxdb-client
 
 # Install uv if needed
 echo "[ Checking uv installation... ]"
@@ -57,10 +52,9 @@ echo "[ Upgrading uv... ]"
 # Stop rpic service if available
 echo "[ Stopping rpic service... ]"
 systemctl stop rpic.target
-systemctl stop rpic.service  # Required for compatibility with version <= 0.5.0
 
 # Backup opt and var folder
-echo "[ Performing app folder backup... ]"
+echo "[ Performing application folder backup... ]"
 mkdir -p "${RPIC_APP_FOLDER}" "${RPIC_OPT_BACKUP_FOLDER}"
 rsync -a --delete "${RPIC_APP_FOLDER}/" "${RPIC_OPT_BACKUP_FOLDER}" || exit 1
 echo "[ Performing workspace folder backup... ]"
@@ -90,14 +84,8 @@ fi
 
 if [[ "${DATABASE_URL}" == "" ]] ; then
   if [[ "${RPIC_APP_DB_URL}" == "" ]] ; then
-    echo "--> Configuring Postgresql..."
-    DB_PASSWORD=$(head /dev/urandom | tr -dc 'A-Za-z0-9()*+,-.:<=>?^_{|}' | head -c 13)
-    echo " =======> Postgresql DB password: \"${DB_PASSWORD}\" <==========="
-    sudo -u postgres psql template1 -c "ALTER USER postgres with encrypted password '${DB_PASSWORD}'"
-    sudo -u postgres psql template1 -c "CREATE DATABASE ${RPIC_APP_DB_NAME}"
-    sudo sed -i  '/^local *all *postgres *peer/ s/peer/md5/' /etc/postgresql/*/main/pg_hba.conf
-    systemctl restart postgresql
-    DATABASE_URL="DATABASE_URL=\"postgres://postgres:${DB_PASSWORD}@localhost:5432/${RPIC_APP_DB_NAME}\""
+    DATABASE_URL="DATABASE_URL=\"postgres://postgres:postgres@localhost:5432/rpic\""
+    echo "WARNING ==>RPIC_APP_DB_URL environment variable is not configured, default value will be used: ${DATABASE_URL}"
   else
     DATABASE_URL="DATABASE_URL=\"${RPIC_APP_DB_URL}\""
   fi
@@ -112,6 +100,7 @@ fi
 if [[ "${CELERY_BROKER_URL}" == "" ]] ; then
   if [[ "${RPIC_APP_REDIS_URL}" == "" ]] ; then
     CELERY_BROKER_URL="CELERY_BROKER_URL=\"redis://localhost:6379/0\""
+    echo "WARNING ==> RPIC_APP_REDIS_URL environment variable is not configured, default value will be used: ${CELERY_BROKER_URL}"
   else
     CELERY_BROKER_URL="CELERY_BROKER_URL=\"${RPIC_APP_REDIS_URL}\""
   fi
@@ -119,8 +108,8 @@ fi
 
 if [[ "${SYSTEM_MONITOR}" == "" ]] ; then
   if [[ "${RPIC_APP_INFLUXDB}" == "" ]] ; then
-    echo " =======> InfluxDB is exposed using default credential, change it if your RaspberryPi is exposed on internet <==========="
     SYSTEM_MONITOR="SYSTEM_MONITOR=\"BACKEND=rpi_controller.monitoring.backends.influxdb.InfluxDBv1SystemMonitor;LOCATION=influxdb://root:root@localhost:8086/rpic\""
+    echo "WARNING ==> RPIC_APP_INFLUXDB environment variable is not configured, default value will be used: ${RPIC_APP_INFLUXDB}"
   else
     SYSTEM_MONITOR="SYSTEM_MONITOR=\"${RPIC_APP_INFLUXDB}\""
   fi
@@ -149,12 +138,13 @@ echo "[ Updating .env file... ]"
   echo "C_FORCE_ROOT=\"true\""  # https://docs.celeryq.dev/en/stable/userguide/daemonizing.html#running-the-worker-with-superuser-privileges-root
 } > "${RPIC_APP_FOLDER}/.env" || exit 1
 
-chmod 700 "${RPIC_APP_FOLDER}/.env"
-
 echo "[ Loading .env file... ]"
 set -o allexport
 source "${RPIC_APP_FOLDER}/.env"
 set +o allexport
+
+echo "[ Configure application user and group... ]"
+groupadd ${RPIC_APP_GROUP}
 
 echo "[ Performing application upgrade... ]"
 "${UV_PROJECT_ENVIRONMENT}/bin/django-admin" upgrade || exit 1
@@ -167,7 +157,7 @@ echo "[ Configuring systemd service... ]"
   echo ""
   echo "[Install]"
   echo "WantedBy=multi-user.target"
-} > "${SYSTEMD_FOLDER}/rpic.target" || exit 1
+} > "${RPIC_SYSTEMD_FOLDER}/rpic.target" || exit 1
 
 {
   echo "[Unit]"
@@ -175,6 +165,7 @@ echo "[ Configuring systemd service... ]"
   echo "Requires=rpic.target"
   echo ""
   echo "[Service]"
+  echo "WorkingDirectory=${RPIC_WORKSPACE_FOLDER}"
   echo "ExecStart=${UV_PROJECT_ENVIRONMENT}/bin/uwsgi --ini ${RPIC_APP_FOLDER}/uwsgi.ini"
   echo "EnvironmentFile=${RPIC_APP_FOLDER}/.env"
   echo "RuntimeDirectory=uwsgi"
@@ -184,10 +175,11 @@ echo "[ Configuring systemd service... ]"
   echo "StandardError=syslog"
   echo "NotifyAccess=all"
   echo "Type=simple"
+  echo "Group=${RPIC_APP_GROUP}"
   echo ""
   echo "[Install]"
   echo "WantedBy=multi-user.target"
-} > "${SYSTEMD_FOLDER}/rpic-webapp.service" || exit 1
+} > "${RPIC_SYSTEMD_FOLDER}/rpic-webapp.service" || exit 1
 
 {
   echo "[Unit]"
@@ -196,6 +188,7 @@ echo "[ Configuring systemd service... ]"
   echo "Requires=rpic.target"
   echo ""
   echo "[Service]"
+  echo "WorkingDirectory=${RPIC_WORKSPACE_FOLDER}"
   echo "ExecStart=${UV_PROJECT_ENVIRONMENT}/bin/celery -A rpi_controller.config.celery multi start worker \\"
   echo "  --pidfile=${RPIC_WORKSPACE_FOLDER}/rpic-celery-worker.pid --logfile=${RPIC_WORKSPACE_LOG_FOLDER}/rpic-worker.log --loglevel=${RPIC_APP_LOGGING_LEVEL}"
   echo "ExecStop=${UV_PROJECT_ENVIRONMENT}/bin/celery -A rpi_controller.config.celery multi stop worker \\"
@@ -208,10 +201,11 @@ echo "[ Configuring systemd service... ]"
   echo "StandardError=syslog"
   echo "NotifyAccess=all"
   echo "Type=forking"
+  echo "Group=${RPIC_APP_GROUP}"
   echo ""
   echo "[Install]"
   echo "WantedBy=multi-user.target"
-} > "${SYSTEMD_FOLDER}/rpic-celery-worker.service" || exit 1
+} > "${RPIC_SYSTEMD_FOLDER}/rpic-celery-worker.service" || exit 1
 
 {
   echo "[Unit]"
@@ -220,6 +214,7 @@ echo "[ Configuring systemd service... ]"
   echo "Requires=rpic.target"
   echo ""
   echo "[Service]"
+  echo "WorkingDirectory=${RPIC_WORKSPACE_FOLDER}"
   echo "ExecStart=${UV_PROJECT_ENVIRONMENT}/bin/celery -A rpi_controller.config.celery beat \\"
   echo "  --pidfile=${RPIC_WORKSPACE_FOLDER}/rpic-celery-beat.pid --logfile=${RPIC_WORKSPACE_LOG_FOLDER}/rpic-beat.log --loglevel=${RPIC_APP_LOGGING_LEVEL}"
   echo "EnvironmentFile=${RPIC_APP_FOLDER}/.env"
@@ -228,12 +223,18 @@ echo "[ Configuring systemd service... ]"
   echo "StandardError=syslog"
   echo "NotifyAccess=all"
   echo "Type=simple"
+  echo "Group=${RPIC_APP_GROUP}"
   echo ""
   echo "[Install]"
   echo "WantedBy=multi-user.target"
-} > "${SYSTEMD_FOLDER}/rpic-celery-beat.service" || exit 1
+} > "${RPIC_SYSTEMD_FOLDER}/rpic-celery-beat.service" || exit 1
 
 systemctl daemon-reload || exit 1
+
+echo "[ Configure workspace permissions... ]"
+chown -R root:${RPIC_APP_GROUP} "${RPIC_OPT_FOLDER}" "${RPIC_WORKSPACE_FOLDER}" || exit 1
+chmod -R o-rwx "${RPIC_OPT_FOLDER}" "${RPIC_WORKSPACE_FOLDER}" || exit 1
+chmod -R g=u "${RPIC_OPT_FOLDER}" "${RPIC_WORKSPACE_FOLDER}" || exit 1
 
 # Start rpic service
 echo "[ Starting rpic service... ]"
