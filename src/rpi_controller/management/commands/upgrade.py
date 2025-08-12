@@ -1,7 +1,8 @@
 from pathlib import Path
 
 import djclick as click
-from django.core.management import call_command
+from django.core.management import call_command, CommandError
+
 
 @click.command()
 @click.option('--check-deploy', is_flag=True)
@@ -43,6 +44,12 @@ def command(check_deploy: bool, admin_user: str, admin_email: str, admin_passwor
     else:
         if verbosity >= 1:
             click.secho(f"- User '{admin_user}' NOT found, trigger creation", fg='yellow')
+
+        if not admin_password:
+            raise CommandError(
+                "Admin password cannot be empty, please configure it properly using "
+                "the admin-password option or the DJANGO_SUPERUSER_PASSWORD environment variable."
+            )
 
         call_command(
             "createsuperuser",
