@@ -4,7 +4,11 @@
 
 A simple and extensible controller for GPIO sensors and actuators on RaspberryPI
 
-## Installation
+## Architecture
+For any architectural decision, please refer to the ["Architecture Decision Log"](docs/architecture-decision-log) inside the docs folder.
+
+
+# Installation
 * Download release file into the target RaspberryPI
 * Unzip the file into a temp folder
 * Export the following environment variable (see next section for installation and configuration options):
@@ -24,7 +28,7 @@ A simple and extensible controller for GPIO sensors and actuators on RaspberryPI
   * If you miss it, we can find it in ${RPIC_OPT}/app/.env
   * If you don't like it, you can change from the Django Admin UI
 
-### External dependencies
+## External dependencies
 The application requires the following external dependencies installed and configured:
 * [Database](https://docs.djangoproject.com/en/5.2/ref/databases/)
   * Suggested: [PostgreSQL](https://www.postgresql.org/)
@@ -52,16 +56,12 @@ Add your users to that group in order to manage the application executable and w
 
 ## Compatibility
 The application has been tested on the following configurations:
-* RaspberryPi 1b
-  * OS: Raspberry Pi OS (Legacy) Lite
-  * PostgreSQL: 13.18
-  * Redis: 6.0.16
-  * InfluxDB: 1.6.7
-* RaspberryPi 5
-  * OS: Raspberry Pi OS (64*bit) Lite
-  * PostgreSQL: 17.5
-  * Redis: 8.0.3
-  * InfluxDB: 1.11
+
+| Hardaware | OS | PostgreSQL | Redis | InfluxDB |
+| ------- | ------- | ------- | ------- | ------- |
+| RaspberryPi 1b | Raspberry Pi OS (Legacy) Lite latest version | 13.18 | 6.0.16 | 1.6.7 |
+| RaspberryPi 5 | Raspberry Pi OS (64*bit) Lite latest version | 17.5 | 8.0.3 | 1.11 |
+
 
 # Roadmap
 ## Documentation
@@ -94,9 +94,6 @@ The application has been tested on the following configurations:
   * For a small environment uWSGI could be enough, for medium to large environment Nginx would be better
 
 ## Installer
-### Mandatory for v1
-* Implement check command extension to include required env variables
-
 ### Future
 * Move installer to a dedicated Python(click) script
   * Better parameter management
