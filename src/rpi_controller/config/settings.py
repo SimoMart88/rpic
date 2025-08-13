@@ -27,7 +27,10 @@ env = environ.Env(
     DEBUG=(bool, False),
     ALLOWED_HOSTS=(list, []),
     LOCAL_APPS=(list, []),
-    STATIC_ROOT=(str, BASE_DIR / '~data/static'),
+    DATABASE_URL=(str, 'sqlite:///rpic.db'),
+    CELERY_BROKER_URL=(str, ''),
+    SYSTEM_MONITOR=(str, ''),
+    STATIC_ROOT=(str, '~data/static'),
     STATIC_URL=(str, '/static/'),
     TIME_ZONE=(str, 'UTC'),
     COMPRESS_ENABLED=(bool, False),
@@ -36,6 +39,14 @@ env = environ.Env(
     SENTRY_DSN=(str, ''),
 )
 
+_MANDATORY_ENV_VARS = [
+    "SECRET_KEY",
+    "DATABASE_URL",
+    "CELERY_BROKER_URL",
+    "SYSTEM_MONITOR",
+    "STATIC_ROOT",
+    "LOGGING_FILE",
+]
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/

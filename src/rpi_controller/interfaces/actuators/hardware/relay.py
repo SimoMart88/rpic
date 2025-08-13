@@ -57,7 +57,7 @@ class IRelay(ABC):
 
 
 class RelayRPiGPIO(IRelay):
-    def setup(self) -> None:
+    def setup(self) -> None:  # pragma: no cover
         from RPi import GPIO
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(self._gpio_pin, GPIO.OUT)
@@ -85,7 +85,7 @@ class RelayLGPIO(IRelay):
         self._client_handler = None
         super().__init__(gpio_pin, contacts_state)
 
-    def setup(self) -> None:
+    def setup(self) -> None:  # pragma: no cover
         import lgpio
         self._client_handler = lgpio.gpiochip_open(0)
         lgpio.gpio_claim_output(self._client_handler, self._gpio_pin)

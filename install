@@ -147,7 +147,7 @@ echo "[ Configure application user and group... ]"
 groupadd ${RPIC_APP_GROUP}
 
 echo "[ Performing application upgrade... ]"
-"${UV_PROJECT_ENVIRONMENT}/bin/django-admin" upgrade || exit 1
+"${UV_PROJECT_ENVIRONMENT}/bin/django-admin" upgrade --check-deploy || exit 1
 
 echo "[ Configuring systemd service... ]"
 {

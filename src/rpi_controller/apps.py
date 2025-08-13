@@ -1,4 +1,5 @@
 from django.apps import AppConfig
+from django.core.checks import register
 
 
 class Config(AppConfig):
@@ -37,9 +38,16 @@ class Config(AppConfig):
 
         post_device_control.connect(system_monitor_update_handler)
 
+    def _register_system_checks(self) -> None:
+        from rpi_controller import checks
+
+        register(deploy=True)(checks.check_required_env_vars)
+
+
 
     def ready(self) -> None:
         self._register_sensors()
         self._register_actuators()
         self._register_controllers()
         self._register_monitoring_signals_handlers()
+        self._register_system_checks()
