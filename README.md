@@ -1,12 +1,23 @@
-# rpi-controller
+# RaspberryPi Controller
 
 [![Test](https://github.com/SimoMart88/rpi-controller/actions/workflows/test.yml/badge.svg)](https://github.com/SimoMart88/rpi-controller/actions/workflows/test.yml)
 
-A simple and extensible controller for GPIO sensors and actuators on RaspberryPI
+A simple and extensible controller for GPIO sensors and actuators on RaspberryPI with web-based management and automation capabilities.
 
-## Architecture
-For any architectural decision, please refer to the ["Architecture Decision Log"](docs/architecture-decision-log) inside the docs folder.
+![HLA](docs/HLA.drawio.png)
 
+## Overview
+The main dashboard displays real-time data from connected GPIO sensors and actuators, providing instant status updates and control options through an intuitive web interface.
+![Dashboard Overview](docs/overview/Landing.png)
+
+The admin interface enables easy configuration and management of GPIO devices, allowing users to set up devices, define parameters, and monitor the status.
+![Device Management](docs/overview/DeviceUpdate.png)
+
+Flexible GPIO pin configuration system lets users assign and customize pin settings, and communication parameters for various sensor and actuators types.
+![GPIO Configuration](docs/overview/DeviceConfig.png)
+
+Built-in scheduling system provides automated task execution and periodic device monitoring, enabling hands-free operation and reliable system maintenance.
+![Task Automation](docs/overview/DeviceSchedule.png)
 
 # Installation
 * Download release file into the target RaspberryPI
@@ -63,20 +74,23 @@ The application has been tested on the following configurations:
 | RaspberryPi 5 | Raspberry Pi OS (64*bit) Lite latest version | 17.5 | 8.0.3 | 1.11 |
 
 
+# Architecture
+For any architectural decision, please refer to the ["Architecture Decision Log"](docs/architecture-decision-log) inside the docs folder.
+
+# Contributing
+
+We welcome contributions from the community! Whether you're fixing bugs, adding new features, or improving documentation, your pull requests are highly appreciated.
+For developers looking to extend the project with custom functionality, you can easily integrate your own extensions by registering them in the dedicated registries located within the interface packages.
+This modular approach allows you to seamlessly add new sensor types, actuators, or controllers while maintaining compatibility with the core system.
+Please feel free to fork the repository, make your changes, and submit a pull request – we're excited to see what you'll build!
+
 # Roadmap
 ## Documentation
-### Mandatory for v1
-* HLA
-* Synthetic documentation on how to use the application
-* Synthetic documentation on how to contribute
-
-### Future
 * Detailed documentation on how to use the application
 * Detailed documentation on how to contribute
 * Detailed documentation on how to extend the system
 
 ## Features
-### Future
 * Implement a caching system for API calls
   * Improving performance by reducing DB access
 * Implement System Monitor data export in the Admin UI
@@ -85,16 +99,13 @@ The application has been tested on the following configurations:
 * Implement support for [ProgressiveWebApp](https://github.com/silviolleite/django-pwa)
 
 ## Security
-### Future
 * Protect UI and API with authentication and an authorization mechanism
 
 ## Infrastructure
-### Future
 * Expose the application and the static content through Nginx
   * For a small environment uWSGI could be enough, for medium to large environment Nginx would be better
 
 ## Installer
-### Future
 * Move installer to a dedicated Python(click) script
   * Better parameter management
 * Move installer to docker compose
