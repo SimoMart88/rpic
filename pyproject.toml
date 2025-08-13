@@ -1,11 +1,13 @@
 [project]
 name = "rpi-controller"
 version = "0.13.0"
-description = "A controller for GPIO sensors and devices on RaspberryPI"
+description = "A simple and extensible controller for GPIO sensors and actuators on RaspberryPI with web-based management and automation capabilities."
 authors = [
-  {name = "SimoMart88"},
+  {name = "SimoMart88", email = "simone.martinotti@gmail.com"},
 ]
 readme = "README.md"
+license = "AGPL-3.0-or-later"
+license-files = ["LICENSE"]
 requires-python = ">=3.9"
 dependencies = [
     "django-admin-extra-buttons>=1.5.8",
