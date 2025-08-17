@@ -111,4 +111,9 @@ Please feel free to fork the repository, make your changes, and submit a pull re
 * Move installer to docker compose
 
 # Known issues
-* None for now
+* Sporadically the application crash with the following error: "Timed out waiting for PulseIn message. Make sure libgpiod is installed."
+  * libgpiod process remains stuck: ```libgpiod_pulsein64 --pulses 81 --queue 8540 -i gpiochip0 17```
+  * Django leaves the select_for_update (lock on device) transaction open and the system doesn't respond anymore
+  * Action plan:
+    * Set transaction timeout
+    * Move lock to Redis
