@@ -86,3 +86,7 @@ repos:
     - pre-push
   repo: https://github.com/commitizen-tools/commitizen
   rev: v4.0.0
+- repo: https://github.com/astral-sh/uv-pre-commit
+  rev: 0.8.11
+  hooks:
+    - id: uv-lock
