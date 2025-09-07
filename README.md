@@ -19,6 +19,37 @@ Flexible GPIO pin configuration system lets users assign and customize pin setti
 Built-in scheduling system provides automated task execution and periodic device monitoring, enabling hands-free operation and reliable system maintenance.
 ![Task Automation](docs/overview/DeviceSchedule.png)
 
+## Real-World Use Case: Automated Cabinet Cooling System
+
+I used this application to create an intelligent temperature-controlled ventilation system for equipment cabinet that require temperature regulation.
+
+### Problem
+Electronic equipment housed in cabinets or enclosures often generates heat that needs to be managed.
+Simple always-on fans waste energy and create unnecessary noise, while no ventilation can lead to overheating and equipment failure.
+
+### Solution
+Using this application with sensors and relays, I created an automated cooling system that:
+
+- **Monitors** inside and outside cabinet temperatures using DHT22 sensors
+- **Calculates** the temperature differential between environments
+- **Controls** exhaust/intake fans via relay switches based on intelligent logic
+- **Optimizes** energy usage by only running fans when beneficial
+
+### Hardware Setup
+- **Inside sensor**: DHT22 temperature/humidity sensor mounted inside the cabinet
+- **Outside sensor**: DHT22 sensor positioned in the ambient environment
+- **Fan control**: Relay module connected to cabinet ventilation fans
+- **Controller**: Raspberry Pi running the application
+
+### Benefits
+- **Energy efficient**: Fans only run when cooling is actually beneficial
+- **Equipment protection**: Prevents overheating damage
+- **Automated operation**: No manual intervention required
+- **Cost effective**: Reduces electricity consumption compared to always-on systems
+- **Scalable**: Can be applied to multiple cabinets or zones
+
+This use case demonstrates how the application can bridge sensor data input with physical world control outputs to create practical automation solutions.
+
 # Installation
 * Download release file into the target RaspberryPI
 * Unzip the file into a temp folder
@@ -91,6 +122,7 @@ Please feel free to fork the repository, make your changes, and submit a pull re
 * Detailed documentation on how to extend the system
 
 ## Features
+* Upgrade to Django 5.2 (LTS)
 * Implement a caching system for API calls
   * Improving performance by reducing DB access
 * Implement System Monitor data export in the Admin UI
@@ -102,6 +134,7 @@ Please feel free to fork the repository, make your changes, and submit a pull re
 * Protect UI and API with authentication and an authorization mechanism
 
 ## Infrastructure
+* Expose coverage on Codcov
 * Expose the application and the static content through Nginx
   * For a small environment uWSGI could be enough, for medium to large environment Nginx would be better
 
