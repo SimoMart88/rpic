@@ -134,7 +134,6 @@ Please feel free to fork the repository, make your changes, and submit a pull re
 * Protect UI and API with authentication and an authorization mechanism
 
 ## Infrastructure
-* Expose coverage on Codcov
 * Expose the application and the static content through Nginx
   * For a small environment uWSGI could be enough, for medium to large environment Nginx would be better
 
@@ -142,6 +141,11 @@ Please feel free to fork the repository, make your changes, and submit a pull re
 * Move installer to a dedicated Python(click) script
   * Better parameter management
 * Move installer to docker compose
+
+## CI/CD
+* Expose coverage on Codcov
+* Extende Ruff configuration to include more code checks
+  * Evaluate if bandit can be then removed
 
 # Known issues
 * Sporadically the application crash with the following error: "Timed out waiting for PulseIn message. Make sure libgpiod is installed."
