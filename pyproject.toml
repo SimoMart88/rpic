@@ -31,6 +31,7 @@ dependencies = [
     "rpi-gpio>=0.7.1; platform_machine != 'aarch64'",
     "adafruit-circuitpython-dht>=4.0.9; platform_machine == 'aarch64'",
     "lgpio>=0.2.2.0; platform_machine == 'aarch64'",
+    "django-redis>=6.0.0",
 ]
 
 [build-system]

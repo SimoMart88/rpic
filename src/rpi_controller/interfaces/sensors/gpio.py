@@ -8,7 +8,7 @@ from rpi_controller.interfaces.exceptions import InterfaceRuntimeException
 from rpi_controller.interfaces.utils import is_status_update_required
 from rpi_controller.interfaces.utils.gpio import get_gpio_pin_from_config
 from rpi_controller.interfaces.sensors.hardware.dht22 import create_hardware_interface
-from rpi_controller.interfaces.utils.locks import lock_db_record
+from rpi_controller.interfaces.utils.locks import lock_device
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +29,7 @@ class Dht22SensorInterface(SensorInterface):
     config_form = Dht22SensorInterfaceForm
     template_name = "rpi_controller/interfaces/sensors/dht22.html"
 
-    @lock_db_record
+    @lock_device
     def read_input(self) -> dict[str, typing.Any]:
         is_status_update_required(
             self.context, self.context.last_status_update_time, self.context.config.get("refresh_min_interval", 60)

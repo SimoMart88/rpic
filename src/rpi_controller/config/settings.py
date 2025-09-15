@@ -28,6 +28,7 @@ env = environ.Env(
     ALLOWED_HOSTS=(list, []),
     LOCAL_APPS=(list, []),
     DATABASE_URL=(str, 'sqlite:///rpic.db'),
+    REDIS_CACHE_URL=(str, ''),
     CELERY_BROKER_URL=(str, ''),
     SYSTEM_MONITOR=(str, ''),
     STATIC_ROOT=(str, '~data/static'),
@@ -42,6 +43,7 @@ env = environ.Env(
 _MANDATORY_ENV_VARS = [
     "SECRET_KEY",
     "DATABASE_URL",
+    "REDIS_CACHE_URL",
     "CELERY_BROKER_URL",
     "SYSTEM_MONITOR",
     "STATIC_ROOT",
@@ -129,6 +131,19 @@ WSGI_APPLICATION = 'rpi_controller.config.wsgi.application'
 
 DATABASES = {
     'default': env.db_url('DATABASE_URL')
+}
+
+
+# Cache
+# https://docs.djangoproject.com/en/4.2/ref/settings/#caches
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": env('REDIS_CACHE_URL'),
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
 }
 
 
