@@ -55,17 +55,18 @@ class Device(models.Model):
     def _as_json_value(self, value: typing.Any) -> typing.Any:
         return json.loads(json.dumps(value))
 
-    def _set_success(self) -> None:
+    def _set_success(self, status: dict[typing.Any, typing.Any]) -> None:
+        self.status = self._as_json_value(status)
         self.last_status_update_time = timezone.now()
         self.last_status_update_log = f"{self.__class__.__name__} status updated successfully"
         self.last_update_status = self.UpdateStatus.SUCCESS
-        self.save()
+        self.save(update_fields=["status", "last_status_update_time", "last_status_update_log", "last_update_status"])
 
     def _set_failure(self, error_message: str) -> None:
         self.last_status_update_time = timezone.now()
         self.last_status_update_log = error_message
         self.last_update_status = self.UpdateStatus.FAILURE
-        self.save()
+        self.save(update_fields=["status", "last_status_update_time", "last_status_update_log", "last_update_status"])
 
     def _control_interface(
             self, interface_func_name: str, *args: typing.Any, **kwargs: typing.Any
@@ -73,10 +74,10 @@ class Device(models.Model):
         class_name = self.__class__.__name__
         try:
             logger.info("[%s '%s'] Control with input: '%s' + '%s'", class_name, self.slug, args, kwargs)
-            self.status = self._as_json_value(getattr(self.interface, interface_func_name)(*args, **kwargs))
+            status = getattr(self.interface, interface_func_name)(*args, **kwargs)
             logger.info("[%s '%s'] Control result: %s", class_name, self.slug, self.status)
 
-            self._set_success()
+            self._set_success(status)
         except InterfaceUpdateNotRequiredException:
             logger.error("[%s '%s'] Status update not required", class_name)
         except InterfaceException as ex:
