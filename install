@@ -24,7 +24,8 @@ RPIC_APP_ENV=${RPIC_ENV:-"PROD"}
 
 # Application external dependencies settings
 RPIC_APP_DB_URL=${RPIC_DB_URL}
-RPIC_APP_REDIS_URL=${RPIC_REDIS_URL}
+RPIC_APP_REDIS_CACHE_URL=${RPIC_REDIS_CACHE_URL}
+RPIC_APP_CELERY_BROKER_URL=${RPIC_CELERY_BROKER_URL}
 RPIC_APP_INFLUXDB=${RPIC_INFLUXDB}
 RPIC_APP_SENTRY_DSN=${RPIC_SENTRY_DSN}
 
@@ -73,6 +74,7 @@ if [ -f "${RPIC_OPT_BACKUP_FOLDER}/.env" ] ; then
   DJANGO_SECRET_KEY=$(grep SECRET_KEY "${RPIC_OPT_BACKUP_FOLDER}/.env")
   DATABASE_URL=$(grep DATABASE_URL "${RPIC_OPT_BACKUP_FOLDER}/.env")
   DJANGO_SUPERUSER_PASSWORD=$(grep DJANGO_SUPERUSER_PASSWORD "${RPIC_OPT_BACKUP_FOLDER}/.env")
+  REDIS_CACHE_URL=$(grep REDIS_CACHE_URL "${RPIC_OPT_BACKUP_FOLDER}/.env")
   CELERY_BROKER_URL=$(grep CELERY_BROKER_URL "${RPIC_OPT_BACKUP_FOLDER}/.env")
   SYSTEM_MONITOR=$(grep SYSTEM_MONITOR "${RPIC_OPT_BACKUP_FOLDER}/.env")
 fi
@@ -97,12 +99,21 @@ if [[ "${DJANGO_SUPERUSER_PASSWORD}" == "" ]] ; then
     DJANGO_SUPERUSER_PASSWORD="DJANGO_SUPERUSER_PASSWORD=\"${DJANGO_ADMIN_PASSWORD}\""
 fi
 
-if [[ "${CELERY_BROKER_URL}" == "" ]] ; then
-  if [[ "${RPIC_APP_REDIS_URL}" == "" ]] ; then
-    CELERY_BROKER_URL="CELERY_BROKER_URL=\"redis://localhost:6379/0\""
-    echo "WARNING ==> RPIC_APP_REDIS_URL environment variable is not configured, default value will be used: ${CELERY_BROKER_URL}"
+if [[ "${REDIS_CACHE_URL}" == "" ]] ; then
+  if [[ "${RPIC_APP_REDIS_CACHE_URL}" == "" ]] ; then
+    REDIS_CACHE_URL="REDIS_CACHE_URL=\"redis://localhost:6379/1\""
+    echo "WARNING ==> RPIC_APP_REDIS_CACHE_URL environment variable is not configured, default value will be used: ${REDIS_CACHE_URL}"
   else
-    CELERY_BROKER_URL="CELERY_BROKER_URL=\"${RPIC_APP_REDIS_URL}\""
+    REDIS_CACHE_URL="REDIS_CACHE_URL=\"${RPIC_APP_REDIS_CACHE_URL}\""
+  fi
+fi
+
+if [[ "${CELERY_BROKER_URL}" == "" ]] ; then
+  if [[ "${RPIC_APP_CELERY_BROKER_URL}" == "" ]] ; then
+    CELERY_BROKER_URL="CELERY_BROKER_URL=\"redis://localhost:6379/0\""
+    echo "WARNING ==> RPIC_APP_CELERY_BROKER_URL environment variable is not configured, default value will be used: ${CELERY_BROKER_URL}"
+  else
+    CELERY_BROKER_URL="CELERY_BROKER_URL=\"${RPIC_APP_CELERY_BROKER_URL}\""
   fi
 fi
 
@@ -133,6 +144,7 @@ echo "[ Updating .env file... ]"
   echo "STATIC_URL=\"/static/\""
   echo "STATIC_ROOT=\"${RPIC_WORKSPACE_FOLDER}/static\""
   echo "LOGGING_FILE=\"${RPIC_WORKSPACE_LOG_FOLDER}/rpi_controller.log\""
+  echo "${REDIS_CACHE_URL}"
   echo "${CELERY_BROKER_URL}"
   echo "${SYSTEM_MONITOR}"
   echo "C_FORCE_ROOT=\"true\""  # https://docs.celeryq.dev/en/stable/userguide/daemonizing.html#running-the-worker-with-superuser-privileges-root
