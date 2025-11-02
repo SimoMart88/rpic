@@ -9,7 +9,7 @@ from rpi_controller.interfaces.exceptions import (InterfaceRuntimeException,
 from rpi_controller.interfaces.utils import is_status_update_required
 from rpi_controller.interfaces.utils.gpio import get_gpio_pin_from_config
 from rpi_controller.interfaces.actuators.hardware.relay import RelayContactsState, create_hardware_interface
-from rpi_controller.interfaces.utils.locks import lock_db_record
+from rpi_controller.interfaces.utils.locks import lock_device
 
 if typing.TYPE_CHECKING:
     from rpi_controller.interfaces.actuators.hardware.relay import IRelay
@@ -33,7 +33,7 @@ class RelayActuatorInterface(ActuatorInterface):
     config_form = RelayInterfaceForm
     template_name = "rpi_controller/interfaces/actuators/relay.html"
 
-    @lock_db_record
+    @lock_device
     def read_input(self) -> dict[str, typing.Any]:
         is_status_update_required(
             self.context, self.context.last_status_update_time, self.context.config.get("refresh_min_interval", 60)
@@ -56,7 +56,7 @@ class RelayActuatorInterface(ActuatorInterface):
         finally:
             actuator.close()
 
-    @lock_db_record
+    @lock_device
     def control(self, *args: typing.Any, **kwargs: typing.Any) -> dict[typing.Any, typing.Any]:
         try:
             active = kwargs["active"]

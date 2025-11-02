@@ -37,7 +37,41 @@ class DHT22AdafruitCircuitPython(IDHT22):
     def setup(self) -> None:  # pragma: no cover
         import board
         import adafruit_dht
-        self._client = adafruit_dht.DHT22(getattr(board, f"D{self._gpio_pin}"))
+
+        try:
+            self._client = adafruit_dht.DHT22(getattr(board, f"D{self._gpio_pin}"))
+        except RuntimeError:
+            import sysv_ipc
+            from inspect import getmodule
+
+            dht22_module = getmodule(adafruit_dht.DHT22)
+            pulse_in_module = getmodule(dht22_module.PulseIn)
+            logger.warning("PulseIn (used by adafruit_dht.DHT22) crashed unexpectedly during initialization "
+                           "leaving the processes (%s) open and queues (%s) set. Trying to clean-up!",
+                           [p.pid for p in pulse_in_module.procs], pulse_in_module.queues)
+
+            # Implementation based on PulseIn.final(), improved with error management
+            for index, queue in enumerate(pulse_in_module.queues):
+                try:
+                    queue.remove()
+                except sysv_ipc.ExistentialError:
+                    logger.warning("'System V IPC' queue (%s) used by PulseIn doesn't exist "
+                                   "anymore so it cannot be removed",  queue.key)
+                    del pulse_in_module.queues[index]
+
+            for proc in pulse_in_module.procs:
+                try:
+                    proc.terminate()
+                except Exception as tex:
+                    logger.warning("Process (%s) used by PulseIn cannot be terminated (will attempt to kill): %s",
+                                   proc.pid, str(tex))
+                    try:
+                        proc.kill()
+                    except Exception as kex:
+                        logger.warning("Process (%s) used by PulseIn cannot be killed: %s",
+                                       proc.pid, str(kex))
+
+            raise
 
     def read(self, retries: int, retry_delay: int = 2) -> tuple[float, float]:
         last_exception = None
