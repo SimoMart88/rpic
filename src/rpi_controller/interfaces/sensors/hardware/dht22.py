@@ -41,13 +41,6 @@ class DHT22AdafruitCircuitPython(IDHT22):
         try:
             self._client = adafruit_dht.DHT22(getattr(board, f"D{self._gpio_pin}"))
         except RuntimeError:
-            # TODO: Implement documentation
-            #   Library adafruit_dht use PulseIo to controll the GPIO
-            #       https://github.com/adafruit/Adafruit_CircuitPython_DHT/blob/main/adafruit_dht.py#L83
-            #   Seems that PulseIo library expect to be executed only in a script
-            #   so it perform clean up using atexit library
-            #       https://github.com/adafruit/Adafruit_Blinka/blob/main/src/adafruit_blinka/microcontroller/bcm283x/pulseio/PulseIn.py#L31
-            #   In Django and Celery clean process is not triggered automatically so we need to run it forcefully!
             import sysv_ipc
             from inspect import getmodule
 

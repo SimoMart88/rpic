@@ -12,10 +12,10 @@ See https://github.com/adafruit/Adafruit_CircuitPython_DHT/blob/main/adafruit_dh
 PulseIO spawn a new process to perform the operations and try to clean it up at the end of the execution using atexit library.\
 See https://github.com/adafruit/Adafruit_Blinka/blob/main/src/adafruit_blinka/microcontroller/bcm283x/pulseio/PulseIn.py#L31
 
-When called from uWSGI or Celery, atexit is not triggered and the process is left open preventing worker to complete.
+When called from uWSGI or Celery, atexit is not triggered and the process is left open preventing the worker to complete.
 
 # Decision
-* Forcefully perform clean up operation by replicating the PulseIn.final function logic directly from the system.
+* Forcefully perform the clean-up operation by replicating the PulseIn.final function logic directly from the system.
   * Logic has to be improved with a proper error management
 
 # Consequences
